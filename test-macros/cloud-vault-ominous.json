@@ -1,0 +1,1279 @@
+{
+  "format": "litemacro-v1",
+  "name": "云宝库-不祥宝库-循环领奖",
+  "stepDelayMs": 0,
+  "alwaysOn": false,
+  "autoStartMode": "off",
+  "autoStartFilter": "",
+  "randomDelayEnabled": false,
+  "randomDelayMinMs": 250,
+  "randomDelayMaxMs": 1250,
+  "nextIndex": 70,
+  "nodes": [
+    {
+      "id": "node-1",
+      "type": "official:start",
+      "x": 80,
+      "y": 80,
+      "displayName": "启动",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "started": "node-2"
+      }
+    },
+    {
+      "id": "node-2",
+      "type": "official:player.isAlive",
+      "x": 80,
+      "y": 180,
+      "displayName": "确认玩家存活",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-3",
+        "false": "node-67",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-3",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 80,
+      "y": 280,
+      "displayName": "判断已有菜单",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-4",
+        "false": "node-8",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-4",
+      "type": "builder:inventory.itemOrSlotHasTag",
+      "x": 430,
+      "y": 80,
+      "displayName": "优先识别已有奖励",
+      "value": "gui 0-53",
+      "value2": "点击领取全部奖励",
+      "value3": "false",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-20",
+        "false": "node-5",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-5",
+      "type": "builder:inventory.itemOrSlotHasTag",
+      "x": 430,
+      "y": 180,
+      "displayName": "识别宝库选择页：普通",
+      "value": "gui 0-53",
+      "value2": "普通宝库",
+      "value3": "false",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-17",
+        "false": "node-6",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-6",
+      "type": "builder:inventory.itemOrSlotHasTag",
+      "x": 430,
+      "y": 280,
+      "displayName": "识别宝库选择页：不祥",
+      "value": "gui 0-53",
+      "value2": "不祥宝库",
+      "value3": "false",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-17",
+        "false": "node-7",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-7",
+      "type": "builder:inventory.itemOrSlotHasTag",
+      "x": 430,
+      "y": 380,
+      "displayName": "识别一级面板入口",
+      "value": "gui 0-53",
+      "value2": "云宝库",
+      "value3": "false",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-14",
+        "false": "node-20",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-8",
+      "type": "official:inventory.hasItem",
+      "x": 800,
+      "y": 80,
+      "displayName": "开面板前检查钥匙",
+      "value": "minecraft:ominous_trial_key",
+      "value2": "1",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-9",
+        "false": "node-61",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-9",
+      "type": "official:player.setCrouch",
+      "x": 800,
+      "y": 180,
+      "displayName": "潜行以触发面板",
+      "value": "true",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-10",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-10",
+      "type": "official:misc.wait",
+      "x": 800,
+      "y": 280,
+      "displayName": "等待服务器收到潜行",
+      "value": "300",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-11",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-11",
+      "type": "builder:player.pressKey",
+      "x": 800,
+      "y": 380,
+      "displayName": "按 F 打开面板",
+      "value": "f",
+      "value2": "tap 100",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-12",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-12",
+      "type": "official:player.setCrouch",
+      "x": 800,
+      "y": 480,
+      "displayName": "释放潜行",
+      "value": "false",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-13",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-13",
+      "type": "official:misc.wait",
+      "x": 800,
+      "y": 580,
+      "displayName": "等待面板同步",
+      "value": "500",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-14",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-14",
+      "type": "official:inventory.hasItem",
+      "x": 1170,
+      "y": 80,
+      "displayName": "进入云宝库前检查钥匙",
+      "value": "minecraft:ominous_trial_key",
+      "value2": "1",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-15",
+        "false": "node-61",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-15",
+      "type": "official:inventory.clickOpenContainerSlot",
+      "x": 1170,
+      "y": 180,
+      "displayName": "点击云宝库入口",
+      "value": "minecraft:ominous_trial_key 云宝库",
+      "value2": "false",
+      "value3": "left",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-16",
+        "failed": "node-62"
+      }
+    },
+    {
+      "id": "node-16",
+      "type": "official:misc.wait",
+      "x": 1170,
+      "y": 280,
+      "displayName": "等待选择页同步",
+      "value": "300",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-17",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-17",
+      "type": "official:inventory.hasItem",
+      "x": 1540,
+      "y": 80,
+      "displayName": "兑换前检查对应钥匙",
+      "value": "minecraft:ominous_trial_key",
+      "value2": "1",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-18",
+        "false": "node-61",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-18",
+      "type": "official:player.isAlive",
+      "x": 1540,
+      "y": 180,
+      "displayName": "兑换前确认存活",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-19",
+        "false": "node-67",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-19",
+      "type": "official:inventory.clickOpenContainerSlot",
+      "x": 1540,
+      "y": 280,
+      "displayName": "只点击一次：不祥宝库",
+      "value": "minecraft:vault 不祥宝库",
+      "value2": "false",
+      "value3": "left",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-20",
+        "failed": "node-63"
+      }
+    },
+    {
+      "id": "node-20",
+      "type": "official:inventory.clickOpenContainerSlot",
+      "x": 1910,
+      "y": 80,
+      "displayName": "等待领奖 1/6：单段约 5 秒",
+      "value": "minecraft:lime_concrete 点击领取全部奖励",
+      "value2": "false",
+      "value3": "left",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-26",
+        "failed": "node-21"
+      }
+    },
+    {
+      "id": "node-21",
+      "type": "official:inventory.clickOpenContainerSlot",
+      "x": 1910,
+      "y": 180,
+      "displayName": "等待领奖 2/6：单段约 5 秒",
+      "value": "minecraft:lime_concrete 点击领取全部奖励",
+      "value2": "false",
+      "value3": "left",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-26",
+        "failed": "node-22"
+      }
+    },
+    {
+      "id": "node-22",
+      "type": "official:inventory.clickOpenContainerSlot",
+      "x": 1910,
+      "y": 280,
+      "displayName": "等待领奖 3/6：单段约 5 秒",
+      "value": "minecraft:lime_concrete 点击领取全部奖励",
+      "value2": "false",
+      "value3": "left",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-26",
+        "failed": "node-23"
+      }
+    },
+    {
+      "id": "node-23",
+      "type": "official:inventory.clickOpenContainerSlot",
+      "x": 1910,
+      "y": 380,
+      "displayName": "等待领奖 4/6：单段约 5 秒",
+      "value": "minecraft:lime_concrete 点击领取全部奖励",
+      "value2": "false",
+      "value3": "left",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-26",
+        "failed": "node-24"
+      }
+    },
+    {
+      "id": "node-24",
+      "type": "official:inventory.clickOpenContainerSlot",
+      "x": 1910,
+      "y": 480,
+      "displayName": "等待领奖 5/6：单段约 5 秒",
+      "value": "minecraft:lime_concrete 点击领取全部奖励",
+      "value2": "false",
+      "value3": "left",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-26",
+        "failed": "node-25"
+      }
+    },
+    {
+      "id": "node-25",
+      "type": "official:inventory.clickOpenContainerSlot",
+      "x": 1910,
+      "y": 580,
+      "displayName": "等待领奖 6/6：单段约 5 秒",
+      "value": "minecraft:lime_concrete 点击领取全部奖励",
+      "value2": "false",
+      "value3": "left",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-26",
+        "failed": "node-59"
+      }
+    },
+    {
+      "id": "node-26",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2280,
+      "y": 80,
+      "displayName": "确认菜单自动关闭 1/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-27",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-27",
+      "type": "official:misc.wait",
+      "x": 2280,
+      "y": 180,
+      "displayName": "关闭检查间隔 1/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-28",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-28",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2280,
+      "y": 280,
+      "displayName": "确认菜单自动关闭 2/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-29",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-29",
+      "type": "official:misc.wait",
+      "x": 2280,
+      "y": 380,
+      "displayName": "关闭检查间隔 2/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-30",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-30",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2280,
+      "y": 480,
+      "displayName": "确认菜单自动关闭 3/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-31",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-31",
+      "type": "official:misc.wait",
+      "x": 2280,
+      "y": 580,
+      "displayName": "关闭检查间隔 3/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-32",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-32",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2280,
+      "y": 680,
+      "displayName": "确认菜单自动关闭 4/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-33",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-33",
+      "type": "official:misc.wait",
+      "x": 2280,
+      "y": 780,
+      "displayName": "关闭检查间隔 4/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-34",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-34",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2280,
+      "y": 880,
+      "displayName": "确认菜单自动关闭 5/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-35",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-35",
+      "type": "official:misc.wait",
+      "x": 2280,
+      "y": 980,
+      "displayName": "关闭检查间隔 5/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-36",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-36",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2280,
+      "y": 1080,
+      "displayName": "确认菜单自动关闭 6/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-37",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-37",
+      "type": "official:misc.wait",
+      "x": 2280,
+      "y": 1180,
+      "displayName": "关闭检查间隔 6/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-38",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-38",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2280,
+      "y": 1280,
+      "displayName": "确认菜单自动关闭 7/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-39",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-39",
+      "type": "official:misc.wait",
+      "x": 2280,
+      "y": 1380,
+      "displayName": "关闭检查间隔 7/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-40",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-40",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2280,
+      "y": 1480,
+      "displayName": "确认菜单自动关闭 8/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-41",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-41",
+      "type": "official:misc.wait",
+      "x": 2280,
+      "y": 1580,
+      "displayName": "关闭检查间隔 8/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-42",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-42",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2650,
+      "y": 80,
+      "displayName": "确认菜单自动关闭 9/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-43",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-43",
+      "type": "official:misc.wait",
+      "x": 2650,
+      "y": 180,
+      "displayName": "关闭检查间隔 9/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-44",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-44",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2650,
+      "y": 280,
+      "displayName": "确认菜单自动关闭 10/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-45",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-45",
+      "type": "official:misc.wait",
+      "x": 2650,
+      "y": 380,
+      "displayName": "关闭检查间隔 10/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-46",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-46",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2650,
+      "y": 480,
+      "displayName": "确认菜单自动关闭 11/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-47",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-47",
+      "type": "official:misc.wait",
+      "x": 2650,
+      "y": 580,
+      "displayName": "关闭检查间隔 11/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-48",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-48",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2650,
+      "y": 680,
+      "displayName": "确认菜单自动关闭 12/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-49",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-49",
+      "type": "official:misc.wait",
+      "x": 2650,
+      "y": 780,
+      "displayName": "关闭检查间隔 12/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-50",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-50",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2650,
+      "y": 880,
+      "displayName": "确认菜单自动关闭 13/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-51",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-51",
+      "type": "official:misc.wait",
+      "x": 2650,
+      "y": 980,
+      "displayName": "关闭检查间隔 13/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-52",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-52",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2650,
+      "y": 1080,
+      "displayName": "确认菜单自动关闭 14/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-53",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-53",
+      "type": "official:misc.wait",
+      "x": 2650,
+      "y": 1180,
+      "displayName": "关闭检查间隔 14/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-54",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-54",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2650,
+      "y": 1280,
+      "displayName": "确认菜单自动关闭 15/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-55",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-55",
+      "type": "official:misc.wait",
+      "x": 2650,
+      "y": 1380,
+      "displayName": "关闭检查间隔 15/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-56",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-56",
+      "type": "official:inventory.hasOpenContainer",
+      "x": 2650,
+      "y": 1480,
+      "displayName": "确认菜单自动关闭 16/16",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-57",
+        "false": "node-58",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-57",
+      "type": "official:misc.wait",
+      "x": 2650,
+      "y": 1580,
+      "displayName": "关闭检查间隔 16/16",
+      "value": "250",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-66",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-58",
+      "type": "official:misc.wait",
+      "x": 3020,
+      "y": 80,
+      "displayName": "领奖后间隔，再开始下一轮",
+      "value": "750",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-2",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-59",
+      "type": "builder:event.ifChatSame",
+      "x": 3020,
+      "y": 180,
+      "displayName": "超时诊断：服务器缺钥匙提示",
+      "value": "你没有 Ominous Trial Key",
+      "value2": "contains",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-65",
+        "false": "node-64",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-60",
+      "type": "builder:stop",
+      "x": 3390,
+      "y": 1080,
+      "displayName": "停止宏并释放按键",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {}
+    },
+    {
+      "id": "node-61",
+      "type": "builder:localMessage",
+      "x": 3390,
+      "y": 80,
+      "displayName": "缺钥匙停止",
+      "value": "[云宝库] 已停止：没有可用的不祥试炼钥匙。不会切换宝库类型。",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-60",
+        "failed": "node-60"
+      }
+    },
+    {
+      "id": "node-62",
+      "type": "builder:localMessage",
+      "x": 3390,
+      "y": 200,
+      "displayName": "停止说明：main-failed",
+      "value": "[云宝库] 已停止：无法找到云宝库入口。检查 Shift+F、F 键绑定、当前菜单及服务器响应。菜单已保留。",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-60",
+        "failed": "node-60"
+      }
+    },
+    {
+      "id": "node-63",
+      "type": "builder:localMessage",
+      "x": 3390,
+      "y": 320,
+      "displayName": "停止说明：selection-failed",
+      "value": "[云宝库] 已停止：找不到不祥宝库按钮，可能菜单不正确或尚未同步。没有自动重新兑换。",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-60",
+        "failed": "node-60"
+      }
+    },
+    {
+      "id": "node-64",
+      "type": "builder:localMessage",
+      "x": 3390,
+      "y": 440,
+      "displayName": "停止说明：claim-failed",
+      "value": "[云宝库] 已停止：约 30 秒内未找到领奖按钮。可能抽奖未完成、菜单不正确或服务器拒绝操作。请检查菜单和聊天；没有重发兑换，菜单已保留。",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-60",
+        "failed": "node-60"
+      }
+    },
+    {
+      "id": "node-65",
+      "type": "builder:localMessage",
+      "x": 3390,
+      "y": 560,
+      "displayName": "停止说明：server-denied",
+      "value": "[云宝库] 已停止：等待领奖超时，最新聊天含缺钥匙提示。该提示仅供诊断，可能来自此前操作。没有重发兑换，菜单已保留。",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-60",
+        "failed": "node-60"
+      }
+    },
+    {
+      "id": "node-66",
+      "type": "builder:localMessage",
+      "x": 3390,
+      "y": 680,
+      "displayName": "停止说明：close-failed",
+      "value": "[云宝库] 已停止：已发出领奖点击，但菜单没有自动关闭，领取结果未确认。请手动检查；没有再次领奖或兑换。",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-60",
+        "failed": "node-60"
+      }
+    },
+    {
+      "id": "node-67",
+      "type": "builder:localMessage",
+      "x": 3390,
+      "y": 800,
+      "displayName": "停止说明：dead",
+      "value": "[云宝库] 已停止：玩家未存活。",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-60",
+        "failed": "node-60"
+      }
+    },
+    {
+      "id": "node-68",
+      "type": "builder:localMessage",
+      "x": 3390,
+      "y": 920,
+      "displayName": "检查异常停止",
+      "value": "[云宝库] 已停止：组件检查或按键操作失败。请查看当前菜单与宏状态。",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-60",
+        "failed": "node-60"
+      }
+    },
+    {
+      "id": "node-69",
+      "type": "builder:flow.note",
+      "x": 80,
+      "y": 820,
+      "displayName": "使用说明",
+      "value": "云宝库：不祥宝库\n\n导入后手动启动；默认循环至对应钥匙耗尽。\n仅在实际兑换前检查钥匙，已有奖励和抽奖流程优先完成。\n全部菜单点击为普通左键；物品检查不自动点击。\n领奖查找共六段，每段约 5 秒。未知菜单只等待领奖，不点击兑换。\n超时及领奖后不关闭时停止并保留菜单。聊天仅用于超时诊断。\nF 必须绑定副手交换；需在实际服务器用一把钥匙验证。\n菜单文本采用包含匹配，若两按钮说明互相提及名称，需调整过滤条件。\n不会自动清背包、丢弃物品、切换宝库或重连。\n停止：宏界面 Stop 或 /litemacro stop。",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {},
+      "stickyNoteText": "云宝库：不祥宝库\n\n导入后手动启动；默认循环至对应钥匙耗尽。\n仅在实际兑换前检查钥匙，已有奖励和抽奖流程优先完成。\n全部菜单点击为普通左键；物品检查不自动点击。\n领奖查找共六段，每段约 5 秒。未知菜单只等待领奖，不点击兑换。\n超时及领奖后不关闭时停止并保留菜单。聊天仅用于超时诊断。\nF 必须绑定副手交换；需在实际服务器用一把钥匙验证。\n菜单文本采用包含匹配，若两按钮说明互相提及名称，需调整过滤条件。\n不会自动清背包、丢弃物品、切换宝库或重连。\n停止：宏界面 Stop 或 /litemacro stop。",
+      "stickyNoteWidth": 650,
+      "stickyNoteHeight": 430
+    }
+  ]
+}
