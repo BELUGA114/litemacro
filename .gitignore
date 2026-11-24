@@ -3,6 +3,7 @@
 .gradle-tools/
 build/
 out/
+versions/*/bin/
 
 # Compiled artifacts
 *.class
