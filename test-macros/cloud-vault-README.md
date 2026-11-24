@@ -1,6 +1,6 @@
 # 云宝库导入宏
 
-适用于本仓库 `feat/mc26.3-cleanup-guard` 分支的 Minecraft 26.3 构建。需要安装包含通用数值组件的新 JAR，旧版 JAR 不支持这些 JSON。
+适用于 Minecraft 26.3 的 Litemacro 1.0.99 构建。需要安装包含通用数值组件的新 JAR，旧版 JAR 不支持这些 JSON。
 
 - `cloud-vault-normal.json`：普通宝库，消耗 `minecraft:trial_key`。
 - `cloud-vault-ominous.json`：不祥宝库，消耗 `minecraft:ominous_trial_key`。
@@ -25,9 +25,9 @@
 
 两个 JSON 使用公共数值比较、条件等待、清除数值记录和条件点击组件。mod 不内置服务器清理文本、600 秒周期或恢复策略。
 
-- 新一轮及实际兑换点击都要求计分板剩余大于 60 秒，且聊天预警也允许继续。
+- 新一轮及实际兑换点击都要求计分板剩余大于 30 秒，且聊天预警也允许继续。
 - 已兑换的一轮仍可领奖；每次领奖点击都要求计分板和聊天预警剩余大于 10 秒。
-- 暂停后先确认计分板降到不超过 60 秒，再等待回到至少 590 秒，清除旧聊天预警，缓冲 5 秒后继续。
+- 暂停后先确认计分板降到不超过 30 秒，再等待回到至少 590 秒，清除旧聊天预警，缓冲 5 秒后继续。
 - 领奖恢复只返回当前领奖步骤，不再次兑换。按钮缺失时沿用原来的有限等待和停止行为。
 - 计分板缺失、数值冲突或数值超过 5 秒不更新都会阻止点击。保护等待没有固定超时，可随时手动停止。
 
@@ -37,7 +37,7 @@
 {
   "type": "builder:logic.scoreboardNumber",
   "value": "垃圾清理\\s*[:：]\\s*\\[\\s*(\\d+)\\s*\\]",
-  "value2": "op=gt value=60 stale=5 rate=-1 mode=latest missing=false"
+  "value2": "op=gt value=30 stale=5 rate=-1 mode=latest missing=false"
 }
 ```
 

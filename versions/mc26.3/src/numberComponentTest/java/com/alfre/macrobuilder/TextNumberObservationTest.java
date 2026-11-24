@@ -156,6 +156,9 @@ public final class TextNumberObservationTest {
       check("node-70".equals(copy.startNode().next("started"))
          && "node-70".equals(copy.node("node-58").next("completed")), "startup and each new round check the scoreboard");
       check("node-70 node-85 node-74".equals(copy.node("node-19").value2), "exchange checks scoreboard, valid range and chat immediately before clicking");
+      check(copy.node("node-70").value2.contains("op=gt value=30 ")
+         && copy.node("node-74").value2.contains("op=gt value=30 ")
+         && copy.node("node-82").value2.contains("op=lte value=30 "), "all new-exchange and low-window thresholds are 30 seconds");
       check("node-81".equals(copy.node("node-80").next("completed"))
          && "node-73".equals(copy.node("node-81").next("completed"))
          && "node-20".equals(copy.node("node-73").next("true")), "emergency recovery only returns to claiming");
@@ -180,9 +183,12 @@ public final class TextNumberObservationTest {
          observation.observeCurrent(serverSidebarLines(228), 3000);
          check(observation.snapshot(3000).value() == 228 && observation.snapshot(3000).ageSeconds() == 0,
             "the reported 231-to-228 update refreshes the observation");
-         observation.observeCurrent(serverSidebarLines(60), 4000);
+         observation.observeCurrent(serverSidebarLines(31), 3999);
+         check(rule.matches(observation.snapshot(3999)) == Set.of("node-70", "node-75", "node-85").contains(id),
+            "31 seconds still permits a new exchange");
+         observation.observeCurrent(serverSidebarLines(30), 4000);
          check(rule.matches(observation.snapshot(4000)) == Set.of("node-75", "node-82", "node-85").contains(id),
-            "60 seconds blocks new exchanges and confirms the low-time window");
+            "30 seconds blocks new exchanges and confirms the low-time window");
          observation.observeCurrent(serverSidebarLines(10), 5000);
          check(rule.matches(observation.snapshot(5000)) == Set.of("node-82", "node-85").contains(id),
             "10 seconds also blocks claiming");
@@ -193,17 +199,17 @@ public final class TextNumberObservationTest {
    }
 
    private static void simulateVault(MacroModel model) {
-      VaultSimulation initialPause = new VaultSimulation(model, 55, 1, 1000);
-      initialPause.runUntil(50000);
+      VaultSimulation initialPause = new VaultSimulation(model, 25, 1, 1000);
+      initialPause.runUntil(20000);
       check(initialPause.exchanges == 0, "startup inside the danger window cannot spend keys");
-      initialPause.runUntil(70000);
+      initialPause.runUntil(45000);
       check(initialPause.exchanges == 1 && initialPause.claims == 1, "confirmed reset and settling resume once");
-      VaultSimulation currentRound = new VaultSimulation(model, 70, 1, 20000);
+      VaultSimulation currentRound = new VaultSimulation(model, 40, 1, 15000);
       currentRound.runUntil(30000);
-      check(currentRound.exchanges == 1 && currentRound.claims == 1, "the current round finishes after crossing 60 seconds");
-      currentRound.runUntil(85000);
+      check(currentRound.exchanges == 1 && currentRound.claims == 1, "the current round finishes after crossing 30 seconds");
+      currentRound.runUntil(60000);
       check(currentRound.exchanges == 1, "recovery cannot exchange again with exhausted keys");
-      VaultSimulation slowButton = new VaultSimulation(model, 63, 1, 1000);
+      VaultSimulation slowButton = new VaultSimulation(model, 33, 1, 1000);
       slowButton.selectionReadyAtMs = 3500;
       slowButton.runUntil(20000);
       check(slowButton.exchanges == 0, "the final condition blocks while a GUI button is still synchronizing");
