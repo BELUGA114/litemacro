@@ -476,6 +476,7 @@ public final class  MacroBuilderClient implements ClientModInitializer {
             RUNNER.recordActionbarMessage(message.getString());
          } else {
             RUNNER.recordChatMessage(message.getString());
+            RUNNER.recordNumberServerMessage(message.getString());
          }
       });
    }

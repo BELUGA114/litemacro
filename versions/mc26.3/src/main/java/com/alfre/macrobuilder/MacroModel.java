@@ -90,6 +90,11 @@ final class MacroModel {
    static final String ENTITY_INTERACT = "official:entity.interact";
    static final String ENTITY_NEARBY = "builder:entity.nearby";
    static final String SCOREBOARD_CONTAINS = "builder:logic.scoreboardContains";
+   static final String SCOREBOARD_NUMBER = "builder:logic.scoreboardNumber";
+   static final String CHAT_NUMBER = "builder:logic.chatNumber";
+   static final String WAIT_FOR_CONDITION = "builder:misc.waitForCondition";
+   static final String CLICK_WITH_CONDITION = "builder:inventory.clickWithCondition";
+   static final String CLEAR_NUMBER_OBSERVATION = "builder:misc.clearNumberObservation";
    static final String ACTIONBAR_CONTAINS = "builder:logic.actionbarContains";
    static final String HAS_STATUS_EFFECT = "builder:logic.hasStatusEffect";
    static final String BOSSBAR_CONTAINS = "builder:logic.bossbarContains";
@@ -180,6 +185,26 @@ final class MacroModel {
       ),
       new MacroModel.Descriptor(
          "builder:logic.scoreboardContains", "Scoreboard Contains", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "Text or regex", "Mode: contains/exact/regex", ""
+      ),
+      new MacroModel.Descriptor(
+         SCOREBOARD_NUMBER, "Scoreboard Number Compare", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true,
+         "Sidebar regex: capture number", "op / value / stale / rate / mode / missing", ""
+      ),
+      new MacroModel.Descriptor(
+         CHAT_NUMBER, "Chat Number Compare", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true,
+         "Server message regex: capture number", "op / value / stale / rate / mode / missing", ""
+      ),
+      new MacroModel.Descriptor(
+         WAIT_FOR_CONDITION, "Wait For Condition", "Flow", -11094334, COMPLETED_OR_FAILED, true,
+         "Condition node IDs: all must be true", "Poll interval ms", ""
+      ),
+      new MacroModel.Descriptor(
+         CLICK_WITH_CONDITION, "Click GUI With Condition", "Inventory", -3770147, List.of("completed", "blocked", "failed"), true,
+         "Item id, tag, price, or GUI slot (left click)", "Condition node IDs: all must be true", ""
+      ),
+      new MacroModel.Descriptor(
+         CLEAR_NUMBER_OBSERVATION, "Clear Number Observation", "Flow", -11094334, COMPLETED_OR_FAILED, true,
+         "Number comparison node ID", "", ""
       ),
       new MacroModel.Descriptor(
          "builder:logic.actionbarContains", "Actionbar Contains", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "Text or regex", "Mode: contains/exact/regex", ""
@@ -1056,6 +1081,11 @@ final class MacroModel {
          case "official:entity.interact" -> "Right-clicks matching mob or player";
          case "builder:entity.nearby" -> "Checks for matching nearby entities";
          case "builder:logic.scoreboardContains" -> "Checks sidebar, team, and objective scoreboard text";
+         case SCOREBOARD_NUMBER -> "Extracts and compares a visible sidebar number, with configurable freshness and change rate";
+         case CHAT_NUMBER -> "Compares numbers from matching server messages; unrelated messages do not overwrite observations";
+         case WAIT_FOR_CONDITION -> "Waits until all referenced conditions are true, keeping the current macro progress";
+         case CLICK_WITH_CONDITION -> "Evaluates all referenced conditions before every normal left-click attempt; false follows blocked";
+         case CLEAR_NUMBER_OBSERVATION -> "Clears the shared numeric observation referenced by a comparison node";
          case "builder:logic.actionbarContains" -> "Checks the latest actionbar text";
          case "builder:logic.hasStatusEffect" -> "Checks whether the player has a matching status effect and level";
          case "builder:logic.bossbarContains" -> "Checks all boss bars currently visible on screen";

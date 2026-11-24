@@ -52,6 +52,26 @@ java {
     targetCompatibility = JavaVersion.VERSION_25
 }
 
+sourceSets {
+    numberComponentTest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
+tasks.register('numberComponentTest', JavaExec) {
+    group = 'verification'
+    description = 'Checks generic numeric components and cloud vault recovery.'
+    dependsOn tasks.named('numberComponentTestClasses')
+    classpath = sourceSets.numberComponentTest.runtimeClasspath
+    mainClass = 'com.alfre.macrobuilder.TextNumberObservationTest'
+    args rootProject.projectDir.toPath().resolve('../../test-macros').normalize().toString()
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('numberComponentTest')
+}
+
 jar {
     manifest {
         attributes(

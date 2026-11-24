@@ -8,7 +8,7 @@
   "randomDelayEnabled": false,
   "randomDelayMinMs": 250,
   "randomDelayMaxMs": 1250,
-  "nextIndex": 70,
+  "nextIndex": 86,
   "nodes": [
     {
       "id": "node-1",
@@ -24,7 +24,7 @@
       "delayMs": 0,
       "enabled": true,
       "outputs": {
-        "started": "node-2"
+        "started": "node-70"
       }
     },
     {
@@ -345,12 +345,12 @@
     },
     {
       "id": "node-19",
-      "type": "official:inventory.clickOpenContainerSlot",
+      "type": "builder:inventory.clickWithCondition",
       "x": 1540,
       "y": 280,
       "displayName": "只点击一次：普通宝库",
       "value": "minecraft:vault 普通宝库",
-      "value2": "false",
+      "value2": "node-70 node-85 node-74",
       "value3": "left",
       "value4": "",
       "value5": "",
@@ -358,17 +358,18 @@
       "enabled": true,
       "outputs": {
         "completed": "node-20",
-        "failed": "node-63"
+        "failed": "node-63",
+        "blocked": "node-71"
       }
     },
     {
       "id": "node-20",
-      "type": "official:inventory.clickOpenContainerSlot",
+      "type": "builder:inventory.clickWithCondition",
       "x": 1910,
       "y": 80,
       "displayName": "等待领奖 1/6：单段约 5 秒",
       "value": "minecraft:lime_concrete 点击领取全部奖励",
-      "value2": "false",
+      "value2": "node-75 node-85 node-76",
       "value3": "left",
       "value4": "",
       "value5": "",
@@ -376,17 +377,18 @@
       "enabled": true,
       "outputs": {
         "completed": "node-26",
-        "failed": "node-21"
+        "failed": "node-21",
+        "blocked": "node-72"
       }
     },
     {
       "id": "node-21",
-      "type": "official:inventory.clickOpenContainerSlot",
+      "type": "builder:inventory.clickWithCondition",
       "x": 1910,
       "y": 180,
       "displayName": "等待领奖 2/6：单段约 5 秒",
       "value": "minecraft:lime_concrete 点击领取全部奖励",
-      "value2": "false",
+      "value2": "node-75 node-85 node-76",
       "value3": "left",
       "value4": "",
       "value5": "",
@@ -394,17 +396,18 @@
       "enabled": true,
       "outputs": {
         "completed": "node-26",
-        "failed": "node-22"
+        "failed": "node-22",
+        "blocked": "node-72"
       }
     },
     {
       "id": "node-22",
-      "type": "official:inventory.clickOpenContainerSlot",
+      "type": "builder:inventory.clickWithCondition",
       "x": 1910,
       "y": 280,
       "displayName": "等待领奖 3/6：单段约 5 秒",
       "value": "minecraft:lime_concrete 点击领取全部奖励",
-      "value2": "false",
+      "value2": "node-75 node-85 node-76",
       "value3": "left",
       "value4": "",
       "value5": "",
@@ -412,17 +415,18 @@
       "enabled": true,
       "outputs": {
         "completed": "node-26",
-        "failed": "node-23"
+        "failed": "node-23",
+        "blocked": "node-72"
       }
     },
     {
       "id": "node-23",
-      "type": "official:inventory.clickOpenContainerSlot",
+      "type": "builder:inventory.clickWithCondition",
       "x": 1910,
       "y": 380,
       "displayName": "等待领奖 4/6：单段约 5 秒",
       "value": "minecraft:lime_concrete 点击领取全部奖励",
-      "value2": "false",
+      "value2": "node-75 node-85 node-76",
       "value3": "left",
       "value4": "",
       "value5": "",
@@ -430,17 +434,18 @@
       "enabled": true,
       "outputs": {
         "completed": "node-26",
-        "failed": "node-24"
+        "failed": "node-24",
+        "blocked": "node-72"
       }
     },
     {
       "id": "node-24",
-      "type": "official:inventory.clickOpenContainerSlot",
+      "type": "builder:inventory.clickWithCondition",
       "x": 1910,
       "y": 480,
       "displayName": "等待领奖 5/6：单段约 5 秒",
       "value": "minecraft:lime_concrete 点击领取全部奖励",
-      "value2": "false",
+      "value2": "node-75 node-85 node-76",
       "value3": "left",
       "value4": "",
       "value5": "",
@@ -448,17 +453,18 @@
       "enabled": true,
       "outputs": {
         "completed": "node-26",
-        "failed": "node-25"
+        "failed": "node-25",
+        "blocked": "node-72"
       }
     },
     {
       "id": "node-25",
-      "type": "official:inventory.clickOpenContainerSlot",
+      "type": "builder:inventory.clickWithCondition",
       "x": 1910,
       "y": 580,
       "displayName": "等待领奖 6/6：单段约 5 秒",
       "value": "minecraft:lime_concrete 点击领取全部奖励",
-      "value2": "false",
+      "value2": "node-75 node-85 node-76",
       "value3": "left",
       "value4": "",
       "value5": "",
@@ -466,7 +472,8 @@
       "enabled": true,
       "outputs": {
         "completed": "node-26",
-        "failed": "node-59"
+        "failed": "node-59",
+        "blocked": "node-72"
       }
     },
     {
@@ -1075,7 +1082,7 @@
       "delayMs": 0,
       "enabled": true,
       "outputs": {
-        "completed": "node-2",
+        "completed": "node-70",
         "failed": "node-68"
       }
     },
@@ -1263,7 +1270,7 @@
       "x": 80,
       "y": 820,
       "displayName": "使用说明",
-      "value": "云宝库：普通宝库\n\n导入后手动启动；默认循环至对应钥匙耗尽。\n仅在实际兑换前检查钥匙，已有奖励和抽奖流程优先完成。\n全部菜单点击为普通左键；物品检查不自动点击。\n领奖查找共六段，每段约 5 秒。未知菜单只等待领奖，不点击兑换。\n超时及领奖后不关闭时停止并保留菜单。聊天仅用于超时诊断。\nF 必须绑定副手交换；需在实际服务器用一把钥匙验证。\n菜单文本采用包含匹配，若两按钮说明互相提及名称，需调整过滤条件。\n不会自动清背包、丢弃物品、切换宝库或重连。\n停止：宏界面 Stop 或 /litemacro stop。",
+      "value": "云宝库：普通宝库\n\n手动启动；默认循环至对应钥匙耗尽。\n仅在实际兑换前检查钥匙，已有奖励和抽奖流程优先完成。\n全部菜单点击为普通左键；物品检查不自动点击。\n领奖查找共六段，每段约 5 秒。未知菜单只等待领奖，不点击兑换。\n超时及领奖后不关闭时停止并保留菜单。缺钥匙聊天仅用于超时诊断；清理预警参与保护。\nF 必须绑定副手交换。\n剩余不超过 60 秒暂停新兑换；当前轮领奖仍可完成。\n剩余不超过 10 秒或倒计时异常时暂停领奖并保留菜单。\n先确认计分板降到不超过 60 秒，再等待重置到至少 590 秒，缓冲 5 秒后继续。\n领奖暂停恢复后只领取当前奖励，不重新兑换。\n匹配规则、数值比较和恢复连线均由 JSON 配置。需使用包含通用数值组件的 26.3 构建；确保奖励及时拾取。",
       "value2": "",
       "value3": "",
       "value4": "",
@@ -1271,9 +1278,289 @@
       "delayMs": 0,
       "enabled": true,
       "outputs": {},
-      "stickyNoteText": "云宝库：普通宝库\n\n导入后手动启动；默认循环至对应钥匙耗尽。\n仅在实际兑换前检查钥匙，已有奖励和抽奖流程优先完成。\n全部菜单点击为普通左键；物品检查不自动点击。\n领奖查找共六段，每段约 5 秒。未知菜单只等待领奖，不点击兑换。\n超时及领奖后不关闭时停止并保留菜单。聊天仅用于超时诊断。\nF 必须绑定副手交换；需在实际服务器用一把钥匙验证。\n菜单文本采用包含匹配，若两按钮说明互相提及名称，需调整过滤条件。\n不会自动清背包、丢弃物品、切换宝库或重连。\n停止：宏界面 Stop 或 /litemacro stop。",
+      "stickyNoteText": "云宝库：普通宝库\n\n手动启动；默认循环至对应钥匙耗尽。\n仅在实际兑换前检查钥匙，已有奖励和抽奖流程优先完成。\n全部菜单点击为普通左键；物品检查不自动点击。\n领奖查找共六段，每段约 5 秒。未知菜单只等待领奖，不点击兑换。\n超时及领奖后不关闭时停止并保留菜单。缺钥匙聊天仅用于超时诊断；清理预警参与保护。\nF 必须绑定副手交换。\n剩余不超过 60 秒暂停新兑换；当前轮领奖仍可完成。\n剩余不超过 10 秒或倒计时异常时暂停领奖并保留菜单。\n先确认计分板降到不超过 60 秒，再等待重置到至少 590 秒，缓冲 5 秒后继续。\n领奖暂停恢复后只领取当前奖励，不重新兑换。\n匹配规则、数值比较和恢复连线均由 JSON 配置。需使用包含通用数值组件的 26.3 构建；确保奖励及时拾取。",
       "stickyNoteWidth": 650,
-      "stickyNoteHeight": 430
+      "stickyNoteHeight": 650
+    },
+    {
+      "id": "node-70",
+      "type": "builder:logic.scoreboardNumber",
+      "x": 80,
+      "y": 480,
+      "displayName": "清理倒计时：剩余大于 60 秒才开新轮",
+      "value": "垃圾清理\\s*[:：]\\s*\\[\\s*(\\d+)\\s*\\]",
+      "value2": "op=gt value=60 stale=5 rate=-1 mode=latest missing=false",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-85",
+        "false": "node-71",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-71",
+      "type": "builder:misc.waitForCondition",
+      "x": 80,
+      "y": 600,
+      "displayName": "暂停新兑换，先确认进入低值清理窗口",
+      "value": "node-82",
+      "value2": "250",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-84",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-72",
+      "type": "builder:misc.waitForCondition",
+      "x": 1910,
+      "y": 740,
+      "displayName": "领奖紧急暂停：保留菜单等待清理",
+      "value": "node-82",
+      "value2": "250",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-83",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-73",
+      "type": "official:player.isAlive",
+      "x": 1910,
+      "y": 860,
+      "displayName": "清理后确认存活，只继续当前领奖",
+      "value": "",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-20",
+        "false": "node-67",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-74",
+      "type": "builder:logic.chatNumber",
+      "x": 80,
+      "y": 720,
+      "displayName": "聊天预警：禁止新兑换",
+      "value": "还剩下\\s*(\\d+)\\s*秒清理物品和实体",
+      "value2": "op=gt value=60 stale=0 rate=-1 mode=min missing=true",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "false": "node-71",
+        "true": "node-2",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-75",
+      "type": "builder:logic.scoreboardNumber",
+      "x": 1540,
+      "y": 440,
+      "displayName": "领奖条件：计分板剩余大于 10 秒",
+      "value": "垃圾清理\\s*[:：]\\s*\\[\\s*(\\d+)\\s*\\]",
+      "value2": "op=gt value=10 stale=5 rate=-1 mode=latest missing=false",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {}
+    },
+    {
+      "id": "node-76",
+      "type": "builder:logic.chatNumber",
+      "x": 1540,
+      "y": 560,
+      "displayName": "领奖条件：聊天预警剩余大于 10 秒",
+      "value": "还剩下\\s*(\\d+)\\s*秒清理物品和实体",
+      "value2": "op=gt value=10 stale=0 rate=-1 mode=min missing=true",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {}
+    },
+    {
+      "id": "node-77",
+      "type": "builder:logic.scoreboardNumber",
+      "x": 430,
+      "y": 600,
+      "displayName": "恢复条件：计分板回到至少 590 秒",
+      "value": "垃圾清理\\s*[:：]\\s*\\[\\s*(\\d+)\\s*\\]",
+      "value2": "op=gte value=590 stale=5 rate=0 mode=latest missing=false",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {}
+    },
+    {
+      "id": "node-78",
+      "type": "builder:misc.clearNumberObservation",
+      "x": 430,
+      "y": 820,
+      "displayName": "新周期清除旧聊天预警",
+      "value": "node-74",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-79",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-79",
+      "type": "official:misc.wait",
+      "x": 430,
+      "y": 940,
+      "displayName": "清理后缓冲 5 秒，再重新识别菜单",
+      "value": "5000",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-70",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-80",
+      "type": "builder:misc.clearNumberObservation",
+      "x": 1910,
+      "y": 1080,
+      "displayName": "领奖恢复：清除旧周期聊天预警",
+      "value": "node-74",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-81",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-81",
+      "type": "official:misc.wait",
+      "x": 1910,
+      "y": 1200,
+      "displayName": "领奖恢复：清理后缓冲 5 秒",
+      "value": "5000",
+      "value2": "",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-73",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-82",
+      "type": "builder:logic.scoreboardNumber",
+      "x": 430,
+      "y": 480,
+      "displayName": "确认清理窗口：计分板已降到不超过 60 秒",
+      "value": "垃圾清理\\s*[:：]\\s*\\[\\s*(\\d+)\\s*\\]",
+      "value2": "op=lte value=60 stale=5 rate=0 mode=latest missing=false",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {}
+    },
+    {
+      "id": "node-83",
+      "type": "builder:misc.waitForCondition",
+      "x": 1910,
+      "y": 960,
+      "displayName": "保留领奖菜单，等待计分板重置",
+      "value": "node-77 node-85",
+      "value2": "250",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-80",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-84",
+      "type": "builder:misc.waitForCondition",
+      "x": 430,
+      "y": 720,
+      "displayName": "等待计分板重置到至少 590 秒",
+      "value": "node-77 node-85",
+      "value2": "250",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "completed": "node-78",
+        "failed": "node-68"
+      }
+    },
+    {
+      "id": "node-85",
+      "type": "builder:logic.scoreboardNumber",
+      "x": 800,
+      "y": 720,
+      "displayName": "计分板合法范围：数值不超过 600",
+      "value": "垃圾清理\\s*[:：]\\s*\\[\\s*(\\d+)\\s*\\]",
+      "value2": "op=lte value=600 stale=5 rate=0 mode=latest missing=false",
+      "value3": "",
+      "value4": "",
+      "value5": "",
+      "delayMs": 0,
+      "enabled": true,
+      "outputs": {
+        "true": "node-74",
+        "false": "node-71",
+        "failed": "node-68"
+      }
     }
   ]
 }

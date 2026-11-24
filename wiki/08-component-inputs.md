@@ -285,6 +285,33 @@ ${fish.rod_durability_percent}
 
 `Macro Active State` also works as an automatic trigger. For example, place it in Macro 2, set the slot to `1`, and set the state to `active`. When Macro 1 starts, Macro 2 starts automatically from this component and follows its `true` connection, even when Macro 2 is not selected in the menu. Use `inactive` to trigger when Macro 1 stops. The component must point to a different macro slot.
 
+### Number comparison components (Minecraft 26.3 branch)
+
+`Scoreboard Number Compare` (`builder:logic.scoreboardNumber`) reads the visible sidebar, including team prefixes/suffixes and displayed score formatting. `Chat Number Compare` (`builder:logic.chatNumber`) records matching server system messages. Player chat and unrelated messages do not overwrite observations. `Scoreboard Contains` retains its existing behavior.
+
+Field 1 is a regex with a finite number in capture group 1. Signed integers and decimals are supported. Field 2 requires all six options; there are no server-specific defaults:
+
+| Option | Meaning |
+| --- | --- |
+| `op=gt/gte/lt/lte/eq/ne` | Comparison operator. |
+| `value=100` | Comparison threshold. |
+| `stale=5` | Maximum age in seconds; `0` disables expiry. Re-reading an unchanged sidebar number does not refresh its age. |
+| `rate=0` | Change per elapsed second; `0` uses the reported value, `-1` estimates a decreasing counter. |
+| `mode=latest/min/max` | Matching message reduction; scoreboard requires `latest`. |
+| `missing=false/true` | Result for absent/expired data. Invalid or conflicting numeric data always returns false. |
+
+For a balance, use `Balance:\s*(-?\d+(?:\.\d+)?)` with `op=gte value=100 stale=0 rate=0 mode=latest missing=false`. For messages, `min` and `max` compare new matches with the previous observation adjusted by its rate. Regexes in the options field must use escaped whitespace such as `\s*` rather than literal spaces.
+
+Outputs are `true`, `false` and `failed`. Invalid settings follow `failed`. Evaluation saves `${last.number}`, `${last.number_age}` (seconds) and `${last.number_valid}`. Missing/expired data leaves the numeric value blank, regardless of its configured condition result.
+
+Comparisons with the same source type, regex, rate and mode share their observation within one macro execution. `Clear Number Observation` (`builder:misc.clearNumberObservation`) takes a comparison node ID in Field 1 and clears that shared state. Restarting the macro or changing worlds also clears it.
+
+`Wait For Condition` (`builder:misc.waitForCondition`) takes whitespace/comma-separated condition node IDs in Field 1 and a positive polling interval in milliseconds in Field 2. It follows `completed` when all conditions are true, or `failed` for invalid references/settings.
+
+`Click GUI With Condition` (`builder:inventory.clickWithCondition`) takes a GUI item/tag/price/slot in Field 1 and condition node IDs in Field 2. It rechecks all conditions before each ordinary left-click attempt: `blocked` on false, `completed` after sending the click, `failed` on invalid settings or GUI search timeout. Reference evaluation does not execute condition connections.
+
+References support numeric comparisons, scoreboard/actionbar/bossbar text, status effects, latest-chat checks, player/account/location/nearby/health/food/XP checks, ground/water checks, inventory capacity/items/held items/slots/durability/open-container checks, and block/entity checks. Action or event-wait nodes cannot be referenced.
+
 ### Flow
 
 | Component | Field 1 | Field 2 | Example |

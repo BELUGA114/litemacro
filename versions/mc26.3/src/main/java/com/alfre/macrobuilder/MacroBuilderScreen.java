@@ -4512,6 +4512,12 @@ final class MacroBuilderScreen extends Screen {
          return node.value + (node.value2 == null || node.value2.isBlank() ? "" : " / " + node.value2);
       } else if ("builder:logic.scoreboardContains".equals(node.type)) {
          return node.value + " / " + node.value2;
+      } else if (MacroModel.SCOREBOARD_NUMBER.equals(node.type) || MacroModel.CHAT_NUMBER.equals(node.type)) {
+         return node.value + " / " + node.value2;
+      } else if (MacroModel.WAIT_FOR_CONDITION.equals(node.type)) {
+         return node.value + " / " + node.value2 + " ms";
+      } else if (MacroModel.CLICK_WITH_CONDITION.equals(node.type)) {
+         return node.value + " / guard " + node.value2;
       } else if ("builder:event.kicked".equals(node.type)) {
          return node.value + (node.value2 == null || node.value2.isBlank() ? "" : " / " + node.value2);
       } else if ("builder:player.autoClick".equals(node.type)) {
@@ -4698,6 +4704,12 @@ final class MacroBuilderScreen extends Screen {
          return secondary ? "optional chat text, player, or kick reason" : "chat, player, full, or kicked";
       } else if ("builder:logic.scoreboardContains".equals(descriptor.type())) {
          return secondary ? "contains, exact, or regex" : "scoreboard text";
+      } else if (MacroModel.SCOREBOARD_NUMBER.equals(descriptor.type()) || MacroModel.CHAT_NUMBER.equals(descriptor.type())) {
+         return secondary ? "op=... value=... stale=... rate=... mode=... missing=..." : "regex with number in capture group 1";
+      } else if (MacroModel.WAIT_FOR_CONDITION.equals(descriptor.type())) {
+         return secondary ? "poll interval ms" : "condition node IDs";
+      } else if (MacroModel.CLICK_WITH_CONDITION.equals(descriptor.type())) {
+         return secondary ? "condition node IDs" : "item id, tag, price, or GUI slot";
       } else if ("builder:event.kicked".equals(descriptor.type())) {
          return secondary ? "any, allow, block, or regex" : "optional kick reason";
       } else if ("builder:flow.note".equals(descriptor.type())) {

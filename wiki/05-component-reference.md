@@ -46,6 +46,8 @@ Many fields can use live values such as `${player.name}`, `${player.pos}`, `${ta
 | `Player At Location` | Checks if player is near coordinates. |
 | `Player Nearby` | Checks for nearby players by name or regex. |
 | `Scoreboard Contains` | Checks scoreboard text with contains, exact, or regex mode. |
+| `Scoreboard Number Compare` | In the Minecraft 26.3 branch, compares a sidebar number with configurable freshness and change rate. |
+| `Chat Number Compare` | In the Minecraft 26.3 branch, compares matching server-message numbers using latest/min/max observations. |
 | `Actionbar Contains` | Checks the latest actionbar text with contains, exact, or regex mode. |
 | `Has Status Effect` | Checks for an active effect such as Speed and an optional minimum level. |
 | `Bossbar Contains` | Checks every boss bar currently visible on screen. |
@@ -56,6 +58,8 @@ Many fields can use live values such as `${player.name}`, `${player.pos}`, `${ta
 | Component | Use |
 | --- | --- |
 | `Wait` | Pauses for a number of milliseconds. |
+| `Wait For Condition` | In the Minecraft 26.3 branch, waits for all referenced conditions to become true. |
+| `Clear Number Observation` | In the Minecraft 26.3 branch, clears a shared number observation explicitly. |
 | `Repeat Macro` | Repeats the whole macro. |
 | `Repeat` | Repeats a connected section. |
 | `Repeat Until` | Repeats a connected section until a condition becomes true. |
@@ -77,6 +81,7 @@ Many fields can use live values such as `${player.name}`, `${player.pos}`, `${ta
 | Component | Use |
 | --- | --- |
 | `Click GUI Item` | Clicks a matching item, tag, price, or GUI slot in an open GUI. |
+| `Click GUI With Condition` | In the Minecraft 26.3 branch, checks conditions before every ordinary left-click attempt; false follows `blocked`. |
 | `Hotbar Select` | Selects a hotbar item or slot. |
 | `Hotbar Use` | Uses a hotbar item. |
 | `Drop Items` | Drops matching inventory or hotbar items. |

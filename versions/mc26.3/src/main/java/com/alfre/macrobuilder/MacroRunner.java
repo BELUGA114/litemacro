@@ -59,6 +59,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.resources.Identifier;
@@ -88,6 +89,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.HitResult.Type;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.PlayerTeam;
@@ -151,6 +153,9 @@ final class MacroRunner {
    private int copiedMacroNumber;
    private int currentMacroNumber = 1;
    private final Map<String, String> runtimeValues = new HashMap<>();
+   private final Map<TextNumberObservation.Key, TextNumberObservation> numberObservations = new HashMap<>();
+   private Object numberObservationWorld;
+   private boolean conditionWaitAnnounced;
    private final boolean[] observedMacroRunning = new boolean[MACRO_COUNT];
    private final Map<KeyMapping, Integer> rootHeldKeyMappings = new HashMap<>();
    private final Map<InputConstants.Key, Integer> rootHeldRawKeys = new HashMap<>();
@@ -652,6 +657,9 @@ final class MacroRunner {
          this.stepDelayTicksRemaining = 0;
          this.repeatCounters.clear();
          this.runtimeValues.clear();
+         this.numberObservations.clear();
+         this.numberObservationWorld = null;
+         this.conditionWaitAnnounced = false;
          this.waitingForWorld = false;
          this.clearPendingRejoin();
          this.autoReconnectAttempted = false;
@@ -660,6 +668,7 @@ final class MacroRunner {
          this.autoStartActionbarBaseline = this.actionbarSequence;
          this.autoStartKickedBaseline = this.kickedSequence;
          this.running = true;
+         this.refreshNumberObservations(client);
          this.lastStatus = "Running Macro " + this.currentMacroNumber + ": " + model.name();
          this.send(client, "Resumed Macro " + this.currentMacroNumber + ": " + model.name() + ".");
       }
@@ -693,6 +702,9 @@ final class MacroRunner {
       this.stepDelayTicksRemaining = 0;
       this.repeatCounters.clear();
       this.runtimeValues.clear();
+      this.numberObservations.clear();
+      this.numberObservationWorld = null;
+      this.conditionWaitAnnounced = false;
       this.clearPendingRejoin();
       this.autoStartChatBaseline = this.chatSequence;
       this.autoStartActionbarBaseline = this.actionbarSequence;
@@ -920,6 +932,8 @@ final class MacroRunner {
       branch.lastPlayerPos = this.lastPlayerPos;
       branch.lastWorldId = this.lastWorldId;
       branch.runtimeValues.putAll(this.runtimeValues);
+      branch.numberObservations.putAll(this.numberObservations);
+      branch.numberObservationWorld = this.numberObservationWorld;
       branch.knownPlayerIds.addAll(this.knownPlayerIds);
       branch.knownPlayerNames.putAll(this.knownPlayerNames);
       branch.captureEventBaselines();
@@ -1471,6 +1485,7 @@ final class MacroRunner {
       }
 
       this.refreshRuntimeValues(client);
+      this.refreshNumberObservations(client);
       if (!this.childRunner) {
          this.maintainBackgroundMacroState(client);
          this.pollComponentAutoTriggers(client);
@@ -1640,6 +1655,19 @@ final class MacroRunner {
                            break;
                         case "builder:logic.scoreboardContains":
                            this.completeCondition(client, node, this.scoreboardContains(client, node), "Failed: Scoreboard Contains mode must be contains, exact, or regex.");
+                           break;
+                        case MacroModel.SCOREBOARD_NUMBER:
+                        case MacroModel.CHAT_NUMBER:
+                           this.completeCondition(client, node, this.numberCondition(client, node), "Failed: invalid number comparison.");
+                           break;
+                        case MacroModel.WAIT_FOR_CONDITION:
+                           this.runWaitForCondition(client, node);
+                           break;
+                        case MacroModel.CLICK_WITH_CONDITION:
+                           this.runClickWithCondition(client, node);
+                           break;
+                        case MacroModel.CLEAR_NUMBER_OBSERVATION:
+                           this.clearNumberObservation(client, node);
                            break;
                         case "builder:logic.actionbarContains":
                            this.completeCondition(client, node, this.actionbarContains(node), "Failed: Actionbar Contains mode must be contains, exact, or regex.");
@@ -1890,7 +1918,9 @@ final class MacroRunner {
                         default:
                            this.stop(client, "Stopped: unsupported component " + node.type + ".");
                      }
-                     } catch (RuntimeException var5) {
+                      } catch (IllegalArgumentException error) {
+                         this.fail(client, node, "Failed: " + node.displayLabel() + ": " + error.getMessage());
+                      } catch (RuntimeException var5) {
                         MacroBuilderClient.LOGGER.error("Litemacro component failed: {}", node.type, var5);
                         this.fail(client, node, "Failed: " + node.displayLabel() + " hit an internal safety check.");
                      }
@@ -3180,6 +3210,215 @@ final class MacroRunner {
             this.fail(client, node, "Failed: could not click " + target + " in the open GUI.");
          }
       }
+   }
+
+   private TextNumberObservation.Spec numberSpec(MacroModel.Node node) {
+      if (node == null || !node.enabled
+         || !MacroModel.SCOREBOARD_NUMBER.equals(node.type) && !MacroModel.CHAT_NUMBER.equals(node.type)) {
+         throw new IllegalArgumentException("Reference must point to an enabled number comparison node.");
+      }
+      return TextNumberObservation.Spec.parse(MacroModel.CHAT_NUMBER.equals(node.type),
+         this.resolveRuntimeText(node.value), this.resolveRuntimeText(node.value2));
+   }
+
+   private TextNumberObservation numberObservation(Minecraft client, TextNumberObservation.Spec spec) {
+      TextNumberObservation observation = this.numberObservations.get(spec.key());
+      if (observation == null) {
+         observation = new TextNumberObservation(spec);
+         if (!spec.chat()) {
+            observation.observeCurrent(this.sidebarNumberLines(client), numberTimeMs());
+         }
+         this.numberObservations.put(spec.key(), observation);
+      }
+      return observation;
+   }
+
+   private boolean numberCondition(Minecraft client, MacroModel.Node node) {
+      TextNumberObservation.Spec spec = this.numberSpec(node);
+      TextNumberObservation.Snapshot snapshot = this.numberObservation(client, spec).snapshot(numberTimeMs());
+      boolean valid = snapshot.present() && (spec.staleSeconds() == 0 || snapshot.ageSeconds() <= spec.staleSeconds());
+      this.putRuntimeValue("last.number", valid ? Double.toString(snapshot.value()) : "");
+      this.putRuntimeValue("last.number_age", snapshot.present() ? Double.toString(snapshot.ageSeconds()) : "");
+      this.putRuntimeValue("last.number_valid", Boolean.toString(valid));
+      return spec.matches(snapshot);
+   }
+
+   private boolean referencedConditions(Minecraft client, String references) {
+      String text = this.resolveRuntimeText(references).trim();
+      if (text.isBlank()) {
+         throw new IllegalArgumentException("At least one condition node ID is required.");
+      }
+      boolean result = true;
+      for (String id : text.split("[,\\s]+")) {
+         MacroModel.Node condition = this.model.node(id);
+         if (condition == null || !condition.enabled) {
+            throw new IllegalArgumentException("Missing or disabled condition: " + id);
+         }
+         // 只读取条件，不执行其连线或动作，避免点击前检查产生额外副作用。
+         Boolean matched = switch (condition.type) {
+            case MacroModel.SCOREBOARD_NUMBER, MacroModel.CHAT_NUMBER -> this.numberCondition(client, condition);
+            case MacroModel.SCOREBOARD_CONTAINS -> this.scoreboardContains(client, condition);
+            case MacroModel.ACTIONBAR_CONTAINS -> this.actionbarContains(condition);
+            case MacroModel.BOSSBAR_CONTAINS -> this.bossbarContains(client, condition);
+            case MacroModel.HAS_STATUS_EFFECT -> this.statusEffectMatches(client, condition);
+            case MacroModel.EVENT_IF_CHAT_SAME -> this.chatSameMatches(condition);
+            case MacroModel.PLAYER_IS_ALIVE -> client.player.getHealth() > 0.0F && !client.player.isDeadOrDying();
+            case MacroModel.PLAYER_IS_ACCOUNT -> this.isAccount(client, condition);
+            case MacroModel.PLAYER_IN_ACTION -> this.isInAction(client, condition);
+            case MacroModel.INVENTORY_FULL -> this.isInventoryFull(client);
+            case MacroModel.ITEM_IN_INVENTORY, MacroModel.LEGACY_ITEM_IN_INVENTORY -> this.inventoryHasItem(client, condition);
+            case MacroModel.HEALTH_BELOW -> doubleAtOrBelow(client.player.getHealth(), this.resolveRuntimeText(condition.value));
+            case MacroModel.FOOD_BELOW -> intAtOrBelow(client.player.getFoodData().getFoodLevel(), this.resolveRuntimeText(condition.value));
+            case MacroModel.XP_LEVEL_AT_LEAST -> intAtLeast(client.player.experienceLevel, this.resolveRuntimeText(condition.value));
+            case MacroModel.PLAYER_ON_GROUND -> client.player.onGround();
+            case MacroModel.PLAYER_IN_WATER -> client.player.isInWater();
+            case MacroModel.PLAYER_AT_LOCATION -> this.isAtLocation(client, condition);
+            case MacroModel.PLAYER_NEARBY -> this.playerNearby(client, condition);
+            case MacroModel.HELD_ITEM_IS -> this.heldItemIs(client, condition);
+            case MacroModel.SLOT_HAS_ITEM -> this.slotHasItem(client, condition);
+            case MacroModel.ITEM_DURABILITY -> this.itemDurabilityMatches(client, condition);
+            case MacroModel.EMPTY_SLOTS_AT_LEAST -> this.emptySlotsAtLeast(client, condition);
+            case MacroModel.OPEN_CONTAINER_HAS_ITEM -> this.openContainerHasItem(client, condition);
+            case MacroModel.HAS_OPEN_CONTAINER -> activeContainerHandler(client) != null;
+            case MacroModel.IS_OPEN_CONTAINER_FULL -> this.isOpenContainerFull(client);
+            case MacroModel.WORLD_BLOCK_IS -> this.blockAtMatches(client, condition);
+            case MacroModel.LOOKING_AT_BLOCK -> this.lookingAtBlockMatches(client, condition);
+            case MacroModel.ENTITY_NEARBY -> this.entityNearby(client, condition);
+            default -> throw new IllegalArgumentException("Unsupported referenced condition: " + condition.displayLabel());
+         };
+         if (matched == null) {
+            throw new IllegalArgumentException("Invalid condition settings: " + condition.displayLabel());
+         }
+         result &= matched;
+      }
+      return result;
+   }
+
+   private void runWaitForCondition(Minecraft client, MacroModel.Node node) {
+      Integer interval = parseIntOrNull(this.resolveRuntimeText(node.value2));
+      if (interval == null || interval < 1) {
+         throw new IllegalArgumentException("Condition polling interval must be a positive number of milliseconds.");
+      }
+      long intervalTicks = (interval + 49L) / 50L;
+      if ((this.activeTicks - 1) % intervalTicks != 0) {
+         return;
+      }
+      if (this.referencedConditions(client, node.value)) {
+         if (this.conditionWaitAnnounced) {
+            this.send(client, "Conditions satisfied; continuing the current macro.");
+            this.conditionWaitAnnounced = false;
+         }
+         this.complete(client, node, "completed");
+      } else {
+         this.lastStatus = "Waiting for conditions: " + node.value;
+         if (!this.conditionWaitAnnounced) {
+            this.send(client, this.lastStatus);
+            this.conditionWaitAnnounced = true;
+         }
+      }
+   }
+
+   private void runClickWithCondition(Minecraft client, MacroModel.Node node) {
+      String target = this.resolveRuntimeText(node.value).trim();
+      if (target.isBlank() || !looksLikeOpenContainerSlotTarget(target)
+         && !clickTargetHasValidFilter(target, clickTargetItemId(target))) {
+         throw new IllegalArgumentException("Conditional click needs a valid item id or GUI slot.");
+      }
+      // 按钮查找可跨多个 tick，每次发送点击前重新检查全部条件。
+      if (!this.referencedConditions(client, node.value2)) {
+         this.complete(client, node, "blocked");
+      } else if (this.clickOpenContainerTarget(client, target, 0, false)) {
+         this.complete(client, node, "completed");
+      } else if (this.activeTicks > SCREEN_TIMEOUT_TICKS) {
+         this.fail(client, node, "Failed: could not click " + target + " in the open GUI.");
+      }
+   }
+
+   private void clearNumberObservation(Minecraft client, MacroModel.Node node) {
+      MacroModel.Node source = this.model.node(this.resolveRuntimeText(node.value).trim());
+      this.numberObservation(client, this.numberSpec(source)).clear();
+      this.complete(client, node, "completed");
+   }
+
+   private void refreshNumberObservations(Minecraft client) {
+      Object world = client == null ? null : client.level;
+      if (world != this.numberObservationWorld) {
+         this.numberObservations.clear();
+         this.numberObservationWorld = world;
+      }
+      if (world == null || !this.running || this.model == null) {
+         return;
+      }
+      List<String> lines = this.sidebarNumberLines(client);
+      long nowMs = numberTimeMs();
+      Set<TextNumberObservation.Key> refreshed = new HashSet<>();
+      for (MacroModel.Node node : this.model.nodes()) {
+         if ((MacroModel.SCOREBOARD_NUMBER.equals(node.type) || MacroModel.CHAT_NUMBER.equals(node.type)) && node.enabled) {
+            try {
+               TextNumberObservation.Spec spec = this.numberSpec(node);
+               TextNumberObservation observation = this.numberObservation(client, spec);
+               if (!spec.chat() && refreshed.add(spec.key())) {
+                  observation.observeCurrent(lines, nowMs);
+               }
+            } catch (IllegalArgumentException error) {
+               this.lastStatus = "Invalid number comparison " + node.id + ": " + error.getMessage();
+            }
+         }
+      }
+   }
+
+   void recordNumberServerMessage(String message) {
+      long nowMs = numberTimeMs();
+      for (Map.Entry<TextNumberObservation.Key, TextNumberObservation> entry : this.numberObservations.entrySet()) {
+         if (entry.getKey().chat()) {
+            entry.getValue().recordMessage(message, nowMs);
+         }
+      }
+      for (MacroRunner child : this.childRunners) {
+         child.recordNumberServerMessage(message);
+      }
+      for (MacroRunner child : this.pendingChildRunners) {
+         child.recordNumberServerMessage(message);
+      }
+   }
+
+   private static long numberTimeMs() {
+      return System.nanoTime() / 1_000_000L;
+   }
+
+   private List<String> sidebarNumberLines(Minecraft client) {
+      if (client == null || client.level == null || client.player == null) {
+         return List.of();
+      }
+      Scoreboard scoreboard = client.level.getScoreboard();
+      Objective objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
+      PlayerTeam playerTeam = scoreboard.getPlayersTeam(client.player.getScoreboardName());
+      if (playerTeam != null && playerTeam.getColor().isPresent()) {
+         Objective colored = scoreboard.getDisplayObjective(playerTeam.getColor().get().displaySlot());
+         if (colored != null) {
+            objective = colored;
+         }
+      }
+      if (objective == null) {
+         return List.of();
+      }
+      List<String> lines = new ArrayList<>();
+      Objective objectiveForLines = objective;
+      // 与侧栏一致地选择可见条目并组合队伍前后缀，不读取其它目标中的旧数值。
+      scoreboard.listPlayerScores(objective).stream()
+         .filter(entry -> !entry.isHidden())
+         .sorted(Comparator.comparingInt(PlayerScoreEntry::value).reversed()
+            .thenComparing(PlayerScoreEntry::owner, String.CASE_INSENSITIVE_ORDER))
+         .limit(15)
+         .forEach(entry -> {
+            String line = PlayerTeam.formatNameForTeam(scoreboard.getPlayersTeam(entry.owner()), entry.ownerName()).getString();
+            lines.add(line);
+            String score = entry.formatValue(objectiveForLines.numberFormatOrDefault(StyledFormat.SIDEBAR_DEFAULT)).getString();
+            if (!score.isBlank()) {
+               lines.add(line + " " + score);
+            }
+         });
+      return lines;
    }
 
    private void runChestDepositItems(Minecraft client, MacroModel.Node node) {
