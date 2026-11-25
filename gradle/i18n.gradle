@@ -1,0 +1,71 @@
+import groovy.json.JsonSlurper
+
+sourceSets {
+    main {
+        java.srcDir '../../shared/java'
+        resources.srcDir '../../shared/resources'
+    }
+    i18nTest {
+        java.srcDir '../../shared/i18nTest/java'
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
+tasks.register('validateTranslations') {
+    group = 'verification'
+    description = 'Checks translation coverage and numbered placeholders for every bundled language.'
+    def languageDirectory = file('../../shared/resources/assets/macro_builder/lang')
+    inputs.dir languageDirectory
+    inputs.files sourceSets.main.java
+    doLast {
+        def parser = new JsonSlurper()
+        def english = parser.parse(new File(languageDirectory, 'en_us.json'), 'UTF-8')
+        sourceSets.main.java.files.each { source ->
+            def references = source.getText('UTF-8') =~ /"(macro_builder\.[A-Za-z0-9_.]+)"/
+            while (references.find()) {
+                def key = references.group(1)
+                if (!key.endsWith('.') && !english.containsKey(key)) {
+                    throw new GradleException("Missing translation ${source.name}: ${key}")
+                }
+            }
+        }
+        def placeholders = { String text ->
+            def values = []
+            def matcher = text =~ /%%|%([1-9][0-9]*)[$]s/
+            while (matcher.find()) {
+                if (matcher.group(1) != null) values.add(matcher.group(1))
+            }
+            if (text.replaceAll(/%%|%[1-9][0-9]*[$]s/, '').contains('%')) {
+                throw new GradleException("Invalid translation placeholder: ${text}")
+            }
+            values.sort()
+        }
+        fileTree(languageDirectory).matching { include '*.json' }.files.sort().each { languageFile ->
+            def translations = parser.parse(languageFile, 'UTF-8')
+            if (translations.keySet() != english.keySet()) {
+                throw new GradleException("Translation keys differ in ${languageFile.name}")
+            }
+            english.each { key, value ->
+                def translated = translations[key]
+                if (!(translated instanceof String) || translated.isBlank()
+                    || placeholders(value) != placeholders(translated)) {
+                    throw new GradleException("Invalid translation ${languageFile.name}: ${key}")
+                }
+            }
+        }
+    }
+}
+
+tasks.register('i18nTest', JavaExec) {
+    group = 'verification'
+    description = 'Checks language switching and saved macro compatibility.'
+    dependsOn tasks.named('i18nTestClasses'), tasks.named('validateTranslations')
+    classpath = sourceSets.i18nTest.runtimeClasspath
+    mainClass = 'com.alfre.macrobuilder.TranslationTest'
+    args file('../../test-macros').absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('i18nTest')
+}

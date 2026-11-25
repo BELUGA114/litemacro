@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,41 +135,41 @@ final class TextNumberObservation {
             case "lte" -> snapshot.value() <= this.threshold;
             case "eq" -> snapshot.value() == this.threshold;
             case "ne" -> snapshot.value() != this.threshold;
-            default -> throw new IllegalStateException("Unsupported number comparison: " + this.operator);
+            default -> throw new IllegalStateException(tr("macro_builder.number.unsupported_number_comparison", this.operator));
          };
       }
 
       static Spec parse(boolean chat, String regex, String options) {
          Map<String, String> values = parseOptions(options);
          if (regex.isBlank()) {
-            throw new IllegalArgumentException("Number regex cannot be blank.");
+            throw new IllegalArgumentException(tr("macro_builder.number.number_regex_cannot_be_blank"));
          }
          Pattern pattern = Pattern.compile(regex);
          if (pattern.matcher("").groupCount() < 1) {
-            throw new IllegalArgumentException("Number regex needs capture group 1 containing a number.");
+            throw new IllegalArgumentException(tr("macro_builder.number.number_regex_needs_capture_group_1_containing_a_number"));
          }
          String operator = values.get("op");
          if (!Set.of("gt", "gte", "lt", "lte", "eq", "ne").contains(operator)) {
-            throw new IllegalArgumentException("Number comparison op must be gt/gte/lt/lte/eq/ne.");
+            throw new IllegalArgumentException(tr("macro_builder.number.number_comparison_op_must_be_gt_gte_lt_lte_eq_ne"));
          }
          double threshold = numberOption("value", values.get("value"));
          double stale = numberOption("stale", values.get("stale"));
          double rate = numberOption("rate", values.get("rate"));
          if (stale < 0) {
-            throw new IllegalArgumentException("Number comparison stale must be nonnegative; 0 disables expiry.");
+            throw new IllegalArgumentException(tr("macro_builder.number.number_comparison_stale_must_be_nonnegative_0_disables_expiry"));
          }
          Mode mode = switch (values.get("mode")) {
             case "latest" -> Mode.LATEST;
             case "min" -> Mode.MIN;
             case "max" -> Mode.MAX;
-            default -> throw new IllegalArgumentException("Number comparison mode must be latest/min/max.");
+            default -> throw new IllegalArgumentException(tr("macro_builder.number.number_comparison_mode_must_be_latest_min_max"));
          };
          if (!chat && mode != Mode.LATEST) {
-            throw new IllegalArgumentException("Scoreboard numbers use mode=latest.");
+            throw new IllegalArgumentException(tr("macro_builder.number.scoreboard_numbers_use_mode_latest"));
          }
          String missing = values.get("missing");
          if (!"true".equals(missing) && !"false".equals(missing)) {
-            throw new IllegalArgumentException("Number comparison missing must be true/false.");
+            throw new IllegalArgumentException(tr("macro_builder.number.number_comparison_missing_must_be_true_false"));
          }
          return new Spec(chat, pattern, operator, threshold, stale, rate, mode, Boolean.parseBoolean(missing));
       }
@@ -181,18 +183,18 @@ final class TextNumberObservation {
             }
             String[] parts = option.split("=", 2);
             if (parts.length != 2 || parts[1].isBlank()) {
-               throw new IllegalArgumentException("Number comparison options must use key=value.");
+               throw new IllegalArgumentException(tr("macro_builder.number.number_comparison_options_must_use_key_value"));
             }
             if (!required.contains(parts[0])) {
-               throw new IllegalArgumentException("Unknown number comparison option: " + parts[0]);
+               throw new IllegalArgumentException(tr("macro_builder.number.unknown_number_comparison_option", parts[0]));
             }
             if (values.putIfAbsent(parts[0], parts[1]) != null) {
-               throw new IllegalArgumentException("Duplicate number comparison option: " + parts[0]);
+               throw new IllegalArgumentException(tr("macro_builder.number.duplicate_number_comparison_option", parts[0]));
             }
          }
          for (String key : required) {
             if (!values.containsKey(key)) {
-               throw new IllegalArgumentException("Missing number comparison option: " + key);
+               throw new IllegalArgumentException(tr("macro_builder.number.missing_number_comparison_option", key));
             }
          }
          return values;
@@ -202,11 +204,11 @@ final class TextNumberObservation {
          try {
             double value = Double.parseDouble(text);
             if (!Double.isFinite(value)) {
-               throw new IllegalArgumentException("Number comparison " + key + " must be finite.");
+               throw new IllegalArgumentException(tr("macro_builder.number.number_comparison_must_be_finite", key));
             }
             return value;
          } catch (NumberFormatException error) {
-            throw new IllegalArgumentException("Number comparison " + key + " must be numeric.", error);
+            throw new IllegalArgumentException(tr("macro_builder.number.number_comparison_must_be_numeric", key), error);
          }
       }
    }

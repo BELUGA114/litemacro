@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -12,21 +14,24 @@ final class RandomDelaySettingsScreen extends Screen {
    private EditBox minField;
    private EditBox maxField;
    private Button enabledButton;
+   private boolean enabled;
+   private String validationError = "";
 
    RandomDelaySettingsScreen(MacroBuilderScreen parent, MacroModel model) {
-      super(Component.literal("Random Delay"));
+      super(Component.translatable("macro_builder.random.random_delay"));
       this.parent = parent;
       this.model = model;
+      this.enabled = model.randomDelayEnabled();
    }
 
    protected void init() {
       int panelWidth = 300;
-      int panelHeight = 164;
+      int panelHeight = 184;
       int left = this.width / 2 - panelWidth / 2;
       int top = this.height / 2 - panelHeight / 2;
       this.enabledButton = (Button)this.addRenderableWidget(
          Button.builder(Component.literal(this.enabledText()), button -> {
-            this.model.setRandomDelayEnabled(!this.model.randomDelayEnabled());
+            this.enabled = !this.enabled;
             this.enabledButton.setMessage(Component.literal(this.enabledText()));
          }).bounds(left + 16, top + 44, 268, 20).build()
       );
@@ -38,14 +43,14 @@ final class RandomDelaySettingsScreen extends Screen {
       this.maxField.setMaxLength(8);
       this.maxField.setValue(Integer.toString(this.model.randomDelayMaxMs()));
       this.addRenderableWidget(this.maxField);
-      this.addRenderableWidget(Button.builder(Component.literal("Apply"), button -> this.applyAndClose()).bounds(left + 92, top + 136, 92, 20).build());
-      this.addRenderableWidget(Button.builder(Component.literal("Cancel"), button -> this.onClose()).bounds(left + 192, top + 136, 92, 20).build());
+      this.addRenderableWidget(Button.builder(Component.translatable("macro_builder.random.apply"), button -> this.applyAndClose()).bounds(left + 92, top + 156, 92, 20).build());
+      this.addRenderableWidget(Button.builder(Component.translatable("macro_builder.random.cancel"), button -> this.onClose()).bounds(left + 192, top + 156, 92, 20).build());
    }
 
    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
       this.renderBackground(context, mouseX, mouseY, delta);
       int panelWidth = 300;
-      int panelHeight = 164;
+      int panelHeight = 184;
       int left = this.width / 2 - panelWidth / 2;
       int top = this.height / 2 - panelHeight / 2;
       context.fill(left, top, left + panelWidth, top + panelHeight, -15724528);
@@ -54,8 +59,9 @@ final class RandomDelaySettingsScreen extends Screen {
       context.fill(left, top, left + 1, top + panelHeight, -9205921);
       context.fill(left + panelWidth - 1, top, left + panelWidth, top + panelHeight, -9205921);
       context.drawCenteredString(this.font, this.title, this.width / 2, top + 14, -1);
-      context.drawString(this.font, "Min ms", left + 16, top + 84, -2565928);
-      context.drawString(this.font, "Max ms", left + 16, top + 112, -2565928);
+      context.drawString(this.font, tr("macro_builder.random.min_ms"), left + 16, top + 84, -2565928);
+      context.drawString(this.font, tr("macro_builder.random.max_ms"), left + 16, top + 112, -2565928);
+      context.drawCenteredString(this.font, this.validationError, this.width / 2, top + 140, 0xFFFF7088);
       super.render(context, mouseX, mouseY, delta);
    }
 
@@ -72,20 +78,23 @@ final class RandomDelaySettingsScreen extends Screen {
    }
 
    private void applyAndClose() {
-      this.model.setRandomDelayRangeMs(this.parseMs(this.minField.getValue(), this.model.randomDelayMinMs()), this.parseMs(this.maxField.getValue(), this.model.randomDelayMaxMs()));
-      this.parent.refreshAfterRandomDelaySettings();
-      this.minecraft.setScreen(this.parent);
-   }
-
-   private int parseMs(String text, int fallback) {
       try {
-         return Math.max(0, Integer.parseInt(text.trim()));
-      } catch (RuntimeException var4) {
-         return fallback;
+         int min = Integer.parseInt(this.minField.getValue().trim());
+         int max = Integer.parseInt(this.maxField.getValue().trim());
+         if (min < 0 || max < min) {
+            this.validationError = tr("macro_builder.random.invalid_range");
+            return;
+         }
+         this.model.setRandomDelayEnabled(this.enabled);
+         this.model.setRandomDelayRangeMs(min, max);
+         this.parent.refreshAfterRandomDelaySettings();
+         this.onClose();
+      } catch (NumberFormatException exception) {
+         this.validationError = tr("macro_builder.random.invalid_range");
       }
    }
 
    private String enabledText() {
-      return this.model.randomDelayEnabled() ? "Random Delay: On" : "Random Delay: Off";
+      return this.enabled ? tr("macro_builder.random.random_delay_on") : tr("macro_builder.random.random_delay_off");
    }
 }

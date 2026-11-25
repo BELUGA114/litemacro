@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import com.alfre.macrobuilder.mixin.BossHealthOverlayAccessor;
 import com.alfre.macrobuilder.mixin.CreativeSlotClickInvoker;
 import com.google.gson.JsonArray;
@@ -166,7 +168,7 @@ final class MacroRunner {
    private int activeFishPhaseTick;
    private int activeFishCatchCount;
    private int stepDelayTicksRemaining;
-   private String lastStatus = "Stopped";
+   private Component lastStatus = Component.translatable("macro_builder.runner.stopped");
    private float lastHealth = Float.NaN;
    private Vec3 lastPlayerPos;
    private String lastWorldId = "";
@@ -260,7 +262,7 @@ final class MacroRunner {
       } catch (RuntimeException | IOException var2) {
          MacroBuilderClient.LOGGER.error("Failed to load Litemacro file", var2);
          this.model = MacroModel.createDefault();
-         this.lastStatus = "Load failed: " + var2.getMessage();
+         this.lastStatus = Component.translatable("macro_builder.runner.load_failed", var2.getMessage());
       }
    }
 
@@ -295,7 +297,7 @@ final class MacroRunner {
    void setChatNotifications(boolean enabled) {
       this.settings.setChatNotifications(enabled);
       this.saveSettings();
-      this.lastStatus = enabled ? "Chat notifications on" : "Chat notifications off";
+      this.lastStatus = enabled ? Component.translatable("macro_builder.runner.chat_notifications_on") : Component.translatable("macro_builder.runner.chat_notifications_off");
    }
 
    void toggleChatNotifications() {
@@ -309,7 +311,7 @@ final class MacroRunner {
    void setRunningOverlay(boolean enabled) {
       this.settings.setRunningOverlay(enabled);
       this.saveSettings();
-      this.lastStatus = enabled ? "Running overlay on" : "Running overlay off";
+      this.lastStatus = enabled ? Component.translatable("macro_builder.runner.running_overlay_on") : Component.translatable("macro_builder.runner.running_overlay_off");
    }
 
    void toggleRunningOverlay() {
@@ -325,7 +327,7 @@ final class MacroRunner {
       int index = Math.max(1, Math.min(100, macroNumber)) - 1;
       this.macroKeyWasDown[index] = keyCode >= 0;
       this.saveSettings();
-      this.lastStatus = "Set Macro " + macroNumber + " key to " + keyName(keyCode);
+      this.lastStatus = Component.translatable("macro_builder.runner.set_macro_key_to", macroNumber, keyName(keyCode));
    }
 
    void clearMacroKey(int macroNumber) {
@@ -333,7 +335,7 @@ final class MacroRunner {
       int index = Math.max(1, Math.min(100, macroNumber)) - 1;
       this.macroKeyWasDown[index] = false;
       this.saveSettings();
-      this.lastStatus = "Cleared Macro " + macroNumber + " key";
+      this.lastStatus = Component.translatable("macro_builder.runner.cleared_macro_key", macroNumber);
    }
 
    String macroKeyName(int macroNumber) {
@@ -354,23 +356,23 @@ final class MacroRunner {
 
    boolean startActionRecording(Minecraft client, MacroModel recordingModel, MacroModel.Node node) {
       if (client == null || client.player == null || client.level == null || recordingModel == null || node == null) {
-         this.lastStatus = "Recording needs an active world and a selected Recorded Actions component.";
+         this.lastStatus = Component.translatable("macro_builder.runner.recording_needs_an_active_world_and_a_selected_recorded_actions_component");
          return false;
       }
 
       if (!MacroModel.PLAYER_RECORDED_ACTIONS.equals(node.type)) {
-         this.lastStatus = "Select a Recorded Actions component first.";
+         this.lastStatus = Component.translatable("macro_builder.runner.select_a_recorded_actions_component_first");
          return false;
       }
 
       int stopKey = this.settings.macroKey(this.currentMacroNumber);
       if (stopKey <= 0) {
-         this.lastStatus = "Assign a key to Macro " + this.currentMacroNumber + " before recording.";
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.assign_a_key_to_macro_before_recording", this.currentMacroNumber);
+         this.send(client, this.lastStatus.getString());
          return false;
       }
 
-      this.stopMacroRuns(client, this.currentMacroNumber, "Stopped before recording actions.");
+      this.stopMacroRuns(client, this.currentMacroNumber, tr("macro_builder.runner.stopped_before_recording_actions"));
       this.actionRecording = true;
       this.actionRecordingModel = recordingModel;
       this.actionRecordingNodeId = node.id;
@@ -382,8 +384,8 @@ final class MacroRunner {
       this.actionRecordingFrames.clear();
       this.actionRecordingEvents.clear();
       this.actionRecordingEvents.clear();
-      this.lastStatus = "Recording actions. Press " + keyName(stopKey) + " to stop and save.";
-      this.send(client, this.lastStatus);
+      this.lastStatus = Component.translatable("macro_builder.runner.recording_actions_press_to_stop_and_save", keyName(stopKey));
+      this.send(client, this.lastStatus.getString());
       return true;
    }
 
@@ -414,20 +416,20 @@ final class MacroRunner {
       try {
          this.ensureConfigFiles();
          this.model = MacroModel.load(this.macroPath(this.currentMacroNumber));
-         this.lastStatus = "Selected Macro " + this.currentMacroNumber;
+         this.lastStatus = Component.translatable("macro_builder.runner.selected_macro", this.currentMacroNumber);
       } catch (RuntimeException | IOException var5) {
          MacroBuilderClient.LOGGER.error("Failed to select macro {}", this.currentMacroNumber, var5);
          this.model = MacroModel.createDefault();
          this.model.setName("Macro " + this.currentMacroNumber);
-         this.lastStatus = "Macro " + this.currentMacroNumber + " failed to load: " + var5.getMessage();
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.macro_failed_to_load", this.currentMacroNumber, var5.getMessage());
+         this.send(client, this.lastStatus.getString());
       }
    }
 
    void toggleMacro(Minecraft client, int macroNumber) {
       int clamped = Math.max(1, Math.min(100, macroNumber));
-      if (this.stopMacroRuns(client, clamped, "Stopped Macro " + clamped + ".")) {
-         this.lastStatus = "Stopped Macro " + clamped + ".";
+      if (this.stopMacroRuns(client, clamped, tr("macro_builder.runner.stopped_macro", clamped))) {
+         this.lastStatus = Component.translatable("macro_builder.runner.stopped_macro", clamped);
       } else {
          this.startMacroSlot(client, clamped);
       }
@@ -446,7 +448,7 @@ final class MacroRunner {
          MacroBuilderClient.LOGGER.warn("Failed to read macro {} name", clamped, var4);
       }
 
-      return "Macro " + clamped;
+      return tr("macro_builder.runner.macro", clamped);
    }
 
    void save(MacroModel model) throws IOException {
@@ -454,7 +456,7 @@ final class MacroRunner {
       this.ensureConfigFiles();
       model.save(this.macroPath(this.currentMacroNumber));
       this.replaceActiveModel(this.currentMacroNumber, model);
-      this.lastStatus = "Saved Macro " + this.currentMacroNumber;
+      this.lastStatus = Component.translatable("macro_builder.runner.saved_macro", this.currentMacroNumber);
    }
 
    void resetMacro(Minecraft client, int macroNumber) {
@@ -462,7 +464,7 @@ final class MacroRunner {
 
       try {
          this.ensureConfigFiles();
-         this.stopMacroRuns(client, clamped, "Stopped before resetting macro.");
+         this.stopMacroRuns(client, clamped, tr("macro_builder.runner.stopped_before_resetting_macro"));
 
          MacroModel reset = MacroModel.createDefault();
          reset.setName("Macro " + clamped);
@@ -473,12 +475,12 @@ final class MacroRunner {
             this.model = reset;
          }
 
-         this.lastStatus = "Reset Macro " + clamped + " to new";
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.reset_macro_to_new", clamped);
+         this.send(client, this.lastStatus.getString());
       } catch (RuntimeException | IOException var5) {
          MacroBuilderClient.LOGGER.error("Failed to reset macro {}", clamped, var5);
-         this.lastStatus = "Reset failed: " + var5.getMessage();
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.reset_failed", var5.getMessage());
+         this.send(client, this.lastStatus.getString());
       }
    }
 
@@ -491,12 +493,12 @@ final class MacroRunner {
          this.copiedMacroJson = Files.readString(path);
          this.copiedMacroLabel = MacroModel.load(path).name();
          this.copiedMacroNumber = clamped;
-         this.lastStatus = "Copied Macro " + clamped + ": " + this.copiedMacroLabel;
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.copied_macro", clamped, this.copiedMacroLabel);
+         this.send(client, this.lastStatus.getString());
       } catch (RuntimeException | IOException var5) {
          MacroBuilderClient.LOGGER.error("Failed to copy macro {}", clamped, var5);
-         this.lastStatus = "Copy failed: " + var5.getMessage();
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.copy_failed", var5.getMessage());
+         this.send(client, this.lastStatus.getString());
       }
    }
 
@@ -505,7 +507,7 @@ final class MacroRunner {
       if (this.copiedMacroJson != null && !this.copiedMacroJson.isBlank()) {
          try {
             this.ensureConfigFiles();
-            this.stopMacroRuns(client, clamped, "Stopped before pasting macro.");
+            this.stopMacroRuns(client, clamped, tr("macro_builder.runner.stopped_before_pasting_macro"));
 
             Path target = this.macroPath(clamped);
             Files.writeString(target, this.copiedMacroJson);
@@ -515,16 +517,16 @@ final class MacroRunner {
                this.model = pasted;
             }
 
-            this.lastStatus = "Pasted Macro " + this.copiedMacroNumber + " into Macro " + clamped;
-            this.send(client, this.lastStatus);
+            this.lastStatus = Component.translatable("macro_builder.runner.pasted_macro_into_macro", this.copiedMacroNumber, clamped);
+            this.send(client, this.lastStatus.getString());
          } catch (RuntimeException | IOException var6) {
             MacroBuilderClient.LOGGER.error("Failed to paste macro into {}", clamped, var6);
-            this.lastStatus = "Paste failed: " + var6.getMessage();
-            this.send(client, this.lastStatus);
+            this.lastStatus = Component.translatable("macro_builder.runner.paste_failed", var6.getMessage());
+            this.send(client, this.lastStatus.getString());
          }
       } else {
-         this.lastStatus = "No copied macro to paste.";
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.no_copied_macro_to_paste");
+         this.send(client, this.lastStatus.getString());
       }
    }
 
@@ -537,12 +539,12 @@ final class MacroRunner {
          Files.createDirectories(downloads);
          Path target = downloads.resolve("Litemacro-Macro-" + clamped + ".json");
          Files.copy(this.macroPath(clamped), target, StandardCopyOption.REPLACE_EXISTING);
-         this.lastStatus = "Downloaded Macro " + clamped + " to " + target;
-         this.send(client, "Downloaded Macro " + clamped + " to Downloads.");
+         this.lastStatus = Component.translatable("macro_builder.runner.downloaded_macro_to", clamped, target);
+         this.send(client, tr("macro_builder.runner.downloaded_macro_to_downloads", clamped));
       } catch (RuntimeException | IOException var6) {
          MacroBuilderClient.LOGGER.error("Failed to download macro {}", clamped, var6);
-         this.lastStatus = "Download failed: " + var6.getMessage();
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.download_failed", var6.getMessage());
+         this.send(client, this.lastStatus.getString());
       }
    }
 
@@ -551,8 +553,8 @@ final class MacroRunner {
          this.importMacroFromDownloads(client, macroNumber, this.newestJsonInDownloads());
       } catch (RuntimeException | IOException var4) {
          MacroBuilderClient.LOGGER.error("Failed to import newest macro into {}", macroNumber, var4);
-         this.lastStatus = "Import failed: " + var4.getMessage();
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.import_failed", var4.getMessage());
+         this.send(client, this.lastStatus.getString());
       }
    }
 
@@ -562,7 +564,7 @@ final class MacroRunner {
       try {
          this.ensureConfigFiles();
          MacroModel imported = this.readMacroImport(source, clamped);
-         this.stopMacroRuns(client, clamped, "Stopped before importing macro.");
+         this.stopMacroRuns(client, clamped, tr("macro_builder.runner.stopped_before_importing_macro"));
 
          Path target = this.macroPath(clamped);
          imported.save(target);
@@ -570,12 +572,12 @@ final class MacroRunner {
             this.model = imported;
          }
 
-         this.lastStatus = "Imported " + source.getFileName() + " into Macro " + clamped;
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.imported_into_macro", source.getFileName(), clamped);
+         this.send(client, this.lastStatus.getString());
       } catch (RuntimeException | IOException var7) {
          MacroBuilderClient.LOGGER.error("Failed to import macro into {}", clamped, var7);
-         this.lastStatus = "Import failed: " + var7.getMessage();
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.import_failed", var7.getMessage());
+         this.send(client, this.lastStatus.getString());
       }
    }
 
@@ -589,12 +591,12 @@ final class MacroRunner {
          MacroModel uploaded = MacroModel.load(this.macroPath(clamped));
          Path target = marketplace.resolve("Litemacro-Macro-" + clamped + "-" + this.safeMarketplaceName(uploaded.name()) + ".json");
          Files.copy(this.macroPath(clamped), target, StandardCopyOption.REPLACE_EXISTING);
-         this.lastStatus = "Uploaded Macro " + clamped + " to Marketplace";
-         this.send(client, "Uploaded Macro " + clamped + " to Marketplace.");
+         this.lastStatus = Component.translatable("macro_builder.runner.uploaded_macro_to_marketplace_2", clamped);
+         this.send(client, tr("macro_builder.runner.uploaded_macro_to_marketplace", clamped));
       } catch (RuntimeException | IOException var7) {
          MacroBuilderClient.LOGGER.error("Failed to upload macro {}", clamped, var7);
-         this.lastStatus = "Marketplace upload failed: " + var7.getMessage();
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.marketplace_upload_failed", var7.getMessage());
+         this.send(client, this.lastStatus.getString());
       }
    }
 
@@ -603,28 +605,28 @@ final class MacroRunner {
          Files.createDirectories(this.downloadsDirectory());
          Path target = this.downloadsDirectory().resolve(source.getFileName().toString());
          Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
-         this.lastStatus = "Downloaded " + source.getFileName() + " from Marketplace";
-         this.send(client, "Downloaded Marketplace macro to Downloads.");
+         this.lastStatus = Component.translatable("macro_builder.runner.downloaded_from_marketplace", source.getFileName());
+         this.send(client, tr("macro_builder.runner.downloaded_marketplace_macro_to_downloads"));
       } catch (RuntimeException | IOException var4) {
          MacroBuilderClient.LOGGER.error("Failed to download marketplace macro", var4);
-         this.lastStatus = "Marketplace download failed: " + var4.getMessage();
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.marketplace_download_failed", var4.getMessage());
+         this.send(client, this.lastStatus.getString());
       }
    }
 
    void reload(Minecraft client) {
-      this.stopMacroRuns(client, this.currentMacroNumber, "Stopped before reload.");
+      this.stopMacroRuns(client, this.currentMacroNumber, tr("macro_builder.runner.stopped_before_reload"));
       this.clearSelfRuntimeState();
 
       try {
          this.ensureConfigFiles();
          this.model = MacroModel.load(this.macroPath(this.currentMacroNumber));
-         this.lastStatus = "Reloaded Macro " + this.currentMacroNumber;
-         this.send(client, "Reloaded Macro " + this.currentMacroNumber + ".");
+         this.lastStatus = Component.translatable("macro_builder.runner.reloaded_macro_2", this.currentMacroNumber);
+         this.send(client, tr("macro_builder.runner.reloaded_macro", this.currentMacroNumber));
       } catch (RuntimeException | IOException var3) {
          MacroBuilderClient.LOGGER.error("Failed to reload Litemacro file", var3);
-         this.lastStatus = "Reload failed: " + var3.getMessage();
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.reload_failed", var3.getMessage());
+         this.send(client, this.lastStatus.getString());
       }
    }
 
@@ -640,8 +642,8 @@ final class MacroRunner {
    private void resumeFromNode(Minecraft client, MacroModel model, MacroModel.Node start) {
       this.model = model;
       if (start == null) {
-         this.lastStatus = "No Macro Entry Point";
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.no_macro_entry_point");
+         this.send(client, this.lastStatus.getString());
       } else {
          this.currentNodeId = start.id;
          this.activeNodeId = null;
@@ -657,8 +659,8 @@ final class MacroRunner {
          this.autoStartActionbarBaseline = this.actionbarSequence;
          this.autoStartKickedBaseline = this.kickedSequence;
          this.running = true;
-         this.lastStatus = "Running Macro " + this.currentMacroNumber + ": " + model.name();
-         this.send(client, "Resumed Macro " + this.currentMacroNumber + ": " + model.name() + ".");
+         this.lastStatus = Component.translatable("macro_builder.runner.running_macro", this.currentMacroNumber, model.name());
+         this.send(client, tr("macro_builder.runner.resumed_macro", this.currentMacroNumber, model.name()));
       }
    }
 
@@ -694,7 +696,7 @@ final class MacroRunner {
       this.autoStartChatBaseline = this.chatSequence;
       this.autoStartActionbarBaseline = this.actionbarSequence;
       this.autoStartKickedBaseline = this.kickedSequence;
-      this.lastStatus = reason;
+      this.lastStatus = Component.literal(reason);
       this.send(client, reason);
    }
 
@@ -705,7 +707,7 @@ final class MacroRunner {
    String status() {
       String step = this.currentNodeId == null ? "none" : this.currentNodeId;
       int runningCount = this.runningChildCount();
-      return this.lastStatus + " | step: " + step + (runningCount > 0 ? " | active: " + runningCount : "");
+      return tr("macro_builder.runner.step", this.lastStatus.getString(), step, (runningCount > 0 ? tr("macro_builder.runner.active", runningCount) : ""));
    }
 
    List<MacroRunner.OverlaySnapshot> overlaySnapshots() {
@@ -761,9 +763,9 @@ final class MacroRunner {
          snapshots.add(
             new MacroRunner.OverlaySnapshot(
                this.currentMacroNumber,
-               this.model == null ? "Macro " + this.currentMacroNumber : this.model.name(),
+               this.model == null ? tr("macro_builder.runner.macro", this.currentMacroNumber) : this.model.name(),
                this.activeComponentLabel(),
-               this.lastStatus,
+               this.lastStatus.getString(),
                this.activeTicks,
                this.runningChildCount()
             )
@@ -777,7 +779,7 @@ final class MacroRunner {
 
    private String activeComponentLabel() {
       if (this.model == null) {
-         return "Waiting";
+         return tr("macro_builder.runner.waiting");
       }
 
       MacroModel.Node node = null;
@@ -789,7 +791,7 @@ final class MacroRunner {
          node = this.model.node(this.currentNodeId);
       }
 
-      return node == null ? "Waiting" : node.displayLabel();
+      return node == null ? tr("macro_builder.runner.waiting") : node.displayLabel();
    }
 
    private boolean hasRunningMacro(int macroNumber) {
@@ -856,18 +858,18 @@ final class MacroRunner {
          this.startModelRuns(client, macroNumber, macro);
       } catch (RuntimeException | IOException error) {
          MacroBuilderClient.LOGGER.error("Failed to start macro {}", macroNumber, error);
-         this.lastStatus = "Macro " + macroNumber + " failed to start: " + error.getMessage();
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.macro_failed_to_start", macroNumber, error.getMessage());
+         this.send(client, this.lastStatus.getString());
       }
    }
 
    private void startModelRuns(Minecraft client, int macroNumber, MacroModel model) {
-      this.stopMacroRuns(client, macroNumber, "Restarted Macro " + macroNumber + ".");
+      this.stopMacroRuns(client, macroNumber, tr("macro_builder.runner.restarted_macro", macroNumber));
       this.model = macroNumber == this.currentMacroNumber ? model : this.model;
       List<MacroModel.Node> starts = model.startNodes();
       if (starts.isEmpty()) {
-         this.lastStatus = "No Macro Entry Point";
-         this.send(client, this.lastStatus);
+         this.lastStatus = Component.translatable("macro_builder.runner.no_macro_entry_point");
+         this.send(client, this.lastStatus.getString());
          return;
       }
 
@@ -879,7 +881,7 @@ final class MacroRunner {
          this.rootRunner().queueChildRunner(child);
       }
 
-      this.lastStatus = "Running Macro " + macroNumber + ": " + model.name();
+      this.lastStatus = Component.translatable("macro_builder.runner.running_macro", macroNumber, model.name());
    }
 
    private void queueChildRunner(MacroRunner child) {
@@ -924,7 +926,7 @@ final class MacroRunner {
       branch.autoStartActionbarBaseline = this.actionbarSequence;
       branch.autoStartKickedBaseline = this.kickedSequence;
       branch.running = true;
-      branch.lastStatus = "Running Macro " + this.currentMacroNumber + " | branch";
+      branch.lastStatus = Component.translatable("macro_builder.runner.running_macro_branch", this.currentMacroNumber);
       return branch;
    }
 
@@ -940,7 +942,7 @@ final class MacroRunner {
       this.putRuntimeValue("macro.name", this.model == null ? "" : this.model.name());
       this.putRuntimeValue("macro.node", this.currentNodeId);
       this.putRuntimeValue("macro.active_node", this.activeNodeId);
-      this.putRuntimeValue("macro.status", this.lastStatus);
+      this.putRuntimeValue("macro.status", this.lastStatus.getString());
       this.putRuntimeValue("macro.running", Boolean.toString(this.running));
 
       if (this.lastServerData != null) {
@@ -1104,7 +1106,7 @@ final class MacroRunner {
       }
 
       this.startMacroStateRuns(client, this.currentMacroNumber, this.model, triggeredNodes);
-      this.lastStatus = "Triggered Macro " + this.currentMacroNumber + " from an effect or bossbar.";
+      this.lastStatus = Component.translatable("macro_builder.runner.triggered_macro_from_an_effect_or_bossbar", this.currentMacroNumber);
       return true;
    }
 
@@ -1167,7 +1169,7 @@ final class MacroRunner {
          this.rootRunner().queueChildRunner(child);
       }
 
-      this.lastStatus = "Triggered Macro " + ownerMacroNumber + " from Macro " + ownerModel.name() + " state watcher.";
+      this.lastStatus = Component.translatable("macro_builder.runner.triggered_macro_from_macro_state_watcher", ownerMacroNumber, ownerModel.name());
    }
 
    private Boolean macroActiveStateMatches(MacroModel.Node node) {
@@ -1332,11 +1334,11 @@ final class MacroRunner {
       return switch (condition) {
          case "chat", "message", "text" -> "chat";
          case "actionbar", "action_bar", "title_actionbar" -> "actionbar";
-         case "player", "nearby", "player_nearby" -> "player nearby";
-         case "inventory", "inventory_full", "full" -> "inventory full";
+         case "player", "nearby", "player_nearby" -> tr("macro_builder.runner.player_nearby");
+         case "inventory", "inventory_full", "full" -> tr("macro_builder.runner.inventory_full");
          case "kick", "kicked", "disconnect", "disconnected" -> "kick/disconnect";
          case "item", "has_item", "inventory_item" -> "item";
-         case "xp", "level", "xp_level" -> "XP level";
+         case "xp", "level", "xp_level" -> tr("macro_builder.runner.xp_level");
          case "health", "health_below", "low_health" -> "health";
          case "food", "hunger", "food_below", "low_food", "low_hunger" -> "hunger";
          case "water", "in_water" -> "water";
@@ -1355,7 +1357,7 @@ final class MacroRunner {
       this.stepDelayTicksRemaining = 0;
       if (!this.waitingForWorld) {
          this.waitingForWorld = true;
-         this.lastStatus = "Waiting for server/world to return.";
+         this.lastStatus = Component.translatable("macro_builder.runner.waiting_for_server_world_to_return");
       }
    }
 
@@ -1376,19 +1378,19 @@ final class MacroRunner {
       this.pendingRejoinConnecting = false;
       this.autoReconnectAttempted = true;
       this.waitingForWorld = false;
-      this.lastStatus = "Disconnected; reconnecting once.";
+      this.lastStatus = Component.translatable("macro_builder.runner.disconnected_reconnecting_once");
    }
 
    private void tickPendingRejoin(Minecraft client) {
       String label = this.pendingRejoinLabel == null || this.pendingRejoinLabel.isBlank() ? "Rejoin Server" : this.pendingRejoinLabel;
       if (this.pendingRejoinServer == null || this.pendingRejoinServer.ip == null || this.pendingRejoinServer.ip.isBlank()) {
-         this.stop(client, "Stopped: " + label + " lost the saved server.");
+         this.stop(client, tr("macro_builder.runner.stopped_lost_the_saved_server", label));
       } else if (this.pendingRejoinDelayTicks > 0) {
          this.pendingRejoinDelayTicks--;
-         this.lastStatus = label + " in " + (this.pendingRejoinDelayTicks * 50) + " ms.";
+         this.lastStatus = Component.translatable("macro_builder.runner.in_ms", label, (this.pendingRejoinDelayTicks * 50));
       } else if (!this.pendingRejoinConnecting) {
          if (client == null) {
-            this.lastStatus = "Waiting for Minecraft client before " + label + ".";
+            this.lastStatus = Component.translatable("macro_builder.runner.waiting_for_minecraft_client_before", label);
          } else {
             ConnectScreen.startConnecting(
                new TitleScreen(),
@@ -1400,12 +1402,12 @@ final class MacroRunner {
             );
             this.pendingRejoinConnecting = true;
             this.pendingRejoinConnectTicks = 0;
-            this.lastStatus = "Connecting to " + this.pendingRejoinServer.ip + ".";
+            this.lastStatus = Component.translatable("macro_builder.runner.connecting_to", this.pendingRejoinServer.ip);
          }
       } else {
          this.pendingRejoinConnectTicks++;
          if (this.pendingRejoinConnectTicks > 600) {
-            this.stop(client, "Stopped: " + label + " timed out.");
+            this.stop(client, tr("macro_builder.runner.stopped_timed_out", label));
          }
       }
    }
@@ -1420,13 +1422,13 @@ final class MacroRunner {
          this.activeTicks = 0;
          this.stepDelayTicksRemaining = 0;
          this.captureEventBaselines();
-         this.lastStatus = "Reconnected Macro " + this.currentMacroNumber + ".";
+         this.lastStatus = Component.translatable("macro_builder.runner.reconnected_macro", this.currentMacroNumber);
          return;
       }
 
       MacroModel.Node node = this.model == null ? null : this.model.node(nodeId);
       if (node == null) {
-         this.stop(client, "Stopped: " + label + " component disappeared.");
+         this.stop(client, tr("macro_builder.runner.stopped_component_disappeared", label));
       } else {
          this.complete(client, node, "completed");
       }
@@ -1459,7 +1461,7 @@ final class MacroRunner {
 
       boolean worldAvailable = client != null && client.player != null && client.level != null;
       if (!this.childRunner && this.wasWorldAvailable && !worldAvailable) {
-         this.recordDisconnect("Disconnected");
+         this.recordDisconnect(tr("macro_builder.runner.disconnected"));
       }
 
       this.wasWorldAvailable = worldAvailable;
@@ -1498,10 +1500,10 @@ final class MacroRunner {
             } else if (this.model != null && this.model.alwaysOn()) {
                this.pauseUntilWorldReturns(client);
             } else {
-               this.stop(client, "Stopped: player or world was unavailable.");
+               this.stop(client, tr("macro_builder.runner.stopped_player_or_world_was_unavailable"));
             }
          } else if (this.model == null) {
-            this.stop(client, "Stopped: no macro loaded.");
+            this.stop(client, tr("macro_builder.runner.stopped_no_macro_loaded"));
          } else if (this.pendingRejoinActive()) {
             this.finishPendingRejoin(client);
          } else {
@@ -1511,7 +1513,7 @@ final class MacroRunner {
                this.activeTicks = 0;
                this.stepDelayTicksRemaining = 0;
                this.captureEventBaselines();
-               this.lastStatus = "Running Macro " + this.currentMacroNumber + " after rejoin.";
+               this.lastStatus = Component.translatable("macro_builder.runner.running_macro_after_rejoin", this.currentMacroNumber);
             }
 
             this.updatePolledEvents(client);
@@ -1520,7 +1522,7 @@ final class MacroRunner {
             } else {
                MacroModel.Node node = this.model.node(this.currentNodeId);
                if (node == null) {
-                  this.stop(client, "Stopped: missing component " + this.currentNodeId + ".");
+                  this.stop(client, tr("macro_builder.runner.stopped_missing_component", this.currentNodeId));
                } else {
                   if (!node.id.equals(this.activeNodeId)) {
                      if (!node.id.equals(this.lastOpenContainerTagNextNodeId)) {
@@ -1566,10 +1568,10 @@ final class MacroRunner {
                            this.runShootBow(client, node);
                            break;
                         case "official:player.isAccount":
-                           this.completeCondition(client, node, this.isAccount(client, node), "Failed: Is Account needs at least one name.");
+                           this.completeCondition(client, node, this.isAccount(client, node), tr("macro_builder.runner.failed_is_account_needs_at_least_one_name"));
                            break;
                         case "official:player.inAction":
-                           this.completeCondition(client, node, this.isInAction(client, node), "Failed: Player In Action needs a known state.");
+                           this.completeCondition(client, node, this.isInAction(client, node), tr("macro_builder.runner.failed_player_in_action_needs_a_known_state"));
                            break;
                         case "official:player.isAlive":
                            this.completeCondition(client, node, client.player.getHealth() > 0.0F && !client.player.isDeadOrDying(), "");
@@ -1597,11 +1599,11 @@ final class MacroRunner {
                            break;
                         case "official:inventory.hasItem":
                         case "builder:inventory.hasItem":
-                           this.completeCondition(client, node, this.inventoryHasItem(client, node), "Failed: Inventory Has Item needs a valid item id.");
+                           this.completeCondition(client, node, this.inventoryHasItem(client, node), tr("macro_builder.runner.failed_inventory_has_item_needs_a_valid_item_id"));
                            break;
                         case "builder:player.healthBelow":
                            this.completeCondition(
-                              client, node, doubleAtOrBelow(client.player.getHealth(), this.resolveRuntimeText(node.value)), "Failed: Health Below needs a number."
+                              client, node, doubleAtOrBelow(client.player.getHealth(), this.resolveRuntimeText(node.value)), tr("macro_builder.runner.failed_health_below_needs_a_number")
                            );
                            break;
                         case "builder:player.foodBelow":
@@ -1609,7 +1611,7 @@ final class MacroRunner {
                               client,
                               node,
                               intAtOrBelow(client.player.getFoodData().getFoodLevel(), this.resolveRuntimeText(node.value)),
-                              "Failed: Food Below needs a whole number."
+                              tr("macro_builder.runner.failed_food_below_needs_a_whole_number")
                            );
                            break;
                          case "builder:player.xpLevelAtLeast":
@@ -1617,7 +1619,7 @@ final class MacroRunner {
                                client,
                                node,
                                intAtLeast(client.player.experienceLevel, this.resolveRuntimeText(node.value)),
-                               "Failed: XP Level At Least needs a whole number."
+                               tr("macro_builder.runner.failed_xp_level_at_least_needs_a_whole_number")
                             );
                             break;
                          case "builder:player.stopAtXpLevel":
@@ -1630,29 +1632,29 @@ final class MacroRunner {
                            this.completeCondition(client, node, client.player.isInWater(), "");
                            break;
                         case "official:player.isAtLocation":
-                           this.completeCondition(client, node, this.isAtLocation(client, node), "Failed: Player At Location needs X Y Z and a max distance.");
+                           this.completeCondition(client, node, this.isAtLocation(client, node), tr("macro_builder.runner.failed_player_at_location_needs_x_y_z_and_a_max_distance"));
                            break;
                         case "official:entity.player_nearby":
-                           this.completeCondition(client, node, this.playerNearby(client, node), "Failed: Player Nearby mode must be any, allow, or block.");
+                           this.completeCondition(client, node, this.playerNearby(client, node), tr("macro_builder.runner.failed_player_nearby_mode_must_be_any_allow_or_block"));
                            break;
                         case "builder:logic.scoreboardContains":
-                           this.completeCondition(client, node, this.scoreboardContains(client, node), "Failed: Scoreboard Contains mode must be contains, exact, or regex.");
+                           this.completeCondition(client, node, this.scoreboardContains(client, node), tr("macro_builder.runner.failed_scoreboard_contains_mode_must_be_contains_exact_or_regex"));
                            break;
                         case "builder:logic.actionbarContains":
-                           this.completeCondition(client, node, this.actionbarContains(node), "Failed: Actionbar Contains mode must be contains, exact, or regex.");
+                           this.completeCondition(client, node, this.actionbarContains(node), tr("macro_builder.runner.failed_actionbar_contains_mode_must_be_contains_exact_or_regex"));
                            break;
                         case "builder:logic.hasStatusEffect":
-                           this.completeCondition(client, node, this.statusEffectMatches(client, node), "Failed: Has Status Effect needs an effect id and a minimum level of 1 or higher.");
+                           this.completeCondition(client, node, this.statusEffectMatches(client, node), tr("macro_builder.runner.failed_has_status_effect_needs_an_effect_id_and_a_minimum_level"));
                            break;
                         case "builder:logic.bossbarContains":
-                           this.completeCondition(client, node, this.bossbarContains(client, node), "Failed: Bossbar Contains mode must be contains, exact, or regex.");
+                           this.completeCondition(client, node, this.bossbarContains(client, node), tr("macro_builder.runner.failed_bossbar_contains_mode_must_be_contains_exact_or_regex"));
                            break;
                         case "builder:logic.macroActiveState":
                            this.completeCondition(
                               client,
                               node,
                               this.macroActiveStateMatches(node),
-                              "Failed: Macro Active State needs another macro slot from 1 to 100 and active or inactive."
+                              tr("macro_builder.runner.failed_macro_active_state_needs_another_macro_slot_from_1_to_100")
                            );
                            break;
                         case "official:misc.wait":
@@ -1686,33 +1688,33 @@ final class MacroRunner {
                             this.runAutoGrindstone(client, node);
                             break;
                         case "builder:inventory.heldItemIs":
-                           this.completeCondition(client, node, this.heldItemIs(client, node), "Failed: Held Item Is needs a valid item id.");
+                           this.completeCondition(client, node, this.heldItemIs(client, node), tr("macro_builder.runner.failed_held_item_is_needs_a_valid_item_id"));
                            break;
                         case "builder:inventory.slotHasItem":
-                           this.completeCondition(client, node, this.slotHasItem(client, node), "Failed: Slot Has Item needs slot 1-36 and a valid item id.");
+                           this.completeCondition(client, node, this.slotHasItem(client, node), tr("macro_builder.runner.failed_slot_has_item_needs_slot_1_36_and_a_valid_item"));
                            break;
                         case "builder:inventory.itemOrSlotHasTag":
                            this.completeCondition(
-                              client, node, this.itemOrSlotHasTag(client, node), "Failed: Item/Slot Has Tag needs a valid item/slot and item tag."
+                              client, node, this.itemOrSlotHasTag(client, node), tr("macro_builder.runner.failed_item_slot_has_tag_needs_a_valid_item_slot_and_item")
                            );
                            break;
                         case "builder:inventory.itemDurability":
                            this.completeCondition(
-                              client, node, this.itemDurabilityMatches(client, node), "Failed: Item Durability needs item/slot and lower/higher percent."
+                              client, node, this.itemDurabilityMatches(client, node), tr("macro_builder.runner.failed_item_durability_needs_item_slot_and_lower_higher_percent")
                            );
                            break;
                         case "builder:inventory.emptySlotsAtLeast":
-                           this.completeCondition(client, node, this.emptySlotsAtLeast(client, node), "Failed: Empty Slots At Least needs a whole number.");
+                           this.completeCondition(client, node, this.emptySlotsAtLeast(client, node), tr("macro_builder.runner.failed_empty_slots_at_least_needs_a_whole_number"));
                            break;
                         case "official:inventory.hasOpenContainer":
                            this.completeCondition(client, node, hasOpenContainer(client), "");
                            break;
                         case "official:inventory.isOpenContainerFull":
-                           this.completeCondition(client, node, this.isOpenContainerFull(client), "Failed: Open GUI Is Full needs an open GUI.");
+                           this.completeCondition(client, node, this.isOpenContainerFull(client), tr("macro_builder.runner.failed_open_gui_is_full_needs_an_open_gui"));
                            break;
                         case "builder:inventory.openContainerHasItem":
                            this.completeCondition(
-                              client, node, this.openContainerHasItem(client, node), "Failed: Open GUI Has Item needs an open GUI and valid item id."
+                              client, node, this.openContainerHasItem(client, node), tr("macro_builder.runner.failed_open_gui_has_item_needs_an_open_gui_and_valid_item")
                            );
                            break;
                         case "official:inventory.openInventory":
@@ -1740,13 +1742,13 @@ final class MacroRunner {
                            this.runOpenNearestContainer(client, node);
                            break;
                         case "builder:world.openNearestChest":
-                           this.runOpenNearestContainer(client, node, "chest", "Open Nearest Chest");
+                           this.runOpenNearestContainer(client, node, "chest", tr("macro_builder.runner.open_nearest_chest"));
                            break;
                         case "builder:world.openNearestBarrel":
-                           this.runOpenNearestContainer(client, node, "barrel", "Open Nearest Barrel");
+                           this.runOpenNearestContainer(client, node, "barrel", tr("macro_builder.runner.open_nearest_barrel"));
                            break;
                         case "builder:world.openNearestShulker":
-                           this.runOpenNearestContainer(client, node, "shulker", "Open Nearest Shulker");
+                           this.runOpenNearestContainer(client, node, "shulker", tr("macro_builder.runner.open_nearest_shulker"));
                            break;
                         case "builder:world.openNearestEnchantingTable":
                            this.runOpenNearestEnchantingTable(client, node);
@@ -1762,7 +1764,7 @@ final class MacroRunner {
                            break;
                         case "builder:world.blockIs":
                            this.completeCondition(
-                              client, node, this.blockAtMatches(client, node), "Failed: Block At Location Is needs loaded X Y Z and valid block id."
+                              client, node, this.blockAtMatches(client, node), tr("macro_builder.runner.failed_block_at_location_is_needs_loaded_x_y_z_and_valid")
                            );
                            break;
                         case "builder:world.lookingAtBlock":
@@ -1770,7 +1772,7 @@ final class MacroRunner {
                               client,
                               node,
                               this.lookingAtBlockMatches(client, node),
-                              "Failed: Looking At Block needs you to look at a block and use a valid block id."
+                              tr("macro_builder.runner.failed_looking_at_block_needs_you_to_look_at_a_block_and")
                            );
                            break;
                         case "official:entity.attack":
@@ -1780,7 +1782,7 @@ final class MacroRunner {
                            this.runEntityAction(client, node, false);
                            break;
                         case "builder:entity.nearby":
-                           this.completeCondition(client, node, this.entityNearby(client, node), "Failed: Entity Nearby needs a positive max distance.");
+                           this.completeCondition(client, node, this.entityNearby(client, node), tr("macro_builder.runner.failed_entity_nearby_needs_a_positive_max_distance"));
                            break;
                         case "builder:inventory.selectHotbarSlot":
                            this.runSelectHotbarSlot(client, node);
@@ -1807,13 +1809,13 @@ final class MacroRunner {
                            this.runSkipIfTrue(client, node);
                            break;
                         case "builder:flow.endConnection":
-                           this.endBranch(client, "Ended connection.");
+                           this.endBranch(client, tr("macro_builder.runner.ended_connection"));
                            break;
                         case "builder:flow.note":
-                           this.endBranch(client, "Ended at note.");
+                           this.endBranch(client, tr("macro_builder.runner.ended_at_note"));
                            break;
                         case "builder:stop":
-                           this.stop(client, "Stopped by macro.");
+                           this.stop(client, tr("macro_builder.runner.stopped_by_macro"));
                            break;
                         case "official:misc.disconnect":
                            this.runDisconnect(client, node);
@@ -1840,7 +1842,7 @@ final class MacroRunner {
                            this.runUpdateSign(client, node);
                            break;
                         case "official:misc.isInLobby":
-                           this.completeCondition(client, node, this.isLobbyMatch(client, node), "Failed: Is In Lobby needs a player name.");
+                           this.completeCondition(client, node, this.isLobbyMatch(client, node), tr("macro_builder.runner.failed_is_in_lobby_needs_a_player_name"));
                            break;
                         case "official:notification.discord":
                            this.runNotification(client, node);
@@ -1849,7 +1851,7 @@ final class MacroRunner {
                            this.complete(client, node, "completed");
                            break;
                         case "builder:event.ifChatSame":
-                           this.completeCondition(client, node, this.chatSameMatches(node), "Failed: If Chat Same mode must be same, contains, or regex.");
+                           this.completeCondition(client, node, this.chatSameMatches(node), tr("macro_builder.runner.failed_if_chat_same_mode_must_be_same_contains_or_regex"));
                            break;
                         case "official:event.chat":
                            this.runEventChat(client, node);
@@ -1885,11 +1887,11 @@ final class MacroRunner {
                            this.runEventPlayerChange(client, node, false);
                            break;
                         default:
-                           this.stop(client, "Stopped: unsupported component " + node.type + ".");
+                           this.stop(client, tr("macro_builder.runner.stopped_unsupported_component", node.type));
                      }
                      } catch (RuntimeException var5) {
                         MacroBuilderClient.LOGGER.error("Litemacro component failed: {}", node.type, var5);
-                        this.fail(client, node, "Failed: " + node.displayLabel() + " hit an internal safety check.");
+                        this.fail(client, node, tr("macro_builder.runner.failed_hit_an_internal_safety_check", node.displayLabel()));
                      }
                   }
                }
@@ -1924,7 +1926,7 @@ final class MacroRunner {
 
       MacroModel.Node node = this.model.node(this.currentNodeId);
       if (node == null) {
-         this.stop(client, "Stopped: missing component " + this.currentNodeId + ".");
+         this.stop(client, tr("macro_builder.runner.stopped_missing_component", this.currentNodeId));
          return true;
       }
 
@@ -1963,14 +1965,14 @@ final class MacroRunner {
                this.runEventActionbar(client, node);
                break;
             case "builder:logic.actionbarContains":
-               this.completeCondition(client, node, this.actionbarContains(node), "Failed: Actionbar Contains mode must be contains, exact, or regex.");
+               this.completeCondition(client, node, this.actionbarContains(node), tr("macro_builder.runner.failed_actionbar_contains_mode_must_be_contains_exact_or_regex"));
                break;
             case "builder:logic.macroActiveState":
                this.completeCondition(
                   client,
                   node,
                   this.macroActiveStateMatches(node),
-                  "Failed: Macro Active State needs another macro slot from 1 to 100 and active or inactive."
+                  tr("macro_builder.runner.failed_macro_active_state_needs_another_macro_slot_from_1_to_100")
                );
                break;
             case "builder:misc.repeatMacro":
@@ -1989,10 +1991,10 @@ final class MacroRunner {
                this.runSkipIfTrue(client, node);
                break;
             case "builder:flow.endConnection":
-               this.endBranch(client, "Ended connection.");
+               this.endBranch(client, tr("macro_builder.runner.ended_connection"));
                break;
             case "builder:flow.note":
-               this.endBranch(client, "Ended at note.");
+               this.endBranch(client, tr("macro_builder.runner.ended_at_note"));
                break;
             case "official:misc.rejoinServer":
                this.runRejoinServer(client, node);
@@ -2007,7 +2009,7 @@ final class MacroRunner {
                this.runNotification(client, node);
                break;
             case "builder:stop":
-               this.stop(client, "Stopped by macro.");
+               this.stop(client, tr("macro_builder.runner.stopped_by_macro"));
                break;
             case "official:misc.random":
                this.runRandom(client, node);
@@ -2020,7 +2022,7 @@ final class MacroRunner {
          }
       } catch (RuntimeException error) {
          MacroBuilderClient.LOGGER.error("Litemacro offline component failed: {}", node.type, error);
-         this.fail(client, node, "Failed: " + node.displayLabel() + " hit an internal safety check.");
+         this.fail(client, node, tr("macro_builder.runner.failed_hit_an_internal_safety_check", node.displayLabel()));
       }
 
       return true;
@@ -2171,7 +2173,7 @@ final class MacroRunner {
    }
 
    void recordDisconnect(String reason) {
-      String text = reason == null || reason.isBlank() ? "Disconnected" : reason.trim();
+      String text = reason == null || reason.isBlank() ? tr("macro_builder.runner.disconnected") : reason.trim();
       this.lastKickReason = text;
       this.kickedSequence++;
 
@@ -2192,7 +2194,7 @@ final class MacroRunner {
             this.complete(client, node, "completed");
          }
       } else {
-         this.fail(client, node, "Failed: Wait needs a delay of 0 ms or more.");
+         this.fail(client, node, tr("macro_builder.runner.failed_wait_needs_a_delay_of_0_ms_or_more"));
       }
    }
 
@@ -2225,7 +2227,7 @@ final class MacroRunner {
       if (this.activeTicks == 1) {
          Boolean crouching = parseBooleanOrDefault(this.resolveRuntimeText(node.value), true);
          if (crouching == null) {
-            this.fail(client, node, "Failed: Set Crouch needs true or false.");
+            this.fail(client, node, tr("macro_builder.runner.failed_set_crouch_needs_true_or_false"));
             return;
          }
 
@@ -2239,7 +2241,7 @@ final class MacroRunner {
       if (this.activeTicks == 1) {
          Boolean sprinting = parseBooleanOrDefault(this.resolveRuntimeText(node.value), true);
          if (sprinting == null) {
-            this.fail(client, node, "Failed: Set Sprint needs true or false.");
+            this.fail(client, node, tr("macro_builder.runner.failed_set_sprint_needs_true_or_false"));
             return;
          }
 
@@ -2262,7 +2264,7 @@ final class MacroRunner {
       Integer button = parseMouseButton(this.resolveRuntimeText(node.value));
       MacroRunner.AutoClickOptions options = autoClickOptions(this.resolveRuntimeText(node.value2));
       if (button == null || options == null) {
-         this.fail(client, node, "Failed: Auto Click needs button left/right and options like count=5 cps=8 or hold 500.");
+         this.fail(client, node, tr("macro_builder.runner.failed_auto_click_needs_button_left_right_and_options_like_count_5"));
       } else if (options.hold()) {
          if (this.activeTicks == 1) {
             this.setMouseButtonDown(client, button, true);
@@ -2288,7 +2290,7 @@ final class MacroRunner {
       Integer rodLowPercent = parseIntOrNull(this.resolveRuntimeText(node.value));
       Integer timeoutSeconds = parseIntOrNull(this.resolveRuntimeText(node.value2));
       if (rodLowPercent == null || rodLowPercent < 0 || rodLowPercent > 100 || timeoutSeconds == null || timeoutSeconds < 5 || timeoutSeconds > 300) {
-         this.fail(client, node, "Failed: Auto Fish needs rod low durability from 0-100% and a bite timeout from 5-300 seconds.");
+         this.fail(client, node, tr("macro_builder.runner.failed_auto_fish_needs_rod_low_durability_from_0_100_and_a"));
          return;
       }
 
@@ -2303,7 +2305,7 @@ final class MacroRunner {
             if (this.hasHotbarFishingRod(client)) {
                this.complete(client, node, "rod_low");
             } else {
-               this.fail(client, node, "Failed: Auto Fish needs a fishing rod in the hotbar.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_fish_needs_a_fishing_rod_in_the_hotbar"));
             }
 
             return;
@@ -2314,7 +2316,7 @@ final class MacroRunner {
          this.putRuntimeValue("fish.rod_slot", Integer.toString(rodSlot + 1));
          this.putRuntimeValue("fish.rod_durability_percent", Integer.toString(remainingDurabilityPercent(rod)));
          if (!this.useFishingRod(client)) {
-            this.fail(client, node, "Failed: Auto Fish could not cast the fishing rod.");
+            this.fail(client, node, tr("macro_builder.runner.failed_auto_fish_could_not_cast_the_fishing_rod"));
             return;
          }
 
@@ -2328,7 +2330,7 @@ final class MacroRunner {
          var bobber = client.player.fishing;
          if (bobber == null) {
             if (phaseTicks > 40) {
-               this.fail(client, node, "Failed: Auto Fish did not create a fishing bobber.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_fish_did_not_create_a_fishing_bobber"));
             }
 
             return;
@@ -2336,7 +2338,7 @@ final class MacroRunner {
 
          if (phaseTicks >= 15 && bobber.getDeltaMovement().y < -0.04) {
             if (!this.useFishingRod(client)) {
-               this.fail(client, node, "Failed: Auto Fish could not reel in the fishing rod.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_fish_could_not_reel_in_the_fishing_rod"));
                return;
             }
 
@@ -2414,7 +2416,7 @@ final class MacroRunner {
       InputConstants.Key key = keyFromText(this.resolveRuntimeText(node.value));
       MacroRunner.PressKeyOptions options = pressKeyOptions(this.resolveRuntimeText(node.value2));
       if (key == null || options == null) {
-         this.fail(client, node, "Failed: Press Key needs a key like space, shift, ctrl, alt, E, or key code.");
+         this.fail(client, node, tr("macro_builder.runner.failed_press_key_needs_a_key_like_space_shift_ctrl_alt_e"));
       } else if (options.hold()) {
          if (this.activeTicks == 1) {
             this.activePressedKey = key;
@@ -2451,7 +2453,7 @@ final class MacroRunner {
             this.setMacroKeyDown(client, client.options.keyUp, true);
             if (this.activeTicks > 300) {
                this.releaseMovementKeys(client);
-               this.fail(client, node, "Failed: Move timed out before reaching target.");
+               this.fail(client, node, tr("macro_builder.runner.failed_move_timed_out_before_reaching_target"));
             }
          }
       } else {
@@ -2465,14 +2467,14 @@ final class MacroRunner {
                this.setMacroKeyDown(client, client.options.keyUp, true);
                if (this.activeTicks > 300) {
                   this.releaseMovementKeys(client);
-                  this.fail(client, node, "Failed: Move timed out before reaching entity.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_move_timed_out_before_reaching_entity"));
                }
             }
          } else {
             String direction = targetText != null && !targetText.isBlank() ? targetText.trim().toLowerCase(Locale.ROOT) : "forward";
             if (!isMoveDirection(direction)) {
                this.releaseMovementKeys(client);
-               this.fail(client, node, "Failed: Move could not find entity '" + targetText + "'. Use id=123, uuid=..., an entity type, or a visible name.");
+               this.fail(client, node, tr("macro_builder.runner.failed_move_could_not_find_entity_use_id_123_uuid_an_entity", targetText));
                return;
             }
 
@@ -2538,7 +2540,7 @@ final class MacroRunner {
                client.player.setXRot((float)Mth.clamp(yawPitch[1], -90.0, 90.0));
                this.complete(client, node, "completed");
             } else {
-               this.fail(client, node, "Failed: Look needs yaw/pitch, a target location, or a target entity.");
+               this.fail(client, node, tr("macro_builder.runner.failed_look_needs_yaw_pitch_a_target_location_or_a_target_entity"));
             }
          }
       }
@@ -2550,7 +2552,7 @@ final class MacroRunner {
       }
 
       if (client == null || client.player == null || client.level == null) {
-         this.finishActionRecording(client, false, "Recording canceled because the world closed.");
+         this.finishActionRecording(client, false, tr("macro_builder.runner.recording_canceled_because_the_world_closed"));
          return true;
       }
 
@@ -2568,7 +2570,7 @@ final class MacroRunner {
       this.captureRecordedActionFrame(client);
       this.actionRecordingTicks++;
       if (this.actionRecordingTicks >= MAX_RECORDED_ACTION_TICKS) {
-         this.finishActionRecording(client, true, "Recording reached the 10 minute limit.");
+         this.finishActionRecording(client, true, tr("macro_builder.runner.recording_reached_the_10_minute_limit"));
       }
 
       return true;
@@ -2628,21 +2630,20 @@ final class MacroRunner {
             this.model = recordingModel;
             this.ensureConfigFiles();
             recordingModel.save(this.macroPath(macroNumber));
-            this.lastStatus = "Saved " + ticks + " recorded ticks and " + events.size() + " inventory/chat events ("
-               + String.format(Locale.ROOT, "%.1f", ticks / 20.0) + " seconds).";
+            this.lastStatus = Component.translatable("macro_builder.runner.saved_recorded_ticks_and_inventory_chat_events_seconds", ticks, events.size(), String.format(Locale.ROOT, "%.1f", ticks / 20.0));
          } catch (RuntimeException | IOException error) {
             MacroBuilderClient.LOGGER.error("Failed to save recorded actions", error);
-            this.lastStatus = "Recording save failed: " + error.getMessage();
+            this.lastStatus = Component.translatable("macro_builder.runner.recording_save_failed", error.getMessage());
          }
       } else {
-         this.lastStatus = detail == null || detail.isBlank() ? "Recording canceled or empty." : detail;
+         this.lastStatus = detail == null || detail.isBlank() ? Component.translatable("macro_builder.runner.recording_canceled_or_empty") : Component.literal(detail);
       }
 
       if (detail != null && !detail.isBlank() && saveRecording) {
-         this.lastStatus = this.lastStatus + " " + detail;
+         this.lastStatus = Component.literal(this.lastStatus.getString() + " " + detail);
       }
 
-      this.send(client, this.lastStatus);
+      this.send(client, this.lastStatus.getString());
       if (client != null && recordingModel != null) {
          client.setScreen(new MacroBuilderScreen(this, recordingModel, nodeId));
       }
@@ -2662,7 +2663,7 @@ final class MacroRunner {
       }
 
       if (this.activeRecordedActionFrames.isEmpty()) {
-         this.fail(client, node, "Failed: Record actions with the component's Record button first.");
+         this.fail(client, node, tr("macro_builder.runner.failed_record_actions_with_the_component_s_record_button_first"));
          return;
       }
 
@@ -2719,8 +2720,7 @@ final class MacroRunner {
 
                if (this.activeRecordedActionEventWaitTicks > SCREEN_TIMEOUT_TICKS) {
                   this.releaseRecordedActionInputs(client);
-                  this.fail(client, node, "Failed: Recorded inventory action expected " + simpleMenuName(event.menuType)
-                     + " with " + event.menuSlotCount + " slots. Open the same inventory or container setup.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_recorded_inventory_action_expected_with_slots_open_the_same_inventory_or", simpleMenuName(event.menuType), event.menuSlotCount));
                }
 
                return false;
@@ -2741,7 +2741,7 @@ final class MacroRunner {
                   input = ClickType.valueOf(event.inputType);
                } catch (IllegalArgumentException error) {
                   this.releaseRecordedActionInputs(client);
-                  this.fail(client, node, "Failed: Recorded creative inventory action type is not supported: " + event.inputType);
+                  this.fail(client, node, tr("macro_builder.runner.failed_recorded_creative_inventory_action_type_is_not_supported", event.inputType));
                   return false;
                }
 
@@ -2756,7 +2756,7 @@ final class MacroRunner {
                input = ClickType.valueOf(event.inputType);
             } catch (IllegalArgumentException error) {
                this.releaseRecordedActionInputs(client);
-               this.fail(client, node, "Failed: Recorded inventory action type is not supported: " + event.inputType);
+               this.fail(client, node, tr("macro_builder.runner.failed_recorded_inventory_action_type_is_not_supported", event.inputType));
                return false;
             }
 
@@ -2824,8 +2824,7 @@ final class MacroRunner {
       RecordedActionData data = parseRecordedActionData(encoded);
       List<RecordedActionFrame> frames = data.frames();
       int ticks = frames.stream().mapToInt(frame -> frame.ticks).sum();
-      return ticks <= 0 ? "Not recorded" : frames.size() + " steps / " + data.events().size() + " events / "
-         + String.format(Locale.ROOT, "%.1fs", ticks / 20.0);
+      return ticks <= 0 ? tr("macro_builder.runner.not_recorded") : tr("macro_builder.runner.steps_events", frames.size(), data.events().size(), String.format(Locale.ROOT, "%.1fs", ticks / 20.0));
    }
 
    private static String encodeRecordedActions(List<RecordedActionFrame> frames, List<RecordedActionEvent> events) {
@@ -2943,7 +2942,7 @@ final class MacroRunner {
 
          this.complete(client, node, "completed");
       } else {
-         this.fail(client, node, "Failed: Mouse Button needs state press/release and button left/right.");
+         this.fail(client, node, tr("macro_builder.runner.failed_mouse_button_needs_state_press_release_and_button_left_right"));
       }
    }
 
@@ -2951,12 +2950,12 @@ final class MacroRunner {
       if (this.activeTicks == 1) {
          Boolean equipBow = parseBooleanOrDefault(this.resolveRuntimeText(node.value2), true);
          if (equipBow == null) {
-            this.fail(client, node, "Failed: Shoot Bow equip value must be true or false.");
+            this.fail(client, node, tr("macro_builder.runner.failed_shoot_bow_equip_value_must_be_true_or_false"));
             return;
          }
 
          if (equipBow && !this.selectHotbarItem(client, "minecraft:bow")) {
-            this.fail(client, node, "Failed: Shoot Bow could not find a bow in the hotbar.");
+            this.fail(client, node, tr("macro_builder.runner.failed_shoot_bow_could_not_find_a_bow_in_the_hotbar"));
             return;
          }
 
@@ -2970,7 +2969,7 @@ final class MacroRunner {
          }
 
          if (client.gameMode == null) {
-            this.fail(client, node, "Failed: Shoot Bow could not use the held item.");
+            this.fail(client, node, tr("macro_builder.runner.failed_shoot_bow_could_not_use_the_held_item"));
             return;
          }
 
@@ -2992,17 +2991,17 @@ final class MacroRunner {
       if (this.activeTicks == 1) {
          String message = this.resolveRuntimeText(node.value).trim();
          if (message.isBlank()) {
-            this.fail(client, node, "Failed: Chat / Command needs text.");
+            this.fail(client, node, tr("macro_builder.runner.failed_chat_command_needs_text"));
             return;
          }
 
          if (message.length() > 256) {
-            this.fail(client, node, "Failed: Chat / Command is over 256 characters.");
+            this.fail(client, node, tr("macro_builder.runner.failed_chat_command_is_over_256_characters"));
             return;
          }
 
          if (message.equals("/")) {
-            this.fail(client, node, "Failed: Chat / Command needs a command after /.");
+            this.fail(client, node, tr("macro_builder.runner.failed_chat_command_needs_a_command_after"));
             return;
          }
 
@@ -3030,7 +3029,7 @@ final class MacroRunner {
          String slotText = this.resolveRuntimeText(rawSlotText).trim();
          Integer slotValue = slotText.isBlank() && rawSlotText.isBlank() ? 1 : parseIntOrNull(slotText);
          if (slotValue == null || !this.selectInventorySlotIntoHotbar(client, slotValue - 1)) {
-            this.fail(client, node, "Failed: Select Hotbar Slot needs a slot from 1 to 36.");
+            this.fail(client, node, tr("macro_builder.runner.failed_select_hotbar_slot_needs_a_slot_from_1_to_36"));
             return;
          }
       }
@@ -3040,7 +3039,7 @@ final class MacroRunner {
 
    private void runHotbarSelect(Minecraft client, MacroModel.Node node) {
       if (this.activeTicks == 1 && !this.selectHotbarSlot(client, node)) {
-         this.fail(client, node, "Failed: Hotbar Select could not find the item.");
+         this.fail(client, node, tr("macro_builder.runner.failed_hotbar_select_could_not_find_the_item"));
       } else {
          this.complete(client, node, "completed");
       }
@@ -3049,12 +3048,12 @@ final class MacroRunner {
    private void runHotbarUse(Minecraft client, MacroModel.Node node) {
       if (this.activeTicks == 1) {
          if (!this.selectHotbarSlot(client, node)) {
-            this.fail(client, node, "Failed: Hotbar Use could not find the item.");
+            this.fail(client, node, tr("macro_builder.runner.failed_hotbar_use_could_not_find_the_item"));
             return;
          }
 
          if (client.gameMode == null) {
-            this.fail(client, node, "Failed: Hotbar Use could not use the selected item.");
+            this.fail(client, node, tr("macro_builder.runner.failed_hotbar_use_could_not_use_the_selected_item"));
             return;
          }
 
@@ -3068,13 +3067,13 @@ final class MacroRunner {
       if (this.activeTicks == 1) {
          Boolean dropStack = parseBooleanOrDefault(this.resolveRuntimeText(node.value2), false);
          if (dropStack == null) {
-            this.fail(client, node, "Failed: Drop Items stack value must be true or false.");
+            this.fail(client, node, tr("macro_builder.runner.failed_drop_items_stack_value_must_be_true_or_false"));
             return;
          }
 
          Set<Integer> excludedSlots = parseInventorySlotSet(this.resolveRuntimeText(node.value3));
          if (excludedSlots == null) {
-            this.fail(client, node, "Failed: Drop Items exclude slots must be numbers or ranges.");
+            this.fail(client, node, tr("macro_builder.runner.failed_drop_items_exclude_slots_must_be_numbers_or_ranges"));
             return;
          }
 
@@ -3088,17 +3087,17 @@ final class MacroRunner {
          Integer targetSlot = inventorySlotNumber(target);
          if (targetSlot != null) {
             if (excludedSlots.contains(targetSlot)) {
-               this.fail(client, node, "Failed: Drop Items target slot is excluded.");
+               this.fail(client, node, tr("macro_builder.runner.failed_drop_items_target_slot_is_excluded"));
                return;
             }
 
             if (client.player.getInventory().getItem(targetSlot).isEmpty()) {
-               this.fail(client, node, "Failed: Drop Items target slot is empty.");
+               this.fail(client, node, tr("macro_builder.runner.failed_drop_items_target_slot_is_empty"));
                return;
             }
 
             if (!this.dropPlayerInventorySlot(client, targetSlot, dropStack)) {
-               this.fail(client, node, "Failed: Drop Items could not drop from inventory.");
+               this.fail(client, node, tr("macro_builder.runner.failed_drop_items_could_not_drop_from_inventory"));
                return;
             }
 
@@ -3108,14 +3107,14 @@ final class MacroRunner {
 
          String itemId = MacroModel.normalizeItemId(target);
          if (!isKnownItemId(itemId)) {
-            this.fail(client, node, "Failed: Drop Items needs a valid item id or inventory slot.");
+            this.fail(client, node, tr("macro_builder.runner.failed_drop_items_needs_a_valid_item_id_or_inventory_slot"));
             return;
          }
 
          if (dropAllMatchingDropItems(node)) {
             int dropped = this.dropMatchingPlayerInventorySlots(client, itemId, dropStack, excludedSlots);
             if (dropped <= 0) {
-               this.fail(client, node, "Failed: Drop Items could not find the item.");
+               this.fail(client, node, tr("macro_builder.runner.failed_drop_items_could_not_find_the_item"));
                return;
             }
 
@@ -3125,12 +3124,12 @@ final class MacroRunner {
 
          Integer inventorySlot = this.firstMatchingPlayerInventorySlot(client, itemId, excludedSlots);
          if (inventorySlot == null) {
-            this.fail(client, node, "Failed: Drop Items could not find the item.");
+            this.fail(client, node, tr("macro_builder.runner.failed_drop_items_could_not_find_the_item"));
             return;
          }
 
          if (!this.dropPlayerInventorySlot(client, inventorySlot, dropStack)) {
-            this.fail(client, node, "Failed: Drop Items could not drop from inventory.");
+            this.fail(client, node, tr("macro_builder.runner.failed_drop_items_could_not_drop_from_inventory"));
             return;
          }
 
@@ -3142,7 +3141,7 @@ final class MacroRunner {
       if (this.activeTicks == 1) {
          Boolean dropStack = parseBooleanOrDefault(this.resolveRuntimeText(node.value), false);
          if (dropStack == null) {
-            this.fail(client, node, "Failed: Drop Selected Item stack value must be true or false.");
+            this.fail(client, node, tr("macro_builder.runner.failed_drop_selected_item_stack_value_must_be_true_or_false"));
             return;
          }
 
@@ -3158,18 +3157,18 @@ final class MacroRunner {
       Boolean shiftClick = parseBooleanOrDefault(this.resolveRuntimeText(node.value2), false);
       Integer button = parseMouseButton(this.resolveRuntimeText(node.value3));
       if (target.isBlank()) {
-         this.fail(client, node, "Failed: Click GUI Item needs an item id or GUI slot.");
+         this.fail(client, node, tr("macro_builder.runner.failed_click_gui_item_needs_an_item_id_or_gui_slot"));
       } else if (!looksLikeOpenContainerSlotTarget(target) && !clickTargetHasValidFilter(target, itemId)) {
-         this.fail(client, node, "Failed: Click GUI Item needs a valid item id or GUI slot.");
+         this.fail(client, node, tr("macro_builder.runner.failed_click_gui_item_needs_a_valid_item_id_or_gui_slot"));
       } else if (shiftClick == null) {
-         this.fail(client, node, "Failed: Click GUI Item shift-click value must be true or false.");
+         this.fail(client, node, tr("macro_builder.runner.failed_click_gui_item_shift_click_value_must_be_true_or_false"));
       } else if (button == null) {
-         this.fail(client, node, "Failed: Click GUI Item button must be left or right.");
+         this.fail(client, node, tr("macro_builder.runner.failed_click_gui_item_button_must_be_left_or_right"));
       } else if (this.clickOpenContainerTarget(client, target, button, shiftClick)) {
          this.complete(client, node, "completed");
       } else {
          if (this.activeTicks > SCREEN_TIMEOUT_TICKS) {
-            this.fail(client, node, "Failed: could not click " + target + " in the open GUI.");
+            this.fail(client, node, tr("macro_builder.runner.failed_could_not_click_in_the_open_gui", target));
          }
       }
    }
@@ -3177,15 +3176,15 @@ final class MacroRunner {
    private void runChestDepositItems(Minecraft client, MacroModel.Node node) {
       MacroRunner.DepositResult result = this.depositNextInventoryStack(client, node);
       if (result == MacroRunner.DepositResult.INVALID_ITEM) {
-         this.fail(client, node, "Failed: Deposit Items specific item is not a valid item id.");
+         this.fail(client, node, tr("macro_builder.runner.failed_deposit_items_specific_item_is_not_a_valid_item_id"));
       } else if (result == MacroRunner.DepositResult.INVALID_SLOTS) {
-         this.fail(client, node, "Failed: Deposit Items exclude slots must be numbers or ranges.");
+         this.fail(client, node, tr("macro_builder.runner.failed_deposit_items_exclude_slots_must_be_numbers_or_ranges"));
       } else if (result != MacroRunner.DepositResult.MOVED) {
          if (result == MacroRunner.DepositResult.DONE) {
             this.complete(client, node, "completed");
          } else {
             if (this.activeTicks > SCREEN_TIMEOUT_TICKS) {
-               this.fail(client, node, "Failed: no open GUI was available for Deposit Items.");
+               this.fail(client, node, tr("macro_builder.runner.failed_no_open_gui_was_available_for_deposit_items"));
             }
          }
       }
@@ -3194,13 +3193,13 @@ final class MacroRunner {
    private void runChestWithdrawItems(Minecraft client, MacroModel.Node node) {
       MacroRunner.DepositResult result = this.withdrawNextContainerStack(client, node);
       if (result == MacroRunner.DepositResult.INVALID_ITEM) {
-         this.fail(client, node, "Failed: Withdraw Items specific item is not a valid item id.");
+         this.fail(client, node, tr("macro_builder.runner.failed_withdraw_items_specific_item_is_not_a_valid_item_id"));
       } else if (result != MacroRunner.DepositResult.MOVED) {
          if (result == MacroRunner.DepositResult.DONE) {
             this.complete(client, node, "completed");
          } else {
             if (this.activeTicks > SCREEN_TIMEOUT_TICKS) {
-               this.fail(client, node, "Failed: no open GUI was available for Withdraw Items.");
+               this.fail(client, node, tr("macro_builder.runner.failed_no_open_gui_was_available_for_withdraw_items"));
             }
          }
       }
@@ -3221,7 +3220,7 @@ final class MacroRunner {
 
             this.complete(client, node, "completed");
          } else {
-            this.lastStatus = "Auto Enchant: finishing enchant.";
+            this.lastStatus = Component.translatable("macro_builder.runner.auto_enchant_finishing_enchant");
          }
 
          return;
@@ -3229,13 +3228,13 @@ final class MacroRunner {
 
       AbstractContainerMenu handler = activeContainerHandler(client);
       if (!(handler instanceof EnchantmentMenu menu)) {
-         this.fail(client, node, "Failed: Auto Enchant needs an open Enchanting Table GUI.");
+         this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_needs_an_open_enchanting_table_gui"));
       } else if (client.gameMode == null || client.player == null || client.player.connection == null) {
-         this.fail(client, node, "Failed: Auto Enchant cannot use the current game mode.");
+         this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_cannot_use_the_current_game_mode"));
       } else {
          MacroRunner.AutoEnchantOptions options = this.autoEnchantOptions(node);
          if (options == null) {
-            this.fail(client, node, "Failed: Auto Enchant needs option 1-3 and XP level 0 or higher.");
+            this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_needs_option_1_3_and_xp_level_0_or"));
          } else {
             int buttonId = options.option() - 1;
             int cost = menu.costs[buttonId];
@@ -3244,49 +3243,49 @@ final class MacroRunner {
             if (!handler.getCarried().isEmpty()) {
                ItemStack carried = handler.getCarried();
                if (!creative && stackMatches(carried, options.lapisItem()) && !containerSlotHasAtLeast(handler, 1, lapisCost) && this.moveCarriedToMenuSlot(client, handler, 1)) {
-                  this.lastStatus = "Auto Enchant: placed carried lapis.";
+                  this.lastStatus = Component.translatable("macro_builder.runner.auto_enchant_placed_carried_lapis");
                } else if (options.autoLoad()
                   && !containerSlotHasItem(handler, 0)
                   && this.isFreshEnchantingInput(client, handler, carried, options.itemSelector(), true)
                   && this.moveCarriedToMenuSlot(client, handler, 0)) {
-                  this.lastStatus = "Auto Enchant: placed carried item.";
+                  this.lastStatus = Component.translatable("macro_builder.runner.auto_enchant_placed_carried_item");
                } else if (this.moveCarriedToPlayerInventory(client, handler)) {
-                  this.lastStatus = "Auto Enchant: cleared carried item.";
+                  this.lastStatus = Component.translatable("macro_builder.runner.auto_enchant_cleared_carried_item");
                } else {
-                  this.fail(client, node, "Failed: Auto Enchant needs inventory space to clear the cursor.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_needs_inventory_space_to_clear_the_cursor"));
                }
             } else if (options.autoLoad() && isAlreadyEnchantedForAutoEnchant(handler.getSlot(0).getItem())) {
                if (this.moveMenuSlotToPlayerInventory(client, handler, 0)) {
-                  this.lastStatus = "Auto Enchant: moved enchanted item to inventory.";
+                  this.lastStatus = Component.translatable("macro_builder.runner.auto_enchant_moved_enchanted_item_to_inventory");
                } else {
-                  this.fail(client, node, "Failed: Auto Enchant needs inventory space for the enchanted item.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_needs_inventory_space_for_the_enchanted_item"));
                }
             } else if (options.autoLoad() && !containerSlotHasItem(handler, 0)) {
                if (this.moveEnchantingInputToTable(client, handler, options.itemSelector())) {
-                  this.lastStatus = "Auto Enchant: loaded item.";
+                  this.lastStatus = Component.translatable("macro_builder.runner.auto_enchant_loaded_item");
                } else {
-                  this.fail(client, node, "Failed: Auto Enchant needs an unenchanted enchantable item in inventory.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_needs_an_unenchanted_enchantable_item_in_inventory"));
                }
             } else if (options.autoLoad() && !creative && !containerSlotHasAtLeast(handler, 1, lapisCost)) {
                if (this.quickMoveItemToMenuSlot(client, handler, options.lapisItem(), 1)) {
-                  this.lastStatus = "Auto Enchant: loaded lapis.";
+                  this.lastStatus = Component.translatable("macro_builder.runner.auto_enchant_loaded_lapis");
                } else {
-                  this.fail(client, node, "Failed: Auto Enchant needs " + options.lapisItem() + " in inventory.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_needs_in_inventory", options.lapisItem()));
                }
             } else if (!containerSlotHasItem(handler, 0)) {
-               this.fail(client, node, "Failed: Auto Enchant needs an item in the enchanting slot.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_needs_an_item_in_the_enchanting_slot"));
             } else if (!creative && !containerSlotHasAtLeast(handler, 1, lapisCost)) {
-               this.fail(client, node, "Failed: Auto Enchant option " + options.option() + " needs " + lapisCost + " lapis.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_option_needs_lapis", options.option(), lapisCost));
             } else if (cost <= 0) {
                if (this.activeTicks > SCREEN_TIMEOUT_TICKS) {
-                  this.fail(client, node, "Failed: Auto Enchant option " + options.option() + " is not available.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_option_is_not_available", options.option()));
                } else {
-                  this.lastStatus = "Auto Enchant: waiting for option " + options.option() + ".";
+                  this.lastStatus = Component.translatable("macro_builder.runner.auto_enchant_waiting_for_option", options.option());
                }
             } else if (!creative && menu.getGoldCount() < lapisCost) {
-               this.fail(client, node, "Failed: Auto Enchant option " + options.option() + " needs " + lapisCost + " lapis.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_option_needs_lapis", options.option(), lapisCost));
             } else if (!creative && client.player.experienceLevel < Math.max(cost, options.minimumLevel())) {
-               this.fail(client, node, "Failed: Auto Enchant needs XP level " + Math.max(cost, options.minimumLevel()) + ".");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_enchant_needs_xp_level", Math.max(cost, options.minimumLevel())));
             } else {
                if (!this.activeEnchantClicked) {
                   client.player.connection.send(new ServerboundContainerButtonClickPacket(handler.containerId, buttonId));
@@ -3301,7 +3300,7 @@ final class MacroRunner {
 
                   this.complete(client, node, "completed");
                } else {
-                  this.lastStatus = "Auto Enchant: option " + options.option() + ".";
+                  this.lastStatus = Component.translatable("macro_builder.runner.auto_enchant_option", options.option());
                }
             }
          }
@@ -3317,25 +3316,25 @@ final class MacroRunner {
 
       AbstractContainerMenu handler = activeContainerHandler(client);
       if (!(handler instanceof GrindstoneMenu)) {
-         this.fail(client, node, "Failed: Auto Grindstone needs an open Grindstone GUI.");
+         this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_needs_an_open_grindstone_gui"));
       } else if (client.gameMode == null || client.player == null) {
-         this.fail(client, node, "Failed: Auto Grindstone cannot use the current game mode.");
+         this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_cannot_use_the_current_game_mode"));
       } else {
       MacroRunner.AutoGrindstoneOptions options = this.autoGrindstoneOptions(node);
          if (options == null) {
-            this.fail(client, node, "Failed: Auto Grindstone needs mode repair/remove and valid item settings.");
+            this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_needs_mode_repair_remove_and_valid_item_settings"));
          } else if (!containerSlotHasItem(handler, 0)) {
             if (this.moveGrindstoneInputToSlot(client, handler, options.inputSelector(), 0, ItemStack.EMPTY, -1)) {
-               this.lastStatus = "Auto Grindstone: loaded input item.";
+               this.lastStatus = Component.translatable("macro_builder.runner.auto_grindstone_loaded_input_item");
             } else {
-               this.fail(client, node, "Failed: Auto Grindstone needs the input item in inventory or item=held.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_needs_the_input_item_in_inventory_or_item_held"));
             }
          } else if (options.repair() && !containerSlotHasItem(handler, 1)) {
             ItemStack firstInput = handler.getSlot(0).getItem();
             if (this.moveGrindstoneInputToSlot(client, handler, options.repairSelector(), 1, firstInput, -1)) {
-               this.lastStatus = "Auto Grindstone: loaded repair item.";
+               this.lastStatus = Component.translatable("macro_builder.runner.auto_grindstone_loaded_repair_item");
             } else {
-               this.fail(client, node, "Failed: Auto Grindstone repair needs a second matching item.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_repair_needs_a_second_matching_item"));
             }
          } else if (!options.repair() && containerSlotHasItem(handler, 1)) {
             if (this.activeTicks % 5 == 1) {
@@ -3343,15 +3342,15 @@ final class MacroRunner {
             }
 
             if (this.activeTicks > SCREEN_TIMEOUT_TICKS) {
-               this.fail(client, node, "Failed: Auto Grindstone could not clear the repair slot.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_could_not_clear_the_repair_slot"));
             } else {
-               this.lastStatus = "Auto Grindstone: clearing repair slot.";
+               this.lastStatus = Component.translatable("macro_builder.runner.auto_grindstone_clearing_repair_slot");
             }
          } else if (!containerSlotHasItem(handler, 2)) {
             if (this.activeTicks > SCREEN_TIMEOUT_TICKS) {
-               this.fail(client, node, "Failed: Auto Grindstone needs a result item in the output slot.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_needs_a_result_item_in_the_output_slot"));
             } else {
-               this.lastStatus = "Auto Grindstone: waiting for result.";
+               this.lastStatus = Component.translatable("macro_builder.runner.auto_grindstone_waiting_for_result");
             }
          } else {
             if (!this.activeGrindstoneResultClicked) {
@@ -3359,12 +3358,12 @@ final class MacroRunner {
                ItemStack resultStack = result.getItem();
                this.setLastItemOutput(node, resultStack);
                if (!"drop".equals(options.resultAction()) && !this.playerInventoryCanAccept(handler, firstPlayerInventorySlot(handler), resultStack)) {
-                  this.fail(client, node, "Failed: Auto Grindstone needs inventory space for the result or Result: Drop.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_needs_inventory_space_for_the_result_or_result_drop"));
                   return;
                }
 
                client.gameMode.handleInventoryMouseClick(handler.containerId, result.index, 0, ClickType.PICKUP, client.player);
-               this.lastStatus = "drop".equals(options.resultAction()) ? "Auto Grindstone: taking result to drop." : "Auto Grindstone: taking one result.";
+               this.lastStatus = "drop".equals(options.resultAction()) ? Component.translatable("macro_builder.runner.auto_grindstone_taking_result_to_drop") : Component.translatable("macro_builder.runner.auto_grindstone_taking_one_result");
 
                this.activeGrindstoneResultClicked = true;
                this.activeGrindstoneResultClickTick = this.activeTicks;
@@ -3376,17 +3375,17 @@ final class MacroRunner {
                      client.gameMode.handleInventoryMouseClick(handler.containerId, OUTSIDE_CONTAINER_SLOT, 0, ClickType.PICKUP, client.player);
                      this.clearLastSlotOutput(node);
                      this.putRuntimeValue("last.action", "drop");
-                     this.lastStatus = "Auto Grindstone: clearing carried result.";
+                     this.lastStatus = Component.translatable("macro_builder.runner.auto_grindstone_clearing_carried_result");
                      this.activeGrindstoneResultReleased = true;
                   } else {
                      int targetSlotIndex = this.moveCarriedToPlayerInventorySlot(client, handler);
                      if (targetSlotIndex >= 0) {
                         this.setLastSlotOutput(node, handler, targetSlotIndex);
                         this.putRuntimeValue("last.action", "inventory");
-                        this.lastStatus = "Auto Grindstone: result moved to slot " + this.runtimeValues.getOrDefault("last.slot", "?") + ".";
+                        this.lastStatus = Component.translatable("macro_builder.runner.auto_grindstone_result_moved_to_slot", this.runtimeValues.getOrDefault("last.slot", "?"));
                         this.activeGrindstoneResultReleased = true;
                      } else {
-                        this.fail(client, node, "Failed: Auto Grindstone could not put the carried result away.");
+                        this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_could_not_put_the_carried_result_away"));
                      }
                   }
                } else if (this.activeGrindstoneResultReleased) {
@@ -3397,14 +3396,14 @@ final class MacroRunner {
                   this.complete(client, node, "completed");
                } else if (containerSlotHasItem(handler, 2)) {
                   if (this.activeTicks > SCREEN_TIMEOUT_TICKS) {
-                     this.fail(client, node, "Failed: Auto Grindstone result was not picked up.");
+                     this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_result_was_not_picked_up"));
                   } else {
-                     this.lastStatus = "Auto Grindstone: waiting to pick up result.";
+                     this.lastStatus = Component.translatable("macro_builder.runner.auto_grindstone_waiting_to_pick_up_result");
                   }
                } else if (this.activeTicks > SCREEN_TIMEOUT_TICKS) {
-                  this.fail(client, node, "Failed: Auto Grindstone result did not move.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_auto_grindstone_result_did_not_move"));
                } else {
-                  this.lastStatus = "Auto Grindstone: waiting for carried result.";
+                  this.lastStatus = Component.translatable("macro_builder.runner.auto_grindstone_waiting_for_carried_result");
                }
             }
          }
@@ -3414,16 +3413,16 @@ final class MacroRunner {
    private void runStopAtXpLevel(Minecraft client, MacroModel.Node node) {
       Integer targetLevel = parseIntOrNull(this.resolveRuntimeText(node.value));
       if (targetLevel == null || targetLevel < 0) {
-         this.fail(client, node, "Failed: Stop At XP Level needs a level of 0 or higher.");
+         this.fail(client, node, tr("macro_builder.runner.failed_stop_at_xp_level_needs_a_level_of_0_or_higher"));
       } else if (client.player.experienceLevel >= targetLevel) {
          this.releaseHeldKeys(client);
          if (shouldStopMacroAtXpLevel(this.resolveRuntimeText(node.value2))) {
-            this.stop(client, "Stopped: XP level " + targetLevel + " reached.");
+            this.stop(client, tr("macro_builder.runner.stopped_xp_level_reached", targetLevel));
          } else {
             this.complete(client, node, "completed");
          }
       } else {
-         this.lastStatus = "Waiting for XP level " + targetLevel + " (" + client.player.experienceLevel + ").";
+         this.lastStatus = Component.translatable("macro_builder.runner.waiting_for_xp_level", targetLevel, client.player.experienceLevel);
       }
    }
 
@@ -3440,7 +3439,7 @@ final class MacroRunner {
 
    private void runOpenInventory(Minecraft client, MacroModel.Node node) {
       if (client.player == null) {
-         this.fail(client, node, "Failed: Open Inventory needs a player.");
+         this.fail(client, node, tr("macro_builder.runner.failed_open_inventory_needs_a_player"));
       } else if (client.screen instanceof InventoryScreen) {
          this.complete(client, node, "completed");
       } else if (client.screen == null && !hasOpenContainer(client)) {
@@ -3459,7 +3458,7 @@ final class MacroRunner {
             client.setScreen(new InventoryScreen(client.player));
             this.complete(client, node, "completed");
          } else if (this.activeTicks > SCREEN_TIMEOUT_TICKS) {
-            this.fail(client, node, "Failed: Open Inventory could not open the player inventory.");
+            this.fail(client, node, tr("macro_builder.runner.failed_open_inventory_could_not_open_the_player_inventory"));
          }
       }
    }
@@ -3476,7 +3475,7 @@ final class MacroRunner {
          client.player.swing(InteractionHand.MAIN_HAND);
          this.complete(client, node, "completed");
       } else {
-         this.fail(client, node, "Failed: Interact With Block needs a target block.");
+         this.fail(client, node, tr("macro_builder.runner.failed_interact_with_block_needs_a_target_block"));
       }
    }
 
@@ -3501,27 +3500,27 @@ final class MacroRunner {
          } else {
             if (this.activeTicks > 300) {
                this.setMacroKeyDown(client, client.options.keyAttack, false);
-               this.fail(client, node, "Failed: Mine Block timed out before the block broke.");
+               this.fail(client, node, tr("macro_builder.runner.failed_mine_block_timed_out_before_the_block_broke"));
             }
          }
       } else {
-         this.fail(client, node, "Failed: Mine Block needs a target block.");
+         this.fail(client, node, tr("macro_builder.runner.failed_mine_block_needs_a_target_block"));
       }
    }
 
    private void runWorldPlace(Minecraft client, MacroModel.Node node) {
       BlockHitResult hit = this.targetBlockHit(client, node.value);
       if (hit == null || client.gameMode == null) {
-         this.fail(client, node, "Failed: Place Block needs a target block.");
+         this.fail(client, node, tr("macro_builder.runner.failed_place_block_needs_a_target_block"));
       } else if (!this.selectItemIfProvided(client, this.resolveRuntimeText(node.value2))) {
-         this.fail(client, node, "Failed: Place Block could not find the selected block.");
+         this.fail(client, node, tr("macro_builder.runner.failed_place_block_could_not_find_the_selected_block"));
       } else {
          InteractionResult result = client.gameMode.useItemOn(client.player, InteractionHand.MAIN_HAND, hit);
          if (result.consumesAction()) {
             client.player.swing(InteractionHand.MAIN_HAND);
             this.complete(client, node, "completed");
          } else {
-            this.fail(client, node, "Failed: Place Block was not accepted by the world.");
+            this.fail(client, node, tr("macro_builder.runner.failed_place_block_was_not_accepted_by_the_world"));
          }
       }
    }
@@ -3529,7 +3528,7 @@ final class MacroRunner {
    private void runJumpAndPlaceBlock(Minecraft client, MacroModel.Node node) {
       if (this.activeTicks == 1) {
          if (!this.selectItemIfProvided(client, this.resolveRuntimeText(node.value))) {
-            this.fail(client, node, "Failed: Jump And Place Block could not find the selected block.");
+            this.fail(client, node, tr("macro_builder.runner.failed_jump_and_place_block_could_not_find_the_selected_block"));
          } else {
             this.activeJumpPlaceSupportPos = this.blockUnderPlayer(client);
             this.setMacroKeyDown(client, client.options.keyJump, true);
@@ -3539,7 +3538,7 @@ final class MacroRunner {
          if (this.activeTicks >= 3) {
             this.setMacroKeyDown(client, client.options.keyJump, false);
             if (client.gameMode == null) {
-               this.fail(client, node, "Failed: Jump And Place Block could not place.");
+               this.fail(client, node, tr("macro_builder.runner.failed_jump_and_place_block_could_not_place"));
                return;
             }
 
@@ -3553,7 +3552,7 @@ final class MacroRunner {
             }
 
             if (this.activeTicks > 18 || this.activeTicks > 6 && client.player.onGround()) {
-               this.fail(client, node, "Failed: Jump And Place Block was not accepted by the world.");
+               this.fail(client, node, tr("macro_builder.runner.failed_jump_and_place_block_was_not_accepted_by_the_world"));
             }
          }
       }
@@ -3562,7 +3561,7 @@ final class MacroRunner {
    private void runFarmArea(Minecraft client, MacroModel.Node node) {
       MacroRunner.FarmOptions options = this.farmOptions(client, node);
       if (options == null) {
-         this.fail(client, node, "Failed: Farm Area needs radius 1-8 or two XYZ points within 16 blocks per side.");
+         this.fail(client, node, tr("macro_builder.runner.failed_farm_area_needs_radius_1_8_or_two_xyz_points_within"));
       } else if (this.activeFarmCropPos == null && options.depositWhenFull() && this.isInventoryFull(client)) {
          this.runFarmDeposit(client, node, options);
       } else {
@@ -3582,7 +3581,7 @@ final class MacroRunner {
             BlockState cropState = client.level.getBlockState(this.activeFarmCropPos);
             this.activeFarmSeedItem = seedForFarmCrop(cropState);
             if (options.replant() && this.activeFarmSeedItem.isBlank()) {
-               this.fail(client, node, "Failed: Farm Area found a crop but no replant item.");
+               this.fail(client, node, tr("macro_builder.runner.failed_farm_area_found_a_crop_but_no_replant_item"));
                return;
             }
          }
@@ -3592,7 +3591,7 @@ final class MacroRunner {
             if (!this.activeFarmHarvested) {
                if (isMatureFarmCrop(currentState)) {
                   if (client.gameMode == null) {
-                     this.fail(client, node, "Failed: Farm Area cannot harvest in the current game mode.");
+                     this.fail(client, node, tr("macro_builder.runner.failed_farm_area_cannot_harvest_in_the_current_game_mode"));
                      return;
                   }
 
@@ -3606,7 +3605,7 @@ final class MacroRunner {
 
                   client.player.swing(InteractionHand.MAIN_HAND);
                   if (this.activeTicks > 300) {
-                     this.fail(client, node, "Failed: Farm Area timed out while harvesting.");
+                     this.fail(client, node, tr("macro_builder.runner.failed_farm_area_timed_out_while_harvesting"));
                   }
 
                   return;
@@ -3624,18 +3623,18 @@ final class MacroRunner {
                   this.releaseMovementKeys(client);
                   this.complete(client, node, "completed");
                } else if (!currentState.isAir()) {
-                  this.fail(client, node, "Failed: Farm Area cannot replant because the crop space is blocked.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_farm_area_cannot_replant_because_the_crop_space_is_blocked"));
                } else if (!this.selectHotbarItem(client, this.activeFarmSeedItem)) {
-                  this.fail(client, node, "Failed: Farm Area needs " + this.activeFarmSeedItem + " in the hotbar to replant.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_farm_area_needs_in_the_hotbar_to_replant", this.activeFarmSeedItem));
                } else if (client.gameMode == null) {
-                  this.fail(client, node, "Failed: Farm Area cannot replant in the current game mode.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_farm_area_cannot_replant_in_the_current_game_mode"));
                } else {
                   this.releaseMovementKeys(client);
                   BlockPos base = this.activeFarmCropPos.below();
                   BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(base), Direction.UP, base, false);
                   InteractionResult result = client.gameMode.useItemOn(client.player, InteractionHand.MAIN_HAND, hit);
                   if (!result.consumesAction() && !isSupportedFarmCrop(client.level.getBlockState(this.activeFarmCropPos))) {
-                     this.fail(client, node, "Failed: Farm Area could not replant " + this.activeFarmSeedItem + ".");
+                     this.fail(client, node, tr("macro_builder.runner.failed_farm_area_could_not_replant", this.activeFarmSeedItem));
                   } else {
                      client.player.swing(InteractionHand.MAIN_HAND);
                      this.releaseMovementKeys(client);
@@ -3655,7 +3654,7 @@ final class MacroRunner {
          }
 
          if (result == MacroRunner.DepositResult.NO_SPACE) {
-            this.fail(client, node, "Failed: nearest container has no room.");
+            this.fail(client, node, tr("macro_builder.runner.failed_nearest_container_has_no_room"));
             return;
          }
 
@@ -3670,7 +3669,7 @@ final class MacroRunner {
       int radius = options.radius() > 0 ? options.radius() : 10;
       BlockPos container = this.nearestContainer(client, Math.min(10, radius + 2));
       if (container == null || client.gameMode == null) {
-         this.fail(client, node, "Failed: inventory full and no nearby container was found.");
+         this.fail(client, node, tr("macro_builder.runner.failed_inventory_full_and_no_nearby_container_was_found"));
       } else if (canReachBlock(client, container)) {
          this.releaseMovementKeys(client);
          this.lookAt(client, Vec3.atCenterOf(container));
@@ -3678,15 +3677,15 @@ final class MacroRunner {
          client.gameMode.useItemOn(client.player, InteractionHand.MAIN_HAND, hit);
          client.player.swing(InteractionHand.MAIN_HAND);
          if (this.activeTicks > 300) {
-            this.fail(client, node, "Failed: nearest container did not open.");
+            this.fail(client, node, tr("macro_builder.runner.failed_nearest_container_did_not_open"));
          }
       } else if (!options.move()) {
-         this.fail(client, node, "Failed: nearest container is out of reach.");
+         this.fail(client, node, tr("macro_builder.runner.failed_nearest_container_is_out_of_reach"));
       } else {
          this.moveTowardBlock(client, container);
          if (this.activeTicks > 300) {
             this.releaseMovementKeys(client);
-            this.fail(client, node, "Failed: nearest container stayed out of reach.");
+            this.fail(client, node, tr("macro_builder.runner.failed_nearest_container_stayed_out_of_reach"));
          }
       }
    }
@@ -3694,16 +3693,16 @@ final class MacroRunner {
    private void runOpenNearestContainer(Minecraft client, MacroModel.Node node) {
       MacroRunner.ContainerSearchOptions options = this.containerSearchOptions(this.resolveRuntimeText(node.value), this.resolveRuntimeText(node.value2));
       if (options == null) {
-         this.fail(client, node, "Failed: Open Nearest Container needs radius 1-16 and type any/chest/barrel/ender_chest/shulker/furnace/brewing_stand.");
+         this.fail(client, node, tr("macro_builder.runner.failed_open_nearest_container_needs_radius_1_16_and_type_any_chest"));
       } else {
-         this.runOpenNearestContainer(client, node, options, "Open Nearest Container");
+         this.runOpenNearestContainer(client, node, options, tr("macro_builder.runner.open_nearest_container"));
       }
    }
 
    private void runOpenNearestContainer(Minecraft client, MacroModel.Node node, String type, String label) {
       MacroRunner.ContainerSearchOptions options = this.containerSearchOptions(this.resolveRuntimeText(node.value), this.resolveRuntimeText(node.value2));
       if (options == null) {
-         this.fail(client, node, "Failed: " + label + " needs radius 1-16.");
+         this.fail(client, node, tr("macro_builder.runner.failed_needs_radius_1_16", label));
       } else {
          this.runOpenNearestContainer(client, node, new MacroRunner.ContainerSearchOptions(options.radius(), options.move(), type), label);
       }
@@ -3724,19 +3723,19 @@ final class MacroRunner {
                }
 
                if (this.activeTicks > 300) {
-                  this.fail(client, node, "Failed: nearest container did not open.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_nearest_container_did_not_open"));
                }
             } else if (!options.move()) {
-               this.fail(client, node, "Failed: nearest container is out of reach.");
+               this.fail(client, node, tr("macro_builder.runner.failed_nearest_container_is_out_of_reach"));
             } else {
                this.setMacroKeyDown(client, client.options.keyUp, true);
                if (this.activeTicks > 300) {
                   this.releaseMovementKeys(client);
-                  this.fail(client, node, "Failed: nearest container stayed out of reach.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_nearest_container_stayed_out_of_reach"));
                }
             }
          } else {
-            this.fail(client, node, "Failed: no nearby " + containerTypeLabel(options.type()) + " was found.");
+            this.fail(client, node, tr("macro_builder.runner.failed_no_nearby_was_found", containerTypeLabel(options.type())));
          }
       }
    }
@@ -3744,12 +3743,12 @@ final class MacroRunner {
    private void runOpenNearestEnchantingTable(Minecraft client, MacroModel.Node node) {
       MacroRunner.ContainerSearchOptions options = this.containerSearchOptions(this.resolveRuntimeText(node.value), this.resolveRuntimeText(node.value2));
       if (options == null) {
-         this.fail(client, node, "Failed: Open Nearest Enchanting Table needs radius 1-16 and move true/false.");
+         this.fail(client, node, tr("macro_builder.runner.failed_open_nearest_enchanting_table_needs_radius_1_16_and_move_true"));
       } else if (activeContainerHandler(client) instanceof EnchantmentMenu) {
          this.releaseMovementKeys(client);
          this.complete(client, node, "completed");
       } else if (activeContainerHandler(client) != null) {
-         this.fail(client, node, "Failed: close the current GUI before opening an enchanting table.");
+         this.fail(client, node, tr("macro_builder.runner.failed_close_the_current_gui_before_opening_an_enchanting_table"));
       } else {
          BlockPos table = this.nearestBlockWithId(client, options.radius(), "minecraft:enchanting_table");
          if (table != null && client.gameMode != null) {
@@ -3761,19 +3760,19 @@ final class MacroRunner {
                }
 
                if (this.activeTicks > 300) {
-                  this.fail(client, node, "Failed: nearest enchanting table did not open.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_nearest_enchanting_table_did_not_open"));
                }
             } else if (!options.move()) {
-               this.fail(client, node, "Failed: nearest enchanting table is out of reach.");
+               this.fail(client, node, tr("macro_builder.runner.failed_nearest_enchanting_table_is_out_of_reach"));
             } else {
                this.moveTowardBlock(client, table);
                if (this.activeTicks > 300) {
                   this.releaseMovementKeys(client);
-                  this.fail(client, node, "Failed: nearest enchanting table stayed out of reach.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_nearest_enchanting_table_stayed_out_of_reach"));
                }
             }
          } else {
-            this.fail(client, node, "Failed: no nearby enchanting table was found.");
+            this.fail(client, node, tr("macro_builder.runner.failed_no_nearby_enchanting_table_was_found"));
          }
       }
    }
@@ -3781,12 +3780,12 @@ final class MacroRunner {
    private void runOpenNearestGrindstone(Minecraft client, MacroModel.Node node) {
       MacroRunner.ContainerSearchOptions options = this.containerSearchOptions(this.resolveRuntimeText(node.value), this.resolveRuntimeText(node.value2));
       if (options == null) {
-         this.fail(client, node, "Failed: Open Nearest Grindstone needs radius 1-16 and move true/false.");
+         this.fail(client, node, tr("macro_builder.runner.failed_open_nearest_grindstone_needs_radius_1_16_and_move_true_false"));
       } else if (activeContainerHandler(client) instanceof GrindstoneMenu) {
          this.releaseMovementKeys(client);
          this.complete(client, node, "completed");
       } else if (activeContainerHandler(client) != null) {
-         this.fail(client, node, "Failed: close the current GUI before opening a grindstone.");
+         this.fail(client, node, tr("macro_builder.runner.failed_close_the_current_gui_before_opening_a_grindstone"));
       } else {
          BlockPos grindstone = this.nearestBlockWithId(client, options.radius(), "minecraft:grindstone");
          if (grindstone != null && client.gameMode != null) {
@@ -3798,19 +3797,19 @@ final class MacroRunner {
                }
 
                if (this.activeTicks > 300) {
-                  this.fail(client, node, "Failed: nearest grindstone did not open.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_nearest_grindstone_did_not_open"));
                }
             } else if (!options.move()) {
-               this.fail(client, node, "Failed: nearest grindstone is out of reach.");
+               this.fail(client, node, tr("macro_builder.runner.failed_nearest_grindstone_is_out_of_reach"));
             } else {
                this.moveTowardBlock(client, grindstone);
                if (this.activeTicks > 300) {
                   this.releaseMovementKeys(client);
-                  this.fail(client, node, "Failed: nearest grindstone stayed out of reach.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_nearest_grindstone_stayed_out_of_reach"));
                }
             }
          } else {
-            this.fail(client, node, "Failed: no nearby grindstone was found.");
+            this.fail(client, node, tr("macro_builder.runner.failed_no_nearby_grindstone_was_found"));
          }
       }
    }
@@ -3818,11 +3817,11 @@ final class MacroRunner {
    private void runAutoBoneMeal(Minecraft client, MacroModel.Node node) {
       String itemId = MacroModel.normalizeItemId(this.resolveRuntimeText(node.value));
       if (!isKnownItemId(itemId)) {
-         this.fail(client, node, "Failed: Auto Bone Meal needs a valid item id.");
+         this.fail(client, node, tr("macro_builder.runner.failed_auto_bone_meal_needs_a_valid_item_id"));
       } else {
          MacroRunner.BoneMealOptions options = this.boneMealOptions(client, node.value2);
          if (options == null) {
-            this.fail(client, node, "Failed: Auto Bone Meal options need radius 1-16.");
+            this.fail(client, node, tr("macro_builder.runner.failed_auto_bone_meal_options_need_radius_1_16"));
          } else if (activeContainerHandler(client) != null) {
             if (this.selectHotbarItem(client, itemId)) {
                client.player.closeContainer();
@@ -3831,24 +3830,24 @@ final class MacroRunner {
                if (result == MacroRunner.DepositResult.MOVED) {
                   client.player.closeContainer();
                } else if (result == MacroRunner.DepositResult.NO_SPACE) {
-                  this.fail(client, node, "Failed: inventory has no room for " + itemId + ".");
+                  this.fail(client, node, tr("macro_builder.runner.failed_inventory_has_no_room_for", itemId));
                } else {
-                  this.fail(client, node, "Failed: nearby container does not have " + itemId + ".");
+                  this.fail(client, node, tr("macro_builder.runner.failed_nearby_container_does_not_have", itemId));
                }
             }
          } else if (!this.selectHotbarItem(client, itemId)) {
             if (!options.refill()) {
-               this.fail(client, node, "Failed: Auto Bone Meal needs " + itemId + " in the hotbar.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_bone_meal_needs_in_the_hotbar", itemId));
             } else {
                BlockPos container = this.nearestContainer(client, options.radius());
                if (container == null || client.gameMode == null) {
-                  this.fail(client, node, "Failed: no nearby refill container was found.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_no_nearby_refill_container_was_found"));
                } else if (!canReachBlock(client, container)) {
-                  this.fail(client, node, "Failed: refill container is out of reach.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_refill_container_is_out_of_reach"));
                } else {
                   this.openBlockAt(client, container);
                   if (this.activeTicks > 300) {
-                     this.fail(client, node, "Failed: refill container did not open.");
+                     this.fail(client, node, tr("macro_builder.runner.failed_refill_container_did_not_open"));
                   }
                }
             }
@@ -3860,10 +3859,10 @@ final class MacroRunner {
                   client.player.swing(InteractionHand.MAIN_HAND);
                   this.complete(client, node, "completed");
                } else {
-                  this.fail(client, node, "Failed: Auto Bone Meal was not accepted by the target block.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_auto_bone_meal_was_not_accepted_by_the_target_block"));
                }
             } else {
-               this.fail(client, node, "Failed: Auto Bone Meal needs you to look at a block or set target X Y Z.");
+               this.fail(client, node, tr("macro_builder.runner.failed_auto_bone_meal_needs_you_to_look_at_a_block_or"));
             }
          }
       }
@@ -3881,12 +3880,12 @@ final class MacroRunner {
 
          this.activeMineAreaTicks = 0;
          this.activeMineAreaTravelTicks = 0;
-         this.fail(client, node, client.player.isInLava() ? "Failed: Mine Area stopped because the player entered lava." : "Failed: Mine Area stopped because the player entered water.");
+         this.fail(client, node, client.player.isInLava() ? tr("macro_builder.runner.failed_mine_area_stopped_because_the_player_entered_lava") : tr("macro_builder.runner.failed_mine_area_stopped_because_the_player_entered_water"));
       } else if (!options.autoTool() && toolIsLow(client, options.toolLowThreshold())) {
          this.releaseHeldKeys(client);
          this.complete(client, node, "tool_low");
       } else if (client.gameMode == null) {
-         this.fail(client, node, "Failed: Mine Area cannot mine in the current game mode.");
+         this.fail(client, node, tr("macro_builder.runner.failed_mine_area_cannot_mine_in_the_current_game_mode"));
       } else {
          if (this.activeMineAreaPos == null || !isMineAreaBreakTarget(client.level.getBlockState(this.activeMineAreaPos))) {
             this.activeMineAreaPos = this.nextMineAreaBlock(client, options);
@@ -3910,7 +3909,7 @@ final class MacroRunner {
              this.putRuntimeValue("mine.protected_block.id", selectedBlockId);
              this.putRuntimeValue("mine.protected_block.pos", blockPosText(this.activeMineAreaPos));
              this.releaseHeldKeys(client);
-             this.stop(client, "Stopped: Mine Area found protected block " + selectedBlockId + " at " + blockPosText(this.activeMineAreaPos) + ".");
+             this.stop(client, tr("macro_builder.runner.stopped_mine_area_found_protected_block_at", selectedBlockId, blockPosText(this.activeMineAreaPos)));
              return;
           }
 
@@ -3919,7 +3918,7 @@ final class MacroRunner {
                this.releaseMovementKeys(client);
                this.activeMineAreaDescentTarget = null;
                this.activeMineAreaTravelTicks = 0;
-               this.lastStatus = "Mine Area: safe descent complete.";
+               this.lastStatus = Component.translatable("macro_builder.runner.mine_area_safe_descent_complete");
             } else {
                this.activeMineAreaTravelTicks++;
                this.moveTowardBlock(client, this.activeMineAreaDescentTarget);
@@ -3927,9 +3926,9 @@ final class MacroRunner {
                   this.releaseHeldKeys(client);
                   this.activeMineAreaDescentTarget = null;
                   this.activeMineAreaTravelTicks = 0;
-                  this.fail(client, node, "Failed: Mine Area could not finish the safe descent.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_mine_area_could_not_finish_the_safe_descent"));
                } else {
-                  this.lastStatus = "Mine Area: stepping down before removing the old support block.";
+                  this.lastStatus = Component.translatable("macro_builder.runner.mine_area_stepping_down_before_removing_the_old_support_block");
                }
 
                return;
@@ -3939,7 +3938,7 @@ final class MacroRunner {
          if (this.activeMineAreaPos.equals(client.player.blockPosition().below())) {
             this.activeMineAreaTicks = 0;
             if (!options.move()) {
-               this.skipMineAreaBlock(client, "Mine Area: left the support block because Move is off.");
+               this.skipMineAreaBlock(client, tr("macro_builder.runner.mine_area_left_the_support_block_because_move_is_off"));
                return;
             }
 
@@ -3947,7 +3946,7 @@ final class MacroRunner {
             if (descentStep == null) {
                this.releaseHeldKeys(client);
                this.activeMineAreaTravelTicks = 0;
-               this.fail(client, node, "Failed: Mine Area could not find a supported step down before mining the block under the player.");
+               this.fail(client, node, tr("macro_builder.runner.failed_mine_area_could_not_find_a_supported_step_down_before_mining"));
                return;
             }
 
@@ -3958,9 +3957,9 @@ final class MacroRunner {
             if (this.activeMineAreaTravelTicks > MINE_AREA_MOVE_TIMEOUT_TICKS) {
                this.releaseHeldKeys(client);
                this.activeMineAreaTravelTicks = 0;
-               this.fail(client, node, "Failed: Mine Area could not finish the safe descent.");
+               this.fail(client, node, tr("macro_builder.runner.failed_mine_area_could_not_finish_the_safe_descent"));
             } else {
-               this.lastStatus = "Mine Area: stepping down before removing the old support block.";
+               this.lastStatus = Component.translatable("macro_builder.runner.mine_area_stepping_down_before_removing_the_old_support_block");
             }
 
             return;
@@ -3969,23 +3968,23 @@ final class MacroRunner {
          if (!canReachBlock(client, this.activeMineAreaPos)) {
             this.activeMineAreaTicks = 0;
             if (!options.move()) {
-               this.skipMineAreaBlock(client, "Mine Area: skipped out-of-reach block.");
+               this.skipMineAreaBlock(client, tr("macro_builder.runner.mine_area_skipped_out_of_reach_block"));
             } else {
                BlockPos movementTarget = options.safePath() ? this.mineAreaSafeStepToward(client, this.activeMineAreaPos, options.sliceHeight()) : this.activeMineAreaPos;
                if (movementTarget == null) {
                   this.releaseHeldKeys(client);
                   this.activeMineAreaTicks = 0;
                   this.activeMineAreaTravelTicks = 0;
-                  this.fail(client, node, "Failed: Mine Area Safe Path could not walk around a hole or drop deeper than " + options.sliceHeight() + " blocks.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_mine_area_safe_path_could_not_walk_around_a_hole_or", options.sliceHeight()));
                   return;
                }
 
                this.activeMineAreaTravelTicks++;
                this.moveTowardBlock(client, movementTarget);
                if (this.activeMineAreaTravelTicks > MINE_AREA_MOVE_TIMEOUT_TICKS) {
-                  this.skipMineAreaBlock(client, "Mine Area: skipped unreachable block.");
+                  this.skipMineAreaBlock(client, tr("macro_builder.runner.mine_area_skipped_unreachable_block"));
                } else {
-                  this.lastStatus = "Mine Area: moving to " + blockPosText(this.activeMineAreaPos) + ".";
+                  this.lastStatus = Component.translatable("macro_builder.runner.mine_area_moving_to", blockPosText(this.activeMineAreaPos));
                }
             }
          } else {
@@ -4022,7 +4021,7 @@ final class MacroRunner {
                this.activeMineAreaTicks = 0;
             } else {
                if (this.activeMineAreaTicks > MINE_AREA_BREAK_TIMEOUT_TICKS) {
-                  this.skipMineAreaBlock(client, "Mine Area: skipped block that would not break.");
+                  this.skipMineAreaBlock(client, tr("macro_builder.runner.mine_area_skipped_block_that_would_not_break"));
                }
             }
          }
@@ -4039,35 +4038,35 @@ final class MacroRunner {
       this.activeMineAreaDescentTarget = null;
       this.activeMineAreaTicks = 0;
       this.activeMineAreaTravelTicks = 0;
-      this.lastStatus = status;
+      this.lastStatus = Component.literal(status);
    }
 
    private void runEntityAction(Minecraft client, MacroModel.Node node, boolean attack) {
       Entity target = this.findTargetEntity(client, this.resolveRuntimeText(node.value));
       if (target == null) {
          if (this.activeTicks > 300) {
-            this.fail(client, node, "Failed: no matching entity found.");
+            this.fail(client, node, tr("macro_builder.runner.failed_no_matching_entity_found"));
          }
       } else {
          this.lookAt(client, this.entityCenter(target));
          Boolean moveToTarget = parseBooleanOrDefault(this.resolveRuntimeText(node.value2), false);
          if (moveToTarget == null) {
-            this.fail(client, node, "Failed: Entity move value must be true or false.");
+            this.fail(client, node, tr("macro_builder.runner.failed_entity_move_value_must_be_true_or_false"));
          } else if (client.player.distanceToSqr(target) > (double)(ENTITY_REACH_DISTANCE * ENTITY_REACH_DISTANCE)) {
             if (moveToTarget) {
                this.setMacroKeyDown(client, client.options.keyUp, true);
                if (this.activeTicks > 300) {
                   this.releaseMovementKeys(client);
-                  this.fail(client, node, "Failed: target entity was out of reach.");
+                  this.fail(client, node, tr("macro_builder.runner.failed_target_entity_was_out_of_reach"));
                }
             } else {
                this.releaseMovementKeys(client);
-               this.fail(client, node, "Failed: target is out of reach. Turn Move on or stand within 3 blocks.");
+               this.fail(client, node, tr("macro_builder.runner.failed_target_is_out_of_reach_turn_move_on_or_stand_within"));
             }
          } else {
             this.releaseMovementKeys(client);
             if (client.gameMode == null) {
-               this.fail(client, node, "Failed: entity interaction was not available.");
+               this.fail(client, node, tr("macro_builder.runner.failed_entity_interaction_was_not_available"));
             } else {
                if (attack) {
                   client.gameMode.attack(client.player, target);
@@ -4087,7 +4086,7 @@ final class MacroRunner {
       this.running = false;
       this.activeNodeId = null;
       this.activeTicks = 0;
-      this.lastStatus = "Disconnected by macro.";
+      this.lastStatus = Component.translatable("macro_builder.runner.disconnected_by_macro");
       if (client != null) {
          client.disconnect();
       }
@@ -4101,21 +4100,21 @@ final class MacroRunner {
 
       ServerData targetServer = this.rejoinTargetServer(node);
       if (targetServer == null || targetServer.ip == null || targetServer.ip.isBlank()) {
-         this.fail(client, node, "Failed: Rejoin Server needs a last server or a server IP.");
+         this.fail(client, node, tr("macro_builder.runner.failed_rejoin_server_needs_a_last_server_or_a_server_ip"));
       } else {
          int delayMs = Math.max(0, parseInt(this.resolveRuntimeText(node.value), 3000));
-         this.scheduleServerConnection(client, node, targetServer, delayMs, "Rejoin Server", "Rejoining by macro.");
+         this.scheduleServerConnection(client, node, targetServer, delayMs, "Rejoin Server", tr("macro_builder.runner.rejoining_by_macro"));
       }
    }
 
    private void runJoinServer(Minecraft client, MacroModel.Node node) {
       String configuredIp = this.resolveRuntimeText(node.value).trim();
       if (configuredIp.isBlank()) {
-         this.fail(client, node, "Failed: Join Server needs a server IP.");
+         this.fail(client, node, tr("macro_builder.runner.failed_join_server_needs_a_server_ip"));
       } else {
          ServerData targetServer = new ServerData(configuredIp, configuredIp, ServerData.Type.OTHER);
          int delayMs = Math.max(0, parseInt(this.resolveRuntimeText(node.value2), 1000));
-         this.scheduleServerConnection(client, node, targetServer, delayMs, "Join Server", "Joining server by macro.");
+         this.scheduleServerConnection(client, node, targetServer, delayMs, "Join Server", tr("macro_builder.runner.joining_server_by_macro"));
       }
    }
 
@@ -4135,7 +4134,7 @@ final class MacroRunner {
          this.clearMineAreaState();
          this.activeJumpPlaceSupportPos = null;
          this.waitingForWorld = false;
-         this.lastStatus = label + " in " + delayMs + " ms.";
+         this.lastStatus = Component.translatable("macro_builder.runner.in_ms", label, delayMs);
          if (client != null && client.player != null && client.level != null) {
             client.disconnect();
          }
@@ -4159,18 +4158,18 @@ final class MacroRunner {
          client, this.resolveRuntimeText(node.value), this.resolveRuntimeText(node.value2), this.nodeChatBaseline, this.nodeActionbarBaseline, this.nodeKickedBaseline
       );
       if (triggered == null) {
-         this.fail(client, node, "Failed: Idle Until condition must be chat, actionbar, player, full, kicked, item, xp, health, food, or water.");
+         this.fail(client, node, tr("macro_builder.runner.failed_idle_until_condition_must_be_chat_actionbar_player_full_kicked_item"));
       } else if (triggered) {
          this.complete(client, node, "triggered");
       } else {
-         this.lastStatus = "Idle: waiting for " + this.idleConditionLabel(this.resolveRuntimeText(node.value)) + ".";
+         this.lastStatus = Component.translatable("macro_builder.runner.idle_waiting_for", this.idleConditionLabel(this.resolveRuntimeText(node.value)));
       }
    }
 
    private void runUpdateSign(Minecraft client, MacroModel.Node node) {
       BlockHitResult hit = this.targetBlockHit(client, "");
       if (hit == null) {
-         this.fail(client, node, "Failed: Update Sign needs you to look at a sign.");
+         this.fail(client, node, tr("macro_builder.runner.failed_update_sign_needs_you_to_look_at_a_sign"));
       } else {
          String[] lines = signLines(this.resolveRuntimeText(node.value));
          client.player.connection.send(new ServerboundSignUpdatePacket(hit.getBlockPos(), true, lines[0], lines[1], lines[2], lines[3]));
@@ -4183,7 +4182,7 @@ final class MacroRunner {
       if (percent != null && !(percent < 0.0) && !(percent > 100.0)) {
          this.complete(client, node, Math.random() * 100.0 < percent ? "true" : "false");
       } else {
-         this.fail(client, node, "Failed: Random True/False needs a number from 0 to 100.");
+         this.fail(client, node, tr("macro_builder.runner.failed_random_true_false_needs_a_number_from_0_to_100"));
       }
    }
 
@@ -4201,14 +4200,14 @@ final class MacroRunner {
       if (isRepeatIndefinitely(repeatText)) {
          MacroModel.Node start = this.model == null ? null : this.model.startNode();
          if (start == null) {
-            this.stop(client, "Stopped: Repeat Macro could not find the entry point.");
+            this.stop(client, tr("macro_builder.runner.stopped_repeat_macro_could_not_find_the_entry_point"));
          } else {
             this.releaseHeldKeys(client);
             this.currentNodeId = start.id;
             this.activeNodeId = null;
             this.activeTicks = 0;
             this.stepDelayTicksRemaining = this.stepDelayTicks(node);
-            this.lastStatus = "Repeating Macro " + this.currentMacroNumber + " forever.";
+            this.lastStatus = Component.translatable("macro_builder.runner.repeating_macro_forever", this.currentMacroNumber);
          }
 
          return;
@@ -4216,16 +4215,16 @@ final class MacroRunner {
 
       int targetRuns = parseInt(repeatText, 1);
       if (targetRuns < 1 || targetRuns > 100000) {
-         this.fail(client, node, "Failed: Repeat Macro needs a repeat count from 1 to 100000 or forever.");
+         this.fail(client, node, tr("macro_builder.runner.failed_repeat_macro_needs_a_repeat_count_from_1_to_100000_or"));
       } else {
          int completedRuns = this.repeatCounters.getOrDefault(node.id, 0) + 1;
          if (completedRuns >= targetRuns) {
             this.repeatCounters.remove(node.id);
-            this.stop(client, "Stopped: Repeat Macro finished " + targetRuns + " run" + (targetRuns == 1 ? "" : "s") + ".");
+            this.stop(client, tr("macro_builder.runner.stopped_repeat_macro_finished_run", targetRuns, (targetRuns == 1 ? "" : "s")));
          } else {
             MacroModel.Node start = this.model == null ? null : this.model.startNode();
             if (start == null) {
-               this.stop(client, "Stopped: Repeat Macro could not find the entry point.");
+               this.stop(client, tr("macro_builder.runner.stopped_repeat_macro_could_not_find_the_entry_point"));
             } else {
                this.releaseHeldKeys(client);
                this.repeatCounters.put(node.id, completedRuns);
@@ -4233,7 +4232,7 @@ final class MacroRunner {
                this.activeNodeId = null;
                this.activeTicks = 0;
                this.stepDelayTicksRemaining = this.stepDelayTicks(node);
-               this.lastStatus = "Repeating Macro " + this.currentMacroNumber + " | run " + (completedRuns + 1) + " of " + targetRuns;
+               this.lastStatus = Component.translatable("macro_builder.runner.repeating_macro_run_of", this.currentMacroNumber, (completedRuns + 1), targetRuns);
             }
          }
       }
@@ -4243,13 +4242,13 @@ final class MacroRunner {
       String repeatText = this.resolveRuntimeText(node.value);
       if (isRepeatIndefinitely(repeatText)) {
          this.complete(client, node, "repeat");
-         this.lastStatus = "Repeating section forever.";
+         this.lastStatus = Component.translatable("macro_builder.runner.repeating_section_forever");
          return;
       }
 
       int targetRuns = parseInt(repeatText, 1);
       if (targetRuns < 1 || targetRuns > 100000) {
-         this.fail(client, node, "Failed: Repeat needs a repeat count from 1 to 100000 or forever.");
+         this.fail(client, node, tr("macro_builder.runner.failed_repeat_needs_a_repeat_count_from_1_to_100000_or_forever"));
       } else {
          int completedRuns = this.repeatCounters.getOrDefault(node.id, 0) + 1;
          if (completedRuns >= targetRuns) {
@@ -4258,7 +4257,7 @@ final class MacroRunner {
          } else {
             this.repeatCounters.put(node.id, completedRuns);
             this.complete(client, node, "repeat");
-            this.lastStatus = "Repeating section | loop " + (completedRuns + 1) + " of " + targetRuns;
+            this.lastStatus = Component.translatable("macro_builder.runner.repeating_section_loop_of", (completedRuns + 1), targetRuns);
          }
       }
    }
@@ -4273,12 +4272,12 @@ final class MacroRunner {
          this.autoStartKickedBaseline
       );
       if (done == null) {
-         this.fail(client, node, "Failed: Repeat Until condition must be chat, actionbar, player, full, kicked, item, xp, health, food, or water.");
+         this.fail(client, node, tr("macro_builder.runner.failed_repeat_until_condition_must_be_chat_actionbar_player_full_kicked_item"));
       } else if (done) {
          this.complete(client, node, "completed");
       } else {
          this.complete(client, node, "repeat");
-         this.lastStatus = "Repeating until " + this.idleConditionLabel(this.resolveRuntimeText(node.value)) + ".";
+         this.lastStatus = Component.translatable("macro_builder.runner.repeating_until", this.idleConditionLabel(this.resolveRuntimeText(node.value)));
       }
    }
 
@@ -4296,10 +4295,10 @@ final class MacroRunner {
    private void skipDisabledNode(Minecraft client, MacroModel.Node node) {
       List<String> outputs = node.descriptor().outputs();
       if (outputs.isEmpty()) {
-         this.endBranch(client, "Skipped disabled " + node.displayLabel() + ".");
+         this.endBranch(client, tr("macro_builder.runner.skipped_disabled", node.displayLabel()));
       } else {
          String output = outputs.contains("completed") ? "completed" : outputs.contains("started") ? "started" : outputs.get(0);
-         this.lastStatus = "Skipped disabled " + node.displayLabel() + ".";
+         this.lastStatus = Component.translatable("macro_builder.runner.skipped_disabled", node.displayLabel());
          this.complete(client, node, output);
       }
    }
@@ -4307,7 +4306,7 @@ final class MacroRunner {
    private void runSkipIfTrue(Minecraft client, MacroModel.Node node) {
       Boolean condition = parseBooleanOrDefault(this.resolveRuntimeText(node.value), true);
       if (condition == null) {
-         this.fail(client, node, "Failed: Skip If True needs true or false.");
+         this.fail(client, node, tr("macro_builder.runner.failed_skip_if_true_needs_true_or_false"));
       } else if (!condition) {
          this.complete(client, node, "false");
       } else {
@@ -4315,7 +4314,7 @@ final class MacroRunner {
          MacroModel.Node skipped = this.findNodeForSkip(node, skipTarget);
          if (skipped == null) {
             if (!skipTarget.isBlank()) {
-               this.fail(client, node, "Failed: Skip If True could not find " + skipTarget.trim() + ".");
+               this.fail(client, node, tr("macro_builder.runner.failed_skip_if_true_could_not_find", skipTarget.trim()));
             } else {
                this.complete(client, node, "true");
             }
@@ -4325,7 +4324,7 @@ final class MacroRunner {
             if (nextTargets.isEmpty()) {
                this.complete(client, node, "true");
             } else {
-               this.jumpToTargets(client, node, nextTargets, "Skipped " + skipped.displayLabel());
+               this.jumpToTargets(client, node, nextTargets, tr("macro_builder.runner.skipped", skipped.displayLabel()));
             }
          }
       }
@@ -4342,6 +4341,7 @@ final class MacroRunner {
          if (node != source
             && (node.id.equals(filter)
                || node.displayLabel().equalsIgnoreCase(filter)
+               || node.descriptor().legacyLabel().equalsIgnoreCase(filter)
                || node.descriptor().label().equalsIgnoreCase(filter)
                || node.type.equalsIgnoreCase(filter))) {
             return node;
@@ -4351,6 +4351,7 @@ final class MacroRunner {
       for (MacroModel.Node node : this.model.nodes()) {
          if (node != source
             && (node.displayLabel().toLowerCase(Locale.ROOT).contains(normalized)
+               || node.descriptor().legacyLabel().toLowerCase(Locale.ROOT).contains(normalized)
                || node.descriptor().label().toLowerCase(Locale.ROOT).contains(normalized))) {
             return node;
          }
@@ -4383,19 +4384,19 @@ final class MacroRunner {
 
    private void jumpToTargets(Minecraft client, MacroModel.Node node, List<String> nextTargets, String message) {
       if (nextTargets.isEmpty()) {
-         this.stop(client, "Stopped: " + message + " has no next connection.");
+         this.stop(client, tr("macro_builder.runner.stopped_has_no_next_connection", message));
       } else if (this.model != null && nextTargets.stream().allMatch(target -> this.model.node(target) != null)) {
          this.currentNodeId = nextTargets.get(0);
          this.activeNodeId = null;
          this.activeTicks = 0;
          this.stepDelayTicksRemaining = this.stepDelayTicks(node);
-         this.lastStatus = message + ".";
+         this.lastStatus = Component.literal(message + ".");
 
          for (int index = 1; index < nextTargets.size(); index++) {
             this.rootRunner().queueChildRunner(this.spawnBranch(nextTargets.get(index), node));
          }
       } else {
-         this.stop(client, "Stopped: " + message + " has a broken link.");
+         this.stop(client, tr("macro_builder.runner.stopped_has_a_broken_link", message));
       }
    }
 
@@ -4412,41 +4413,41 @@ final class MacroRunner {
       this.stepDelayTicksRemaining = 0;
       this.repeatCounters.clear();
       this.clearPendingRejoin();
-      this.lastStatus = reason;
+      this.lastStatus = Component.literal(reason);
    }
 
    private void completeCondition(Minecraft client, MacroModel.Node node, Boolean result, String failReason) {
       if (result != null) {
          this.complete(client, node, result ? "true" : "false");
       } else {
-         this.fail(client, node, failReason != null && !failReason.isBlank() ? failReason : "Failed: " + node.displayLabel() + " could not run.");
+         this.fail(client, node, failReason != null && !failReason.isBlank() ? failReason : tr("macro_builder.runner.failed_could_not_run", node.displayLabel()));
       }
    }
 
    private void complete(Minecraft client, MacroModel.Node node, String outputKey) {
       List<String> nextTargets = node.nextTargets(outputKey);
       if (nextTargets.isEmpty()) {
-         this.stop(client, "Stopped: " + node.displayLabel() + " has no " + outputKey + " connection.");
+         this.stop(client, tr("macro_builder.runner.stopped_has_no_connection", node.displayLabel(), MacroText.output(outputKey)));
       } else if (this.model != null && nextTargets.stream().allMatch(target -> this.model.node(target) != null)) {
          String next = nextTargets.get(0);
          this.currentNodeId = next;
          this.activeNodeId = null;
          this.activeTicks = 0;
          this.stepDelayTicksRemaining = this.stepDelayTicks(node);
-         this.lastStatus = "Running Macro " + this.currentMacroNumber + " | " + node.displayLabel();
+         this.lastStatus = Component.translatable("macro_builder.runner.running_macro_2", this.currentMacroNumber, node.displayLabel());
 
          for (int index = 1; index < nextTargets.size(); index++) {
             this.rootRunner().queueChildRunner(this.spawnBranch(nextTargets.get(index), node));
          }
       } else {
-         this.stop(client, "Stopped: " + node.displayLabel() + " has a broken " + outputKey + " link.");
+         this.stop(client, tr("macro_builder.runner.stopped_has_a_broken_link_2", node.displayLabel(), outputKey));
       }
    }
 
    private void fail(Minecraft client, MacroModel.Node node, String reason) {
       this.releaseHeldKeys(client);
       List<String> nextTargets = node.nextTargets("failed");
-      this.lastStatus = reason;
+      this.lastStatus = Component.literal(reason);
       if (nextTargets.isEmpty()) {
          this.stop(client, reason);
       } else if (this.model != null && nextTargets.stream().allMatch(target -> this.model.node(target) != null)) {
@@ -4460,7 +4461,7 @@ final class MacroRunner {
             this.rootRunner().queueChildRunner(this.spawnBranch(nextTargets.get(index), node));
          }
       } else {
-         this.stop(client, reason + " Broken failed link.");
+         this.stop(client, tr("macro_builder.runner.broken_failed_link", reason));
       }
    }
 
@@ -4628,42 +4629,42 @@ final class MacroRunner {
          this.rootRunner().startMacroSlot(client, macroNumber);
          this.complete(client, node, "completed");
       } else {
-         this.fail(client, node, "Failed: Start Macro Slot needs a macro number from 1 to 100.");
+         this.fail(client, node, tr("macro_builder.runner.failed_start_macro_slot_needs_a_macro_number_from_1_to_100"));
       }
    }
 
    private void runMacroStop(Minecraft client, MacroModel.Node node) {
       int macroNumber = parseInt(this.resolveRuntimeText(node.value), this.currentMacroNumber);
       if (macroNumber >= 1 && macroNumber <= 100) {
-         boolean stopped = this.rootRunner().stopMacroRuns(client, macroNumber, "Stopped Macro " + macroNumber + " by macro component.");
+         boolean stopped = this.rootRunner().stopMacroRuns(client, macroNumber, tr("macro_builder.runner.stopped_macro_by_macro_component", macroNumber));
          if (this.childRunner && macroNumber == this.currentMacroNumber) {
-            this.stopSelf(client, "Stopped by macro component.");
+            this.stopSelf(client, tr("macro_builder.runner.stopped_by_macro_component"));
          } else if (stopped || macroNumber != this.currentMacroNumber) {
             this.complete(client, node, "completed");
          } else {
             this.complete(client, node, "completed");
          }
       } else {
-         this.fail(client, node, "Failed: Stop Macro Slot needs a macro number from 1 to 100.");
+         this.fail(client, node, tr("macro_builder.runner.failed_stop_macro_slot_needs_a_macro_number_from_1_to_100"));
       }
    }
 
    private void runNotification(Minecraft client, MacroModel.Node node) {
       if (this.activeTicks != 1 && this.activeDiscordRequest != null && node.id.equals(this.activeDiscordNodeId)) {
          if (this.activeDiscordRequest.isDone()) {
-            MacroRunner.DiscordResult result = this.activeDiscordRequest.getNow(new MacroRunner.DiscordResult(false, "Discord failed."));
+            MacroRunner.DiscordResult result = this.activeDiscordRequest.getNow(new MacroRunner.DiscordResult(false, tr("macro_builder.runner.discord_failed")));
             this.clearDiscordRequest();
             if (result.success()) {
                this.complete(client, node, "completed");
             } else {
-               this.fail(client, node, "Failed: " + result.message());
+               this.fail(client, node, tr("macro_builder.runner.failed", result.message()));
             }
 
             this.send(client, result.message());
          } else {
             if (this.activeTicks > 300) {
                this.clearDiscordRequest();
-               this.fail(client, node, "Failed: Discord webhook timed out.");
+               this.fail(client, node, tr("macro_builder.runner.failed_discord_webhook_timed_out"));
             }
          }
       } else {
@@ -4671,16 +4672,16 @@ final class MacroRunner {
          String webhook = node.value == null ? "" : node.value.trim();
          if (webhook.isBlank()) {
             this.clearDiscordRequest();
-            this.fail(client, node, "Failed: Discord Notification needs a webhook URL.");
+            this.fail(client, node, tr("macro_builder.runner.failed_discord_notification_needs_a_webhook_url"));
          } else {
             URI webhookUri = this.parseHttpUri(webhook);
             if (webhookUri == null) {
                this.clearDiscordRequest();
-               this.fail(client, node, "Failed: Discord Notification needs a valid webhook URL.");
+               this.fail(client, node, tr("macro_builder.runner.failed_discord_notification_needs_a_valid_webhook_url"));
             } else {
                this.activeDiscordNodeId = node.id;
                this.activeDiscordRequest = this.postDiscordWebhook(webhookUri, message);
-               this.send(client, "Discord notification sending.");
+               this.send(client, tr("macro_builder.runner.discord_notification_sending"));
             }
          }
       }
@@ -4962,28 +4963,28 @@ final class MacroRunner {
             .build();
          return DISCORD_HTTP.sendAsync(request, BodyHandlers.ofString()).handle((response, throwable) -> {
             if (throwable != null) {
-               String errorx = "Discord failed: " + throwable.getMessage();
-               this.lastStatus = errorx;
+               String errorx = tr("macro_builder.runner.discord_failed_2", throwable.getMessage());
+               this.lastStatus = Component.literal(errorx);
                MacroBuilderClient.LOGGER.warn("Discord webhook failed", throwable);
                return new MacroRunner.DiscordResult(false, errorx);
             } else {
                int statusCode = response.statusCode();
                if (statusCode >= 200 && statusCode < 300) {
-                  String success = "Discord notification sent";
-                  this.lastStatus = success;
+                  String success = tr("macro_builder.runner.discord_notification_sent");
+                  this.lastStatus = Component.literal(success);
                   return new MacroRunner.DiscordResult(true, success);
                } else {
                   String body = response.body() == null ? "" : response.body().trim();
-                  String errorxx = "Discord failed: HTTP " + statusCode + (body.isBlank() ? "" : " " + body);
-                  this.lastStatus = errorxx;
+                  String errorxx = tr("macro_builder.runner.discord_failed_http", statusCode, (body.isBlank() ? "" : " " + body));
+                  this.lastStatus = Component.literal(errorxx);
                   MacroBuilderClient.LOGGER.warn("Discord webhook returned HTTP {} {}", statusCode, body);
                   return new MacroRunner.DiscordResult(false, errorxx);
                }
             }
          });
       } catch (URISyntaxException | IllegalArgumentException var7) {
-         String error = "Discord failed: bad webhook URL";
-         this.lastStatus = error;
+         String error = tr("macro_builder.runner.discord_failed_bad_webhook_url");
+         this.lastStatus = Component.literal(error);
          MacroBuilderClient.LOGGER.warn("Invalid Discord webhook URL", var7);
          return CompletableFuture.completedFuture(new MacroRunner.DiscordResult(false, error));
       }
@@ -5133,7 +5134,7 @@ final class MacroRunner {
 
          return var5;
       } else if (!root.has("nodes") && !root.has("format")) {
-         throw new IOException("JSON file is not a Litemacro or MineBot macro.");
+         throw new IOException(tr("macro_builder.runner.json_file_is_not_a_litemacro_or_minebot_macro"));
       } else {
          return MacroModel.load(source);
       }
@@ -5142,7 +5143,7 @@ final class MacroRunner {
    List<Path> downloadsJsonFiles() throws IOException {
       Path downloads = this.downloadsDirectory();
       if (Files.notExists(downloads)) {
-         throw new IOException("Downloads folder was not found.");
+         throw new IOException(tr("macro_builder.runner.downloads_folder_was_not_found"));
       } else {
          List<Path> files = new ArrayList<>();
 
@@ -5175,7 +5176,7 @@ final class MacroRunner {
    private Path newestJsonInDownloads() throws IOException {
       List<Path> files = this.downloadsJsonFiles();
       if (files.isEmpty()) {
-         throw new IOException("No .json macro file found in Downloads.");
+         throw new IOException(tr("macro_builder.runner.no_json_macro_file_found_in_downloads"));
       } else {
          return files.get(0);
       }
@@ -6060,21 +6061,8 @@ final class MacroRunner {
       };
    }
 
-   private static String containerTypeLabel(String type) {
-      return switch (type == null ? "any" : type) {
-         case "chest" -> "chest";
-         case "barrel" -> "barrel";
-         case "ender_chest" -> "ender chest";
-         case "shulker" -> "shulker box";
-         case "furnace" -> "furnace";
-         case "blast_furnace" -> "blast furnace";
-         case "smoker" -> "smoker";
-         case "brewing_stand" -> "brewing stand";
-         case "hopper" -> "hopper";
-         case "dispenser" -> "dispenser";
-         case "dropper" -> "dropper";
-         default -> "container";
-      };
+   private String containerTypeLabel(String type) {
+      return tr("macro_builder.container." + (type == null ? "any" : type));
    }
 
    private MacroRunner.BoneMealOptions boneMealOptions(Minecraft client, String value) {
@@ -6142,20 +6130,20 @@ final class MacroRunner {
       BlockPos from = this.parseResolvedBlockPos(client, node.value);
       BlockPos to = this.parseResolvedFirstBlockPos(client, node.value2);
       if (from == null && to == null) {
-         return "Failed: Mine Area needs From and To coordinates. Examples: 10 64 10 / 25 79 25 or ~ ~-1 ~ / ~5 ~2 ~5 auto_tool=true.";
+         return tr("macro_builder.runner.failed_mine_area_needs_from_and_to_coordinates_examples_10_64_10");
       } else if (from == null) {
-         return "Failed: Mine Area needs From X Y Z in the first field.";
+         return tr("macro_builder.runner.failed_mine_area_needs_from_x_y_z_in_the_first_field");
       } else if (to == null) {
-         return "Failed: Mine Area needs To X Y Z in the second field.";
+         return tr("macro_builder.runner.failed_mine_area_needs_to_x_y_z_in_the_second_field");
        } else if (node.value3 != null && !node.value3.isBlank() && !isKnownBlockId(this.resolveRuntimeText(node.value3))) {
-          return "Failed: Mine Area Stop Before Block needs a valid block ID, such as minecraft:diamond_ore.";
+          return tr("macro_builder.runner.failed_mine_area_stop_before_block_needs_a_valid_block_id_such");
       } else {
          BlockPos min = minPos(from, to);
          BlockPos max = maxPos(from, to);
          if (!areaWithinLimit(min, max, 16)) {
-            return "Failed: Mine Area is " + areaSizeText(min, max) + ". Max is 16x16x16. Split bigger areas into smaller Mine Area components.";
+            return tr("macro_builder.runner.failed_mine_area_is_max_is_16x16x16_split_bigger_areas_into_smaller", areaSizeText(min, max));
          } else {
-            return "Failed: Mine Area settings are invalid.";
+            return tr("macro_builder.runner.failed_mine_area_settings_are_invalid");
          }
       }
    }
@@ -6478,13 +6466,13 @@ final class MacroRunner {
          this.releaseMovementKeys(client);
          return true;
       } else if (!options.move()) {
-         this.fail(client, node, "Failed: Farm Area target is out of reach.");
+         this.fail(client, node, tr("macro_builder.runner.failed_farm_area_target_is_out_of_reach"));
          return false;
       } else {
          this.moveTowardBlock(client, target);
          if (this.activeTicks > 300) {
             this.releaseMovementKeys(client);
-            this.fail(client, node, "Failed: Farm Area could not reach the crop.");
+            this.fail(client, node, tr("macro_builder.runner.failed_farm_area_could_not_reach_the_crop"));
          }
 
          return false;
@@ -6495,13 +6483,13 @@ final class MacroRunner {
       if (options.radius() > 0 || this.areaHasLoadedPosition(client, options.min(), options.max())) {
          return false;
       } else if (!options.move()) {
-         this.fail(client, node, "Failed: Farm Area is not loaded and move is false.");
+         this.fail(client, node, tr("macro_builder.runner.failed_farm_area_is_not_loaded_and_move_is_false"));
          return true;
       } else {
          this.moveTowardBlock(client, areaCenter(options.min(), options.max()));
          if (this.activeTicks > 300) {
             this.releaseMovementKeys(client);
-            this.fail(client, node, "Failed: Farm Area could not reach the area.");
+            this.fail(client, node, tr("macro_builder.runner.failed_farm_area_could_not_reach_the_area"));
          }
 
          return true;
@@ -6512,16 +6500,16 @@ final class MacroRunner {
       if (this.areaHasLoadedPosition(client, options.min(), options.max())) {
          return false;
       } else if (!options.move()) {
-         this.fail(client, node, "Failed: Mine Area is not loaded and move is false.");
+         this.fail(client, node, tr("macro_builder.runner.failed_mine_area_is_not_loaded_and_move_is_false"));
          return true;
       } else {
          this.moveTowardBlock(client, areaCenter(options.min(), options.max()));
          this.activeMineAreaTravelTicks++;
          if (this.activeMineAreaTravelTicks > MINE_AREA_MOVE_TIMEOUT_TICKS) {
             this.releaseMovementKeys(client);
-            this.fail(client, node, "Failed: Mine Area could not reach the area.");
+            this.fail(client, node, tr("macro_builder.runner.failed_mine_area_could_not_reach_the_area"));
          } else {
-            this.lastStatus = "Mine Area: moving to load the area.";
+            this.lastStatus = Component.translatable("macro_builder.runner.mine_area_moving_to_load_the_area");
          }
 
          return true;
@@ -8733,7 +8721,7 @@ final class MacroRunner {
    }
 
    private static String keyName(int keyCode) {
-      return keyCode != -1 && keyCode >= 0 ? InputConstants.getKey(keyCode, 0).getDisplayName().getString() : "Unbound";
+      return keyCode != -1 && keyCode >= 0 ? InputConstants.getKey(keyCode, 0).getDisplayName().getString() : tr("macro_builder.runner.unbound");
    }
 
    record OverlaySnapshot(int macroNumber, String macroName, String componentName, String status, int ticks, int activeCount) {

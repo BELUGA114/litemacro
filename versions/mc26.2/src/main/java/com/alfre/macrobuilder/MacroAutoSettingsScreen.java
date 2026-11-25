@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -16,7 +18,7 @@ final class MacroAutoSettingsScreen extends Screen {
    private Button modeButton;
 
    MacroAutoSettingsScreen(MacroBuilderScreen parent, MacroModel model) {
-      super(Component.literal("Auto Start"));
+      super(Component.translatable("macro_builder.auto.auto_start"));
       this.parent = parent;
       this.model = model;
       this.alwaysOn = model.alwaysOn();
@@ -43,10 +45,10 @@ final class MacroAutoSettingsScreen extends Screen {
       this.filterField = new EditBox(this.font, left + 16, top + 124, 304, 20, Component.empty());
       this.filterField.setMaxLength(256);
       this.filterField.setValue(this.model.autoStartFilter());
-      this.filterField.setSuggestion("optional chat text, player, or kick reason");
+      this.filterField.setSuggestion(tr("macro_builder.auto.optional_chat_text_player_or_kick_reason"));
       this.addRenderableWidget(this.filterField);
-      this.addRenderableWidget(Button.builder(Component.literal("Apply"), button -> this.applyAndClose()).bounds(left + 128, top + 170, 92, 20).build());
-      this.addRenderableWidget(Button.builder(Component.literal("Cancel"), button -> this.onClose()).bounds(left + 228, top + 170, 92, 20).build());
+      this.addRenderableWidget(Button.builder(Component.translatable("macro_builder.auto.apply"), button -> this.applyAndClose()).bounds(left + 128, top + 170, 92, 20).build());
+      this.addRenderableWidget(Button.builder(Component.translatable("macro_builder.auto.cancel"), button -> this.onClose()).bounds(left + 228, top + 170, 92, 20).build());
    }
 
    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
@@ -61,8 +63,8 @@ final class MacroAutoSettingsScreen extends Screen {
       context.fill(left, top, left + 1, top + panelHeight, -9205921);
       context.fill(left + panelWidth - 1, top, left + panelWidth, top + panelHeight, -9205921);
       context.centeredText(this.font, this.title, this.width / 2, top + 14, -1);
-      context.text(this.font, "Filter", left + 16, top + 112, -2565928);
-      context.text(this.font, "Chat/player/kicked can use this filter.", left + 16, top + 150, -7366491);
+      context.text(this.font, tr("macro_builder.auto.filter"), left + 16, top + 112, -2565928);
+      context.text(this.font, tr("macro_builder.auto.chat_player_kicked_can_use_this_filter"), left + 16, top + 150, -7366491);
       super.extractRenderState(context, mouseX, mouseY, delta);
    }
 
@@ -87,11 +89,11 @@ final class MacroAutoSettingsScreen extends Screen {
    }
 
    private String alwaysText() {
-      return this.alwaysOn ? "Always On: On" : "Always On: Off";
+      return this.alwaysOn ? tr("macro_builder.auto.always_on_on") : tr("macro_builder.auto.always_on_off");
    }
 
    private String modeText() {
-      return "Enable When: " + this.modeLabel(this.autoStartMode);
+      return tr("macro_builder.auto.enable_when", this.modeLabel(this.autoStartMode));
    }
 
    private String nextMode(String mode) {
@@ -107,11 +109,11 @@ final class MacroAutoSettingsScreen extends Screen {
 
    private String modeLabel(String mode) {
       return switch (mode == null ? "" : mode) {
-         case "chat" -> "Chat Message";
-         case "player" -> "Player Nearby";
-         case "inventory_full" -> "Inventory Full";
-         case "kicked" -> "Kicked/Disconnected";
-         default -> "Off";
+         case "chat" -> tr("macro_builder.auto.chat_message");
+         case "player" -> tr("macro_builder.auto.player_nearby");
+         case "inventory_full" -> tr("macro_builder.auto.inventory_full");
+         case "kicked" -> tr("macro_builder.auto.kicked_disconnected");
+         default -> tr("macro_builder.auto.off");
       };
    }
 }

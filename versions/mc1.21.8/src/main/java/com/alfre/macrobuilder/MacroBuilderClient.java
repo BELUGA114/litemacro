@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import com.mojang.blaze3d.platform.InputConstants.Type;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -69,8 +71,8 @@ public final class MacroBuilderClient implements ClientModInitializer {
          int y = 8;
          context.fill(x, y, x + panelWidth, y + 42, 0xE0101820);
          context.fill(x, y, x + panelWidth, y + 2, 0xFFFF4D6D);
-         context.drawString(client.font, "Recording actions", x + 9, y + 8, 0xFFFFDCE3);
-         String detail = String.format(Locale.ROOT, "%.1fs - press %s to stop", RUNNER.actionRecordingTicks() / 20.0, RUNNER.actionRecordingStopKeyName());
+         context.drawString(client.font, tr("macro_builder.client.recording_actions"), x + 9, y + 8, 0xFFFFDCE3);
+         String detail = tr("macro_builder.client.s_press_to_stop", String.format(Locale.ROOT, "%.1f", RUNNER.actionRecordingTicks() / 20.0), RUNNER.actionRecordingStopKeyName());
          context.drawString(client.font, fitOverlay(client, detail, panelWidth - 18), x + 9, y + 24, 0xFFEFF6FF);
          return;
       }
@@ -98,7 +100,7 @@ public final class MacroBuilderClient implements ClientModInitializer {
       context.fill(x, y + panelHeight - 1, x + panelWidth, y + panelHeight, 0xFF0A0F14);
       context.fill(x, y, x + 1, y + panelHeight, 0xFF4A6A82);
       context.fill(x + panelWidth - 1, y, x + panelWidth, y + panelHeight, 0xFF0A0F14);
-      context.drawString(client.font, "Litemacro Running", x + 8, y + 6, 0xFFEFF6FF);
+      context.drawString(client.font, tr("macro_builder.client.litemacro_running"), x + 8, y + 6, 0xFFEFF6FF);
 
       int rowY = y + 20;
       for (int index = 0; index < visibleRows; index++) {
@@ -112,7 +114,7 @@ public final class MacroBuilderClient implements ClientModInitializer {
       }
 
       if (snapshots.size() > visibleRows) {
-         context.drawString(client.font, "+" + (snapshots.size() - visibleRows) + " more", x + 14, y + panelHeight - 10, 0xFF6F8192);
+         context.drawString(client.font, tr("macro_builder.client.more", (snapshots.size() - visibleRows)), x + 14, y + panelHeight - 10, 0xFF6F8192);
       }
    }
 
@@ -275,7 +277,7 @@ public final class MacroBuilderClient implements ClientModInitializer {
 
    private static void registerConnectionEvents() {
       ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-         String reason = "Disconnected";
+         String reason = tr("macro_builder.client.disconnected");
          if (handler != null && handler.getConnection() != null) {
             DisconnectionDetails details = handler.getConnection().getDisconnectionDetails();
             if (details != null && details.reason() != null) {
@@ -403,7 +405,7 @@ public final class MacroBuilderClient implements ClientModInitializer {
    }
 
    private static int stopMacro() {
-      RUNNER.stop(Minecraft.getInstance(), "Stopped.");
+      RUNNER.stop(Minecraft.getInstance(), tr("macro_builder.client.stopped"));
       return 1;
    }
 
@@ -439,20 +441,20 @@ public final class MacroBuilderClient implements ClientModInitializer {
 
    private static int setChatNotifications(boolean enabled) {
       RUNNER.setChatNotifications(enabled);
-      sendClientMessage(enabled ? "Chat notifications on." : "Chat notifications off.");
+      sendClientMessage(enabled ? tr("macro_builder.client.chat_notifications_on") : tr("macro_builder.client.chat_notifications_off"));
       return 1;
    }
 
    private static int toggleChatNotifications() {
       RUNNER.toggleChatNotifications();
-      sendClientMessage("Chat notifications toggled.");
+      sendClientMessage(tr("macro_builder.client.chat_notifications_toggled"));
       return 1;
    }
 
    private static int showCommandHelp() {
-      sendClientMessage("Commands: /litemacro open, help, macro <1-100>, run <1-100>, start <1-100>, stop, reload.");
-      sendClientMessage("More: /litemacro copy <n>, paste <n>, reset <n>, export <n>, import <n>, chat on/off/toggle.");
-      sendClientMessage("Aliases: /lm, /litemacro, /macrobuilder, /macro_builder.");
+      sendClientMessage(tr("macro_builder.client.commands_litemacro_open_help_macro_1_100_run_1_100_start_1"));
+      sendClientMessage(tr("macro_builder.client.more_litemacro_copy_n_paste_n_reset_n_export_n_import_n"));
+      sendClientMessage(tr("macro_builder.client.aliases_lm_litemacro_macrobuilder_macro_builder"));
       return 1;
    }
 

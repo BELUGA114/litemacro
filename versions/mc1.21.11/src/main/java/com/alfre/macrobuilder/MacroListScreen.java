@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -33,7 +35,7 @@ final class MacroListScreen extends Screen {
    }
 
    MacroListScreen(MacroRunner runner, int page) {
-      super(Component.literal("Litemacro Macros"));
+      super(Component.translatable("macro_builder.library.litemacro_macros"));
       this.runner = runner;
       int maxPage = Math.max(0, (int)Math.ceil(runner.macroCount() / (double)PAGE_SIZE) - 1);
       this.page = Math.max(0, Math.min(maxPage, page));
@@ -70,8 +72,8 @@ final class MacroListScreen extends Screen {
       this.drawTopBar(context, mouseX, mouseY);
       Rect list = this.listPanel();
       this.drawPanel(context, list);
-      context.drawString(this.font, "SAVED MACROS", list.x + 14, list.y + 11, ACCENT, false);
-      context.drawString(this.font, "Select a macro or use the quick actions", list.x + list.w - 212, list.y + 11, MUTED, false);
+      context.drawString(this.font, tr("macro_builder.library.saved_macros"), list.x + 14, list.y + 11, ACCENT, false);
+      context.drawString(this.font, tr("macro_builder.library.select_a_macro_or_use_the_quick_actions"), list.x + list.w - 212, list.y + 11, MUTED, false);
 
       int startMacro = this.page * PAGE_SIZE + 1;
       int endMacro = Math.min(this.runner.macroCount(), startMacro + PAGE_SIZE - 1);
@@ -79,7 +81,7 @@ final class MacroListScreen extends Screen {
          this.drawMacroRow(context, mouseX, mouseY, macroNumber, macroNumber - startMacro);
       }
       if (endMacro < startMacro) {
-         context.drawCenteredString(this.font, "No macros on this page", list.x + list.w / 2, list.y + 150, MUTED);
+         context.drawCenteredString(this.font, tr("macro_builder.library.no_macros_on_this_page"), list.x + list.w / 2, list.y + 150, MUTED);
       }
 
       this.drawActionPanel(context, mouseX, mouseY, endMacro);
@@ -93,14 +95,14 @@ final class MacroListScreen extends Screen {
       int left = this.contentLeft();
       int contentWidth = this.contentWidth();
       context.drawString(this.font, "Litemacro", left, 12, TEXT, false);
-      context.drawString(this.font, "MACRO LIBRARY", left, 29, ACCENT, false);
+      context.drawString(this.font, tr("macro_builder.library.macro_library"), left, 29, ACCENT, false);
       String summary = this.bindingMacroNumber > 0
-         ? "Press a key for Macro " + this.bindingMacroNumber + "  |  Esc clears"
-         : "Page " + (this.page + 1) + " / " + this.totalPages() + "  |  Selected: " + this.runner.macroName(this.runner.currentMacroNumber());
+         ? tr("macro_builder.library.press_a_key_for_macro_esc_clears", this.bindingMacroNumber)
+         : tr("macro_builder.library.page_selected", (this.page + 1), this.totalPages(), this.runner.macroName(this.runner.currentMacroNumber()));
       context.drawCenteredString(this.font, this.fit(summary, 400), left + 420, 22, this.bindingMacroNumber > 0 ? ORANGE : MUTED);
-      this.drawButton(context, this.overlayRect(), this.runner.runningOverlay() ? "Overlay On" : "Overlay Off", mouseX, mouseY, this.runner.runningOverlay() ? GREEN : MUTED, true);
-      this.drawButton(context, this.chatRect(), this.runner.chatNotifications() ? "Chat On" : "Chat Off", mouseX, mouseY, this.runner.chatNotifications() ? GREEN : MUTED, true);
-      this.drawButton(context, this.closeRect(), "Close", mouseX, mouseY, TEXT, true);
+      this.drawButton(context, this.overlayRect(), this.runner.runningOverlay() ? tr("macro_builder.library.overlay_on") : tr("macro_builder.library.overlay_off"), mouseX, mouseY, this.runner.runningOverlay() ? GREEN : MUTED, true);
+      this.drawButton(context, this.chatRect(), this.runner.chatNotifications() ? tr("macro_builder.library.chat_on") : tr("macro_builder.library.chat_off"), mouseX, mouseY, this.runner.chatNotifications() ? GREEN : MUTED, true);
+      this.drawButton(context, this.closeRect(), tr("macro_builder.library.close"), mouseX, mouseY, TEXT, true);
    }
 
    private void drawMacroRow(GuiGraphics context, int mouseX, int mouseY, int macroNumber, int row) {
@@ -113,35 +115,35 @@ final class MacroListScreen extends Screen {
       String number = String.format("%02d", macroNumber);
       context.drawString(this.font, number, select.x + 12, select.y + 8, selected ? ACCENT : DIM, false);
       context.drawString(this.font, this.fit(this.runner.macroName(macroNumber), select.w - 52), select.x + 42, select.y + 8, TEXT, false);
-      this.drawButton(context, this.rowEditRect(row), "Edit", mouseX, mouseY, TEXT, true);
-      this.drawButton(context, this.rowRunRect(row), "Run", mouseX, mouseY, GREEN, true);
-      this.drawButton(context, this.rowKeyRect(row), "Key: " + this.runner.macroKeyName(macroNumber), mouseX, mouseY, ORANGE, true);
-      this.drawButton(context, this.rowClearRect(row), "Clear", mouseX, mouseY, RED, true);
+      this.drawButton(context, this.rowEditRect(row), tr("macro_builder.library.edit"), mouseX, mouseY, TEXT, true);
+      this.drawButton(context, this.rowRunRect(row), tr("macro_builder.library.run"), mouseX, mouseY, GREEN, true);
+      this.drawButton(context, this.rowKeyRect(row), tr("macro_builder.library.key", this.runner.macroKeyName(macroNumber)), mouseX, mouseY, ORANGE, true);
+      this.drawButton(context, this.rowClearRect(row), tr("macro_builder.library.clear"), mouseX, mouseY, RED, true);
    }
 
    private void drawActionPanel(GuiGraphics context, int mouseX, int mouseY, int endMacro) {
       Rect panel = this.actionPanel();
       this.drawPanel(context, panel);
       int x = panel.x;
-      context.drawString(this.font, "CURRENT MACRO", x + 14, panel.y + 10, ACCENT, false);
+      context.drawString(this.font, tr("macro_builder.library.current_macro"), x + 14, panel.y + 10, ACCENT, false);
       context.drawString(this.font, this.fit(this.runner.currentMacroNumber() + ". " + this.runner.macroName(this.runner.currentMacroNumber()), 196), x + 14, panel.y + 26, TEXT, false);
-      this.drawButton(context, this.prevRect(), "< Prev", mouseX, mouseY, TEXT, this.page > 0);
-      this.drawButton(context, this.nextRect(), "Next >", mouseX, mouseY, TEXT, endMacro < this.runner.macroCount());
-      this.drawButton(context, this.editSelectedRect(), "Edit Selected", mouseX, mouseY, TEXT, true);
-      this.drawButton(context, this.runSelectedRect(), "Run Selected", mouseX, mouseY, GREEN, true);
-      this.drawButton(context, this.stopRect(), "Stop", mouseX, mouseY, RED, true);
-      this.drawButton(context, this.copyRect(), "Copy", mouseX, mouseY, TEXT, true);
-      this.drawButton(context, this.pasteRect(), "Paste", mouseX, mouseY, TEXT, true);
-      this.drawButton(context, this.exportRect(), "Export", mouseX, mouseY, TEXT, true);
-      this.drawButton(context, this.importRect(), "Import", mouseX, mouseY, TEXT, true);
-      this.drawButton(context, this.resetRect(), "Reset", mouseX, mouseY, RED, true);
-      this.drawButton(context, this.marketRect(), "Marketplace", mouseX, mouseY, ACCENT, true);
+      this.drawButton(context, this.prevRect(), tr("macro_builder.library.prev"), mouseX, mouseY, TEXT, this.page > 0);
+      this.drawButton(context, this.nextRect(), tr("macro_builder.library.next"), mouseX, mouseY, TEXT, endMacro < this.runner.macroCount());
+      this.drawButton(context, this.editSelectedRect(), tr("macro_builder.library.edit_selected"), mouseX, mouseY, TEXT, true);
+      this.drawButton(context, this.runSelectedRect(), tr("macro_builder.library.run_selected"), mouseX, mouseY, GREEN, true);
+      this.drawButton(context, this.stopRect(), tr("macro_builder.library.stop"), mouseX, mouseY, RED, true);
+      this.drawButton(context, this.copyRect(), tr("macro_builder.library.copy"), mouseX, mouseY, TEXT, true);
+      this.drawButton(context, this.pasteRect(), tr("macro_builder.library.paste"), mouseX, mouseY, TEXT, true);
+      this.drawButton(context, this.exportRect(), tr("macro_builder.library.export"), mouseX, mouseY, TEXT, true);
+      this.drawButton(context, this.importRect(), tr("macro_builder.library.import"), mouseX, mouseY, TEXT, true);
+      this.drawButton(context, this.resetRect(), tr("macro_builder.library.reset"), mouseX, mouseY, RED, true);
+      this.drawButton(context, this.marketRect(), tr("macro_builder.library.marketplace"), mouseX, mouseY, ACCENT, true);
    }
 
    private void drawStatusPanel(GuiGraphics context) {
       Rect panel = this.statusPanel();
       this.drawPanel(context, panel);
-      context.drawString(this.font, "STATUS", panel.x + 12, panel.y + 11, ACCENT, false);
+      context.drawString(this.font, tr("macro_builder.library.status"), panel.x + 12, panel.y + 11, ACCENT, false);
       context.drawString(this.font, this.fit(this.runner.status(), panel.w - 78), panel.x + 64, panel.y + 11, TEXT, false);
    }
 
@@ -203,7 +205,7 @@ final class MacroListScreen extends Screen {
       if (endMacro < this.runner.macroCount() && this.nextRect().contains(x, y)) { this.minecraft.setScreen(new MacroListScreen(this.runner, this.page + 1)); return true; }
       if (this.editSelectedRect().contains(x, y)) { this.minecraft.setScreen(new MacroBuilderScreen(this.runner, this.runner.model())); return true; }
       if (this.runSelectedRect().contains(x, y)) { this.runner.toggleMacro(this.minecraft, this.runner.currentMacroNumber()); return true; }
-      if (this.stopRect().contains(x, y)) { this.runner.stop(this.minecraft, "Stopped."); return true; }
+      if (this.stopRect().contains(x, y)) { this.runner.stop(this.minecraft, tr("macro_builder.library.stopped")); return true; }
       if (this.copyRect().contains(x, y)) { this.runner.copyMacro(this.minecraft, this.runner.currentMacroNumber()); return true; }
       if (this.pasteRect().contains(x, y)) { this.runner.pasteCopiedMacro(this.minecraft, this.runner.currentMacroNumber()); return true; }
       if (this.exportRect().contains(x, y)) { this.runner.exportMacroToDownloads(this.minecraft, this.runner.currentMacroNumber()); return true; }
@@ -216,7 +218,8 @@ final class MacroListScreen extends Screen {
    public boolean keyPressed(KeyEvent input) {
       if (this.bindingMacroNumber <= 0) return super.keyPressed(input);
       int keyCode = input.key();
-      if (keyCode == 256 || keyCode == 259 || keyCode == 261) this.runner.clearMacroKey(this.bindingMacroNumber);
+      if (keyCode == 256) { this.bindingMacroNumber = 0; return true; }
+      if (keyCode == 259 || keyCode == 261) this.runner.clearMacroKey(this.bindingMacroNumber);
       else this.runner.setMacroKey(this.bindingMacroNumber, keyCode);
       this.bindingMacroNumber = 0;
       return true;
@@ -256,12 +259,7 @@ final class MacroListScreen extends Screen {
    private double layoutScale(int actualWidth, int actualHeight) { return actualWidth <= 0 || actualHeight <= 0 ? 1.0 : Math.min(1.0, Math.min(actualWidth / (double)MIN_LAYOUT_WIDTH, actualHeight / (double)MIN_LAYOUT_HEIGHT)); }
 
    private String fit(String text, int maxWidth) {
-      if (text == null) return "";
-      if (this.font == null || this.font.width(text) <= maxWidth) return text;
-      String suffix = "...";
-      String trimmed = text;
-      while (!trimmed.isEmpty() && this.font.width(trimmed) + this.font.width(suffix) > maxWidth) trimmed = trimmed.substring(0, trimmed.length() - 1);
-      return trimmed + suffix;
+      return MacroText.fit(text, this.font, maxWidth);
    }
 
    private record Rect(int x, int y, int w, int h) {

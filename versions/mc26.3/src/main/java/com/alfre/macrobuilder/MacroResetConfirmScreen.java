@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -12,7 +14,7 @@ final class MacroResetConfirmScreen extends Screen {
    private final int returnPage;
 
    MacroResetConfirmScreen(MacroRunner runner, int macroNumber, int returnPage) {
-      super(Component.literal("Reset Macro"));
+      super(Component.translatable("macro_builder.reset.reset_macro"));
       this.runner = runner;
       this.macroNumber = macroNumber;
       this.returnPage = returnPage;
@@ -23,12 +25,12 @@ final class MacroResetConfirmScreen extends Screen {
       int left = (this.width - panelWidth) / 2;
       int top = Math.max(50, (this.height - 130) / 2);
       int buttonY = top + 92;
-      this.addRenderableWidget(Button.builder(Component.literal("Reset"), button -> {
+      this.addRenderableWidget(Button.builder(Component.translatable("macro_builder.reset.reset"), button -> {
          this.runner.resetMacro(this.minecraft, this.macroNumber);
          this.minecraft.setScreenAndShow(new MacroListScreen(this.runner, this.returnPage));
       }).bounds(left + 40, buttonY, 104, 20).build());
       this.addRenderableWidget(
-         Button.builder(Component.literal("Cancel"), button -> this.minecraft.setScreenAndShow(new MacroListScreen(this.runner, this.returnPage)))
+         Button.builder(Component.translatable("macro_builder.reset.cancel"), button -> this.minecraft.setScreenAndShow(new MacroListScreen(this.runner, this.returnPage)))
             .bounds(left + 176, buttonY, 104, 20)
             .build()
       );
@@ -41,9 +43,9 @@ final class MacroResetConfirmScreen extends Screen {
       int top = Math.max(50, (this.height - 130) / 2);
       context.fill(left, top, left + panelWidth, top + 122, -14867926);
       context.centeredText(this.font, this.title, this.width / 2, top + 14, -1);
-      context.centeredText(this.font, Component.literal("Reset Macro " + this.macroNumber + " back to new?"), this.width / 2, top + 36, -2565928);
-      context.centeredText(this.font, Component.literal("This clears components, name, and keybind."), this.width / 2, top + 52, -11823);
-      context.centeredText(this.font, Component.literal("Download or copy first if you need a backup."), this.width / 2, top + 68, -5327166);
+      context.centeredText(this.font, Component.translatable("macro_builder.reset.reset_macro_back_to_new", this.macroNumber), this.width / 2, top + 36, -2565928);
+      context.centeredText(this.font, Component.translatable("macro_builder.reset.this_clears_components_name_and_keybind"), this.width / 2, top + 52, -11823);
+      context.centeredText(this.font, Component.translatable("macro_builder.reset.download_or_copy_first_if_you_need_a_backup"), this.width / 2, top + 68, -5327166);
       super.extractRenderState(context, mouseX, mouseY, delta);
    }
 

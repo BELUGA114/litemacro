@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -130,6 +132,9 @@ final class MacroModel {
    static final String EVENT_SCHEDULE = "official:event.schedule";
    static final String EVENT_PLAYER_SPAWNED = "official:event.player_spawned";
    static final String EVENT_PLAYER_DESPAWNED = "official:event.player_despawned";
+   // 物品字段能力由稳定的组件类型定义，不依赖当前语言的显示标签。
+   private static final java.util.Set<String> PRIMARY_ITEM_FIELDS = java.util.Set.of("official:inventory.hasItem", "builder:inventory.hasItem", "builder:inventory.clickWithCondition", "official:inventory.clickOpenContainerSlot", "official:inventory.hotbarSelect", "official:inventory.hotbarUse", "official:inventory.dropItems", "builder:inventory.heldItemIs", "builder:inventory.itemOrSlotHasTag", "builder:inventory.itemDurability", "builder:inventory.openContainerHasItem", "builder:world.autoBoneMeal");
+   private static final java.util.Set<String> SECONDARY_ITEM_FIELDS = java.util.Set.of("official:inventory.chestWithdrawItems", "official:inventory.chestDepositItems", "builder:inventory.slotHasItem", "builder:inventory.autoGrindstone");
    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
    private static final List<String> COMPLETED_OR_FAILED = List.of("completed", "failed");
    private static final List<String> TRUE_FALSE_OR_FAILED = List.of("true", "false", "failed");
@@ -138,342 +143,342 @@ final class MacroModel {
    private static final List<String> RANDOM_OUTPUT_3 = List.of("one", "two", "three");
    private static final List<String> REPEAT_COMPLETED_OR_FAILED = List.of("repeat", "completed", "failed");
    private static final List<MacroModel.Descriptor> DESCRIPTORS = List.of(
-      new MacroModel.Descriptor("official:start", "Macro Entry Point", "Entry", -11961857, List.of("started"), true, "", "", ""),
-      new MacroModel.Descriptor("official:player.respawn", "Respawn", "Player", -6765703, COMPLETED_OR_FAILED, true, "", "", ""),
-      new MacroModel.Descriptor("official:player.move", "Move", "Player", -6765703, COMPLETED_OR_FAILED, true, "Direction, position, or entity selector", "Distance", "forward"),
-      new MacroModel.Descriptor("official:player.look", "Look", "Player", -6765703, COMPLETED_OR_FAILED, true, "Yaw Pitch, position, or entity selector", "", "0 0"),
-      new MacroModel.Descriptor("builder:player.recordedActions", "Recorded Actions", "Player", -6765703, COMPLETED_OR_FAILED, true, "", "", ""),
+      new MacroModel.Descriptor("official:start", "macro_builder.component.official.start.name", "Macro Entry Point", "Entry", -11961857, List.of("started"), true, "", "", ""),
+      new MacroModel.Descriptor("official:player.respawn", "macro_builder.component.official.player.respawn.name", "Respawn", "Player", -6765703, COMPLETED_OR_FAILED, true, "", "", ""),
+      new MacroModel.Descriptor("official:player.move", "macro_builder.component.official.player.move.name", "Move", "Player", -6765703, COMPLETED_OR_FAILED, true, "macro_builder.component.official.player.move.primary", "macro_builder.component.official.player.move.secondary", "forward"),
+      new MacroModel.Descriptor("official:player.look", "macro_builder.component.official.player.look.name", "Look", "Player", -6765703, COMPLETED_OR_FAILED, true, "macro_builder.component.official.player.look.primary", "", "0 0"),
+      new MacroModel.Descriptor("builder:player.recordedActions", "macro_builder.component.builder.player.recordedActions.name", "Recorded Actions", "Player", -6765703, COMPLETED_OR_FAILED, true, "", "", ""),
       new MacroModel.Descriptor(
-         "official:player.setMouseButton", "Mouse Button", "Player", -6765703, COMPLETED_OR_FAILED, true, "State: press/release", "Button: left/right", "press"
+         "official:player.setMouseButton", "macro_builder.component.official.player.setMouseButton.name", "Mouse Button", "Player", -6765703, COMPLETED_OR_FAILED, true, "macro_builder.component.official.player.setMouseButton.primary", "macro_builder.component.official.player.setMouseButton.secondary", "press"
       ),
-      new MacroModel.Descriptor("official:player.shootBow", "Shoot Bow", "Player", -6765703, COMPLETED_OR_FAILED, true, "Target", "Equip bow true/false", ""),
-      new MacroModel.Descriptor("official:player.isAccount", "Is Account", "Player", -1726398, TRUE_FALSE_OR_FAILED, true, "Names", "", ""),
-      new MacroModel.Descriptor("official:player.inAction", "Player In Action", "Player", -1726398, TRUE_FALSE_OR_FAILED, true, "State", "", "sneaking"),
-      new MacroModel.Descriptor("official:player.isAlive", "Player Is Alive", "Player", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
-      new MacroModel.Descriptor("official:player.setCrouch", "Set Crouch", "Player", -6765703, COMPLETED_OR_FAILED, true, "Crouch true/false", "", "true"),
-      new MacroModel.Descriptor("builder:player.setSprint", "Set Sprint", "Player", -6765703, COMPLETED_OR_FAILED, true, "Sprint true/false", "", "true"),
-      new MacroModel.Descriptor("official:player.jump", "Jump", "Player", -6765703, COMPLETED_OR_FAILED, true, "", "", ""),
+      new MacroModel.Descriptor("official:player.shootBow", "macro_builder.component.official.player.shootBow.name", "Shoot Bow", "Player", -6765703, COMPLETED_OR_FAILED, true, "macro_builder.component.official.player.shootBow.primary", "macro_builder.component.official.player.shootBow.secondary", ""),
+      new MacroModel.Descriptor("official:player.isAccount", "macro_builder.component.official.player.isAccount.name", "Is Account", "Player", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.official.player.isAccount.primary", "", ""),
+      new MacroModel.Descriptor("official:player.inAction", "macro_builder.component.official.player.inAction.name", "Player In Action", "Player", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.official.player.inAction.primary", "", "sneaking"),
+      new MacroModel.Descriptor("official:player.isAlive", "macro_builder.component.official.player.isAlive.name", "Player Is Alive", "Player", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
+      new MacroModel.Descriptor("official:player.setCrouch", "macro_builder.component.official.player.setCrouch.name", "Set Crouch", "Player", -6765703, COMPLETED_OR_FAILED, true, "macro_builder.component.official.player.setCrouch.primary", "", "true"),
+      new MacroModel.Descriptor("builder:player.setSprint", "macro_builder.component.builder.player.setSprint.name", "Set Sprint", "Player", -6765703, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.player.setSprint.primary", "", "true"),
+      new MacroModel.Descriptor("official:player.jump", "macro_builder.component.official.player.jump.name", "Jump", "Player", -6765703, COMPLETED_OR_FAILED, true, "", "", ""),
       new MacroModel.Descriptor(
-         "builder:player.autoClick", "Auto Click", "Player", -6765703, COMPLETED_OR_FAILED, true, "Button: left/right", "Count/cps or hold ms", "left"
-      ),
-      new MacroModel.Descriptor(
-         "builder:player.autoFish", "Auto Fish", "Player", -6765703, AUTO_FISH_OUTPUTS, true, "Rod low durability %", "Bite timeout seconds", "10"
+         "builder:player.autoClick", "macro_builder.component.builder.player.autoClick.name", "Auto Click", "Player", -6765703, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.player.autoClick.primary", "macro_builder.component.builder.player.autoClick.secondary", "left"
       ),
       new MacroModel.Descriptor(
-         "builder:player.pressKey", "Press Key", "Player", -6765703, COMPLETED_OR_FAILED, true, "Key name/code", "Press/hold duration", "space"
-      ),
-      new MacroModel.Descriptor("official:inventory.isFull", "Inventory Is Full", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
-      new MacroModel.Descriptor(
-         "official:inventory.hasItem", "Inventory Has Item", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "Item id", "Minimum count", "minecraft:bone_block"
+         "builder:player.autoFish", "macro_builder.component.builder.player.autoFish.name", "Auto Fish", "Player", -6765703, AUTO_FISH_OUTPUTS, true, "macro_builder.component.builder.player.autoFish.primary", "macro_builder.component.builder.player.autoFish.secondary", "10"
       ),
       new MacroModel.Descriptor(
-         "builder:inventory.hasItem", "Inventory Has Item", "Logic", -1726398, TRUE_FALSE_OR_FAILED, false, "Item id", "Minimum count", "minecraft:bone_block"
+         "builder:player.pressKey", "macro_builder.component.builder.player.pressKey.name", "Press Key", "Player", -6765703, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.player.pressKey.primary", "macro_builder.component.builder.player.pressKey.secondary", "space"
       ),
-      new MacroModel.Descriptor("builder:player.healthBelow", "Health Below", "Logic", -2069387, TRUE_FALSE_OR_FAILED, true, "Health value", "", "10"),
-      new MacroModel.Descriptor("builder:player.foodBelow", "Food Below", "Logic", -2069387, TRUE_FALSE_OR_FAILED, true, "Food value 0-20", "", "6"),
-      new MacroModel.Descriptor("builder:player.xpLevelAtLeast", "XP Level At Least", "Logic", -4794025, TRUE_FALSE_OR_FAILED, true, "Level", "", "1"),
+      new MacroModel.Descriptor("official:inventory.isFull", "macro_builder.component.official.inventory.isFull.name", "Inventory Is Full", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
       new MacroModel.Descriptor(
-         "builder:player.stopAtXpLevel", "Stop At XP Level", "Flow", -7366491, COMPLETED_OR_FAILED, true, "Target level", "Mode: release/stop", "30"
-      ),
-      new MacroModel.Descriptor("builder:player.onGround", "Player On Ground", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
-      new MacroModel.Descriptor("builder:player.inWater", "Player In Water", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
-      new MacroModel.Descriptor(
-         "official:player.isAtLocation", "Player At Location", "Logic", -10375185, TRUE_FALSE_OR_FAILED, true, "X Y Z, ~, or ${player.pos}", "Max distance", "0 64 0"
+         "official:inventory.hasItem", "macro_builder.component.official.inventory.hasItem.name", "Inventory Has Item", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.official.inventory.hasItem.primary", "macro_builder.component.official.inventory.hasItem.secondary", "minecraft:bone_block"
       ),
       new MacroModel.Descriptor(
-         "official:entity.player_nearby", "Player Nearby", "Logic", -10375185, TRUE_FALSE_OR_FAILED, true, "Names or regex", "Mode: any/allow/block", ""
+         "builder:inventory.hasItem", "macro_builder.component.builder.inventory.hasItem.name", "Inventory Has Item", "Logic", -1726398, TRUE_FALSE_OR_FAILED, false, "macro_builder.component.builder.inventory.hasItem.primary", "macro_builder.component.builder.inventory.hasItem.secondary", "minecraft:bone_block"
+      ),
+      new MacroModel.Descriptor("builder:player.healthBelow", "macro_builder.component.builder.player.healthBelow.name", "Health Below", "Logic", -2069387, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.player.healthBelow.primary", "", "10"),
+      new MacroModel.Descriptor("builder:player.foodBelow", "macro_builder.component.builder.player.foodBelow.name", "Food Below", "Logic", -2069387, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.player.foodBelow.primary", "", "6"),
+      new MacroModel.Descriptor("builder:player.xpLevelAtLeast", "macro_builder.component.builder.player.xpLevelAtLeast.name", "XP Level At Least", "Logic", -4794025, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.player.xpLevelAtLeast.primary", "", "1"),
+      new MacroModel.Descriptor(
+         "builder:player.stopAtXpLevel", "macro_builder.component.builder.player.stopAtXpLevel.name", "Stop At XP Level", "Flow", -7366491, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.player.stopAtXpLevel.primary", "macro_builder.component.builder.player.stopAtXpLevel.secondary", "30"
+      ),
+      new MacroModel.Descriptor("builder:player.onGround", "macro_builder.component.builder.player.onGround.name", "Player On Ground", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
+      new MacroModel.Descriptor("builder:player.inWater", "macro_builder.component.builder.player.inWater.name", "Player In Water", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
+      new MacroModel.Descriptor(
+         "official:player.isAtLocation", "macro_builder.component.official.player.isAtLocation.name", "Player At Location", "Logic", -10375185, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.official.player.isAtLocation.primary", "macro_builder.component.official.player.isAtLocation.secondary", "0 64 0"
       ),
       new MacroModel.Descriptor(
-         "builder:logic.scoreboardContains", "Scoreboard Contains", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "Text or regex", "Mode: contains/exact/regex", ""
+         "official:entity.player_nearby", "macro_builder.component.official.entity.player_nearby.name", "Player Nearby", "Logic", -10375185, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.official.entity.player_nearby.primary", "macro_builder.component.official.entity.player_nearby.secondary", ""
       ),
       new MacroModel.Descriptor(
-         SCOREBOARD_NUMBER, "Scoreboard Number Compare", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true,
-         "Sidebar regex: capture number", "op / value / stale / rate / mode / missing", ""
+         "builder:logic.scoreboardContains", "macro_builder.component.builder.logic.scoreboardContains.name", "Scoreboard Contains", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.logic.scoreboardContains.primary", "macro_builder.component.builder.logic.scoreboardContains.secondary", ""
       ),
       new MacroModel.Descriptor(
-         CHAT_NUMBER, "Chat Number Compare", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true,
-         "Server message regex: capture number", "op / value / stale / rate / mode / missing", ""
+         SCOREBOARD_NUMBER, "macro_builder.component.builder.logic.scoreboardNumber.name", "Scoreboard Number Compare", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true,
+         "macro_builder.component.builder.logic.scoreboardNumber.primary", "macro_builder.component.builder.logic.scoreboardNumber.secondary", ""
       ),
       new MacroModel.Descriptor(
-         WAIT_FOR_CONDITION, "Wait For Condition", "Flow", -11094334, COMPLETED_OR_FAILED, true,
-         "Condition node IDs: all must be true", "Poll interval ms", ""
+         CHAT_NUMBER, "macro_builder.component.builder.logic.chatNumber.name", "Chat Number Compare", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true,
+         "macro_builder.component.builder.logic.chatNumber.primary", "macro_builder.component.builder.logic.chatNumber.secondary", ""
       ),
       new MacroModel.Descriptor(
-         CLICK_WITH_CONDITION, "Click GUI With Condition", "Inventory", -3770147, List.of("completed", "blocked", "failed"), true,
-         "Item id, tag, price, or GUI slot (left click)", "Condition node IDs: all must be true", ""
+         WAIT_FOR_CONDITION, "macro_builder.component.builder.misc.waitForCondition.name", "Wait For Condition", "Flow", -11094334, COMPLETED_OR_FAILED, true,
+         "macro_builder.component.builder.misc.waitForCondition.primary", "macro_builder.component.builder.misc.waitForCondition.secondary", ""
       ),
       new MacroModel.Descriptor(
-         CLEAR_NUMBER_OBSERVATION, "Clear Number Observation", "Flow", -11094334, COMPLETED_OR_FAILED, true,
-         "Number comparison node ID", "", ""
+         CLICK_WITH_CONDITION, "macro_builder.component.builder.inventory.clickWithCondition.name", "Click GUI With Condition", "Inventory", -3770147, List.of("completed", "blocked", "failed"), true,
+         "macro_builder.component.builder.inventory.clickWithCondition.primary", "macro_builder.component.builder.inventory.clickWithCondition.secondary", ""
       ),
       new MacroModel.Descriptor(
-         "builder:logic.actionbarContains", "Actionbar Contains", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "Text or regex", "Mode: contains/exact/regex", ""
+         CLEAR_NUMBER_OBSERVATION, "macro_builder.component.builder.misc.clearNumberObservation.name", "Clear Number Observation", "Flow", -11094334, COMPLETED_OR_FAILED, true,
+         "macro_builder.component.builder.misc.clearNumberObservation.primary", "", ""
       ),
       new MacroModel.Descriptor(
-         "builder:logic.hasStatusEffect", "Has Status Effect", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "Effect id or name", "Minimum level", "minecraft:speed"
+         "builder:logic.actionbarContains", "macro_builder.component.builder.logic.actionbarContains.name", "Actionbar Contains", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.logic.actionbarContains.primary", "macro_builder.component.builder.logic.actionbarContains.secondary", ""
       ),
       new MacroModel.Descriptor(
-         "builder:logic.bossbarContains", "Bossbar Contains", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "Visible bossbar text", "Mode: contains/exact/regex", ""
+         "builder:logic.hasStatusEffect", "macro_builder.component.builder.logic.hasStatusEffect.name", "Has Status Effect", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.logic.hasStatusEffect.primary", "macro_builder.component.builder.logic.hasStatusEffect.secondary", "minecraft:speed"
       ),
       new MacroModel.Descriptor(
-         "builder:logic.macroActiveState", "Macro Active State", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "Macro slot 1-100", "State: active/inactive", "1"
+         "builder:logic.bossbarContains", "macro_builder.component.builder.logic.bossbarContains.name", "Bossbar Contains", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.logic.bossbarContains.primary", "macro_builder.component.builder.logic.bossbarContains.secondary", ""
       ),
-      new MacroModel.Descriptor("official:misc.wait", "Wait", "Flow", -11094334, COMPLETED_OR_FAILED, true, "Duration ms", "", "10000"),
-      new MacroModel.Descriptor("official:misc.chat", "Chat / Command", "Action", -6765703, COMPLETED_OR_FAILED, true, "Message; use ${player.name}", "", "/say Macro running"),
+      new MacroModel.Descriptor(
+         "builder:logic.macroActiveState", "macro_builder.component.builder.logic.macroActiveState.name", "Macro Active State", "Logic", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.logic.macroActiveState.primary", "macro_builder.component.builder.logic.macroActiveState.secondary", "1"
+      ),
+      new MacroModel.Descriptor("official:misc.wait", "macro_builder.component.official.misc.wait.name", "Wait", "Flow", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.official.misc.wait.primary", "", "10000"),
+      new MacroModel.Descriptor("official:misc.chat", "macro_builder.component.official.misc.chat.name", "Chat / Command", "Action", -6765703, COMPLETED_OR_FAILED, true, "macro_builder.component.official.misc.chat.primary", "", "/say Macro running"),
       new MacroModel.Descriptor(
          "official:inventory.clickOpenContainerSlot",
-         "Click GUI Item",
+         "macro_builder.component.official.inventory.clickOpenContainerSlot.name", "Click GUI Item",
          "Inventory",
          -3770147,
          COMPLETED_OR_FAILED,
          true,
-         "Item id, tag, price, or GUI slot",
-         "Shift click: true/false",
+         "macro_builder.component.official.inventory.clickOpenContainerSlot.primary",
+         "macro_builder.component.official.inventory.clickOpenContainerSlot.secondary",
          "minecraft:bone_block"
       ),
       new MacroModel.Descriptor(
-         "official:inventory.hotbarSelect", "Hotbar Select", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "Item id, last.item, or blank", "Slot 1-36, last.slot, or blank", ""
+         "official:inventory.hotbarSelect", "macro_builder.component.official.inventory.hotbarSelect.name", "Hotbar Select", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "macro_builder.component.official.inventory.hotbarSelect.primary", "macro_builder.component.official.inventory.hotbarSelect.secondary", ""
       ),
       new MacroModel.Descriptor(
-         "official:inventory.hotbarUse", "Hotbar Use", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "Item id, last.item, or blank", "Slot 1-36, last.slot, or blank", ""
+         "official:inventory.hotbarUse", "macro_builder.component.official.inventory.hotbarUse.name", "Hotbar Use", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "macro_builder.component.official.inventory.hotbarUse.primary", "macro_builder.component.official.inventory.hotbarUse.secondary", ""
       ),
       new MacroModel.Descriptor(
-         "official:inventory.dropItems", "Drop Items", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "Item id, slot, or blank", "Drop stack true/false", ""
+         "official:inventory.dropItems", "macro_builder.component.official.inventory.dropItems.name", "Drop Items", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "macro_builder.component.official.inventory.dropItems.primary", "macro_builder.component.official.inventory.dropItems.secondary", ""
       ),
       new MacroModel.Descriptor(
          "official:inventory.chestWithdrawItems",
-         "Withdraw Items",
+         "macro_builder.component.official.inventory.chestWithdrawItems.name", "Withdraw Items",
          "Inventory",
          -3040666,
          COMPLETED_OR_FAILED,
          true,
-         "Mode: all/specific",
-         "Specific item",
+         "macro_builder.component.official.inventory.chestWithdrawItems.primary",
+         "macro_builder.component.official.inventory.chestWithdrawItems.secondary",
          "all"
       ),
       new MacroModel.Descriptor(
          "official:inventory.chestDepositItems",
-         "Deposit Items",
+         "macro_builder.component.official.inventory.chestDepositItems.name", "Deposit Items",
          "Inventory",
          -3040666,
          COMPLETED_OR_FAILED,
          true,
-         "Mode: all/specific",
-         "Specific item",
+         "macro_builder.component.official.inventory.chestDepositItems.primary",
+         "macro_builder.component.official.inventory.chestDepositItems.secondary",
          "all"
       ),
       new MacroModel.Descriptor(
-         "builder:inventory.heldItemIs", "Held Item Is", "Inventory", -1726398, TRUE_FALSE_OR_FAILED, true, "Item id", "", "minecraft:bone_block"
+         "builder:inventory.heldItemIs", "macro_builder.component.builder.inventory.heldItemIs.name", "Held Item Is", "Inventory", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.inventory.heldItemIs.primary", "", "minecraft:bone_block"
       ),
       new MacroModel.Descriptor(
-         "builder:inventory.slotHasItem", "Slot Has Item", "Inventory", -1726398, TRUE_FALSE_OR_FAILED, true, "Slot 1-36", "Item id", "1"
+         "builder:inventory.slotHasItem", "macro_builder.component.builder.inventory.slotHasItem.name", "Slot Has Item", "Inventory", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.inventory.slotHasItem.primary", "macro_builder.component.builder.inventory.slotHasItem.secondary", "1"
       ),
       new MacroModel.Descriptor(
          "builder:inventory.itemOrSlotHasTag",
-         "Item/Slot Has Tag",
+         "macro_builder.component.builder.inventory.itemOrSlotHasTag.name", "Item/Slot Has Tag",
          "Inventory",
          -1726398,
          TRUE_FALSE_OR_FAILED,
          true,
-         "Item id, held, slot, or GUI slots",
-         "Tag/text or $price range",
+         "macro_builder.component.builder.inventory.itemOrSlotHasTag.primary",
+         "macro_builder.component.builder.inventory.itemOrSlotHasTag.secondary",
          "held"
       ),
       new MacroModel.Descriptor(
          "builder:inventory.itemDurability",
-         "Item Durability",
+         "macro_builder.component.builder.inventory.itemDurability.name", "Item Durability",
          "Inventory",
          -1726398,
          TRUE_FALSE_OR_FAILED,
          true,
-         "Item, held, slot, or GUI slots",
-         "Lower/Higher than %",
+         "macro_builder.component.builder.inventory.itemDurability.primary",
+         "macro_builder.component.builder.inventory.itemDurability.secondary",
          "held"
       ),
       new MacroModel.Descriptor(
-         "builder:inventory.emptySlotsAtLeast", "Empty Slots At Least", "Inventory", -1726398, TRUE_FALSE_OR_FAILED, true, "Minimum empty slots", "", "1"
+         "builder:inventory.emptySlotsAtLeast", "macro_builder.component.builder.inventory.emptySlotsAtLeast.name", "Empty Slots At Least", "Inventory", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.inventory.emptySlotsAtLeast.primary", "", "1"
       ),
-      new MacroModel.Descriptor("official:inventory.hasOpenContainer", "Has Open GUI", "Inventory", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
-      new MacroModel.Descriptor("official:inventory.isOpenContainerFull", "Open GUI Is Full", "Inventory", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
+      new MacroModel.Descriptor("official:inventory.hasOpenContainer", "macro_builder.component.official.inventory.hasOpenContainer.name", "Has Open GUI", "Inventory", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
+      new MacroModel.Descriptor("official:inventory.isOpenContainerFull", "macro_builder.component.official.inventory.isOpenContainerFull.name", "Open GUI Is Full", "Inventory", -1726398, TRUE_FALSE_OR_FAILED, true, "", "", ""),
       new MacroModel.Descriptor(
          "builder:inventory.openContainerHasItem",
-         "Open GUI Has Item",
+         "macro_builder.component.builder.inventory.openContainerHasItem.name", "Open GUI Has Item",
          "Inventory",
          -1726398,
          TRUE_FALSE_OR_FAILED,
          true,
-         "Item id",
-         "Minimum count",
+         "macro_builder.component.builder.inventory.openContainerHasItem.primary",
+         "macro_builder.component.builder.inventory.openContainerHasItem.secondary",
          "minecraft:bone_block"
       ),
       new MacroModel.Descriptor(
          "builder:inventory.autoEnchant",
-         "Auto Enchant",
+         "macro_builder.component.builder.inventory.autoEnchant.name", "Auto Enchant",
          "Inventory",
          -3040666,
          COMPLETED_OR_FAILED,
          true,
-         "Enchant option",
-         "Minimum XP level",
+         "macro_builder.component.builder.inventory.autoEnchant.primary",
+         "macro_builder.component.builder.inventory.autoEnchant.secondary",
          "3"
       ),
       new MacroModel.Descriptor(
          "builder:inventory.autoGrindstone",
-         "Auto Grindstone",
+         "macro_builder.component.builder.inventory.autoGrindstone.name", "Auto Grindstone",
          "Inventory",
          -3040666,
          COMPLETED_OR_FAILED,
          true,
-         "Mode",
-         "Input item; outputs last.slot",
+         "macro_builder.component.builder.inventory.autoGrindstone.primary",
+         "macro_builder.component.builder.inventory.autoGrindstone.secondary",
          "disenchant"
       ),
-      new MacroModel.Descriptor("official:inventory.openInventory", "Open Inventory", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "", "", ""),
-      new MacroModel.Descriptor("official:inventory.closeOpenContainer", "Close GUI", "Inventory", -2069387, COMPLETED_OR_FAILED, true, "", "", ""),
+      new MacroModel.Descriptor("official:inventory.openInventory", "macro_builder.component.official.inventory.openInventory.name", "Open Inventory", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "", "", ""),
+      new MacroModel.Descriptor("official:inventory.closeOpenContainer", "macro_builder.component.official.inventory.closeOpenContainer.name", "Close GUI", "Inventory", -2069387, COMPLETED_OR_FAILED, true, "", "", ""),
       new MacroModel.Descriptor(
-         "builder:inventory.selectHotbarSlot", "Select Hotbar Slot", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "Slot 1-36 or last.slot", "", "1"
+         "builder:inventory.selectHotbarSlot", "macro_builder.component.builder.inventory.selectHotbarSlot.name", "Select Hotbar Slot", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.inventory.selectHotbarSlot.primary", "", "1"
       ),
       new MacroModel.Descriptor(
-         "builder:inventory.dropSelectedItem", "Drop Selected Item", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "Drop stack: true/false", "", "false"
+         "builder:inventory.dropSelectedItem", "macro_builder.component.builder.inventory.dropSelectedItem.name", "Drop Selected Item", "Inventory", -3040666, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.inventory.dropSelectedItem.primary", "", "false"
       ),
       new MacroModel.Descriptor(
-         "official:world.interactWithBlock", "Interact With Block", "World", -11094334, COMPLETED_OR_FAILED, true, "Target X Y Z, ~, or ${target.block.pos}", "Button 0/1", ""
+         "official:world.interactWithBlock", "macro_builder.component.official.world.interactWithBlock.name", "Interact With Block", "World", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.official.world.interactWithBlock.primary", "macro_builder.component.official.world.interactWithBlock.secondary", ""
       ),
       new MacroModel.Descriptor(
-         "official:world.mineBlock", "Mine Block", "World", -11094334, COMPLETED_OR_FAILED, true, "Target X Y Z, ~, or ${target.block.pos}", "Select tool true/false", ""
+         "official:world.mineBlock", "macro_builder.component.official.world.mineBlock.name", "Mine Block", "World", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.official.world.mineBlock.primary", "macro_builder.component.official.world.mineBlock.secondary", ""
       ),
       new MacroModel.Descriptor(
-         "builder:world.mineArea", "Mine Area", "World", -11094334, COMPLETED_TOOL_LOW_OR_FAILED, true, "From X Y Z or ~ ~ ~", "To X Y Z / options", "0 64 0"
+         "builder:world.mineArea", "macro_builder.component.builder.world.mineArea.name", "Mine Area", "World", -11094334, COMPLETED_TOOL_LOW_OR_FAILED, true, "macro_builder.component.builder.world.mineArea.primary", "macro_builder.component.builder.world.mineArea.secondary", "0 64 0"
       ),
-      new MacroModel.Descriptor("official:world.placeBlock", "Place Block", "World", -11094334, COMPLETED_OR_FAILED, true, "Target X Y Z", "Select block", ""),
+      new MacroModel.Descriptor("official:world.placeBlock", "macro_builder.component.official.world.placeBlock.name", "Place Block", "World", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.official.world.placeBlock.primary", "macro_builder.component.official.world.placeBlock.secondary", ""),
       new MacroModel.Descriptor(
-         "official:world.jumpAndPlaceBlock", "Jump And Place Block", "World", -11094334, COMPLETED_OR_FAILED, true, "Select block", "", ""
-      ),
-      new MacroModel.Descriptor(
-         "builder:world.farmArea", "Farm Area", "World", -11094334, COMPLETED_OR_FAILED, true, "Radius, X Y Z, or ~ ~ ~", "To X Y Z / options", "0 64 0"
+         "official:world.jumpAndPlaceBlock", "macro_builder.component.official.world.jumpAndPlaceBlock.name", "Jump And Place Block", "World", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.official.world.jumpAndPlaceBlock.primary", "", ""
       ),
       new MacroModel.Descriptor(
-         "builder:world.openNearestContainer", "Open Nearest Container", "World", -11094334, COMPLETED_OR_FAILED, true, "Radius 1-16", "Move / container type", "8"
+         "builder:world.farmArea", "macro_builder.component.builder.world.farmArea.name", "Farm Area", "World", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.world.farmArea.primary", "macro_builder.component.builder.world.farmArea.secondary", "0 64 0"
       ),
       new MacroModel.Descriptor(
-         "builder:world.openNearestChest", "Open Nearest Chest", "World", -11094334, COMPLETED_OR_FAILED, true, "Radius 1-16", "Move", "8"
+         "builder:world.openNearestContainer", "macro_builder.component.builder.world.openNearestContainer.name", "Open Nearest Container", "World", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.world.openNearestContainer.primary", "macro_builder.component.builder.world.openNearestContainer.secondary", "8"
       ),
       new MacroModel.Descriptor(
-         "builder:world.openNearestBarrel", "Open Nearest Barrel", "World", -11094334, COMPLETED_OR_FAILED, true, "Radius 1-16", "Move", "8"
+         "builder:world.openNearestChest", "macro_builder.component.builder.world.openNearestChest.name", "Open Nearest Chest", "World", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.world.openNearestChest.primary", "macro_builder.component.builder.world.openNearestChest.secondary", "8"
       ),
       new MacroModel.Descriptor(
-         "builder:world.openNearestShulker", "Open Nearest Shulker", "World", -11094334, COMPLETED_OR_FAILED, true, "Radius 1-16", "Move", "8"
+         "builder:world.openNearestBarrel", "macro_builder.component.builder.world.openNearestBarrel.name", "Open Nearest Barrel", "World", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.world.openNearestBarrel.primary", "macro_builder.component.builder.world.openNearestBarrel.secondary", "8"
+      ),
+      new MacroModel.Descriptor(
+         "builder:world.openNearestShulker", "macro_builder.component.builder.world.openNearestShulker.name", "Open Nearest Shulker", "World", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.world.openNearestShulker.primary", "macro_builder.component.builder.world.openNearestShulker.secondary", "8"
       ),
       new MacroModel.Descriptor(
          "builder:world.openNearestEnchantingTable",
-         "Open Nearest Enchanting Table",
+         "macro_builder.component.builder.world.openNearestEnchantingTable.name", "Open Nearest Enchanting Table",
          "World",
          -11094334,
          COMPLETED_OR_FAILED,
          true,
-         "Radius 1-16",
-         "Move true/false",
+         "macro_builder.component.builder.world.openNearestEnchantingTable.primary",
+         "macro_builder.component.builder.world.openNearestEnchantingTable.secondary",
          "8"
       ),
       new MacroModel.Descriptor(
          "builder:world.openNearestGrindstone",
-         "Open Nearest Grindstone",
+         "macro_builder.component.builder.world.openNearestGrindstone.name", "Open Nearest Grindstone",
          "World",
          -11094334,
          COMPLETED_OR_FAILED,
          true,
-         "Radius 1-16",
-         "Move true/false",
+         "macro_builder.component.builder.world.openNearestGrindstone.primary",
+         "macro_builder.component.builder.world.openNearestGrindstone.secondary",
          "8"
       ),
       new MacroModel.Descriptor(
-         "builder:world.autoBoneMeal", "Auto Bone Meal", "World", -11094334, COMPLETED_OR_FAILED, true, "Item id", "Options", "minecraft:bone_meal"
+         "builder:world.autoBoneMeal", "macro_builder.component.builder.world.autoBoneMeal.name", "Auto Bone Meal", "World", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.world.autoBoneMeal.primary", "macro_builder.component.builder.world.autoBoneMeal.secondary", "minecraft:bone_meal"
       ),
-      new MacroModel.Descriptor("builder:world.blockIs", "Block At Location Is", "World", -1726398, TRUE_FALSE_OR_FAILED, true, "X Y Z, ~, or ${target.block.pos}", "Block id", "0 64 0"),
-      new MacroModel.Descriptor("builder:world.lookingAtBlock", "Looking At Block", "World", -1726398, TRUE_FALSE_OR_FAILED, true, "Block id or blank", "", ""),
+      new MacroModel.Descriptor("builder:world.blockIs", "macro_builder.component.builder.world.blockIs.name", "Block At Location Is", "World", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.world.blockIs.primary", "macro_builder.component.builder.world.blockIs.secondary", "0 64 0"),
+      new MacroModel.Descriptor("builder:world.lookingAtBlock", "macro_builder.component.builder.world.lookingAtBlock.name", "Looking At Block", "World", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.world.lookingAtBlock.primary", "", ""),
       new MacroModel.Descriptor(
-         "official:entity.attack", "Attack Entity", "Entity", -3770147, COMPLETED_OR_FAILED, true, "Target/filter", "Move true/false", "minecraft:zombie"
-      ),
-      new MacroModel.Descriptor(
-         "official:entity.interact", "Interact Entity", "Entity", -3770147, COMPLETED_OR_FAILED, true, "Target/filter", "Move true/false", "minecraft:villager"
+         "official:entity.attack", "macro_builder.component.official.entity.attack.name", "Attack Entity", "Entity", -3770147, COMPLETED_OR_FAILED, true, "macro_builder.component.official.entity.attack.primary", "macro_builder.component.official.entity.attack.secondary", "minecraft:zombie"
       ),
       new MacroModel.Descriptor(
-         "builder:entity.nearby", "Entity Nearby", "Entity", -1726398, TRUE_FALSE_OR_FAILED, true, "Target/filter", "Max distance", "minecraft:zombie"
-      ),
-      new MacroModel.Descriptor("builder:localMessage", "Local Message", "Action", -10375185, COMPLETED_OR_FAILED, true, "Message; use ${player.pos}", "", "Macro message"),
-      new MacroModel.Descriptor("builder:misc.repeatMacro", "Repeat Macro", "Flow", -7366491, List.of(), true, "Repeat count", "", "3"),
-      new MacroModel.Descriptor("builder:misc.repeatSection", "Repeat", "Flow", -7366491, REPEAT_COMPLETED_OR_FAILED, true, "Repeat count", "", "3"),
-      new MacroModel.Descriptor(
-         "builder:misc.repeatUntil", "Repeat Until", "Flow", -7366491, REPEAT_COMPLETED_OR_FAILED, true, "Condition", "Filter/value", "actionbar"
+         "official:entity.interact", "macro_builder.component.official.entity.interact.name", "Interact Entity", "Entity", -3770147, COMPLETED_OR_FAILED, true, "macro_builder.component.official.entity.interact.primary", "macro_builder.component.official.entity.interact.secondary", "minecraft:villager"
       ),
       new MacroModel.Descriptor(
-         "builder:misc.idleUntil", "Idle Until", "Flow", -7366491, List.of("triggered", "failed"), true, "Condition: chat/player/full/kicked", "Filter", "chat"
+         "builder:entity.nearby", "macro_builder.component.builder.entity.nearby.name", "Entity Nearby", "Entity", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.entity.nearby.primary", "macro_builder.component.builder.entity.nearby.secondary", "minecraft:zombie"
+      ),
+      new MacroModel.Descriptor("builder:localMessage", "macro_builder.component.builder.localMessage.name", "Local Message", "Action", -10375185, COMPLETED_OR_FAILED, true, "macro_builder.component.builder.localMessage.primary", "", "Macro message"),
+      new MacroModel.Descriptor("builder:misc.repeatMacro", "macro_builder.component.builder.misc.repeatMacro.name", "Repeat Macro", "Flow", -7366491, List.of(), true, "macro_builder.component.builder.misc.repeatMacro.primary", "", "3"),
+      new MacroModel.Descriptor("builder:misc.repeatSection", "macro_builder.component.builder.misc.repeatSection.name", "Repeat", "Flow", -7366491, REPEAT_COMPLETED_OR_FAILED, true, "macro_builder.component.builder.misc.repeatSection.primary", "", "3"),
+      new MacroModel.Descriptor(
+         "builder:misc.repeatUntil", "macro_builder.component.builder.misc.repeatUntil.name", "Repeat Until", "Flow", -7366491, REPEAT_COMPLETED_OR_FAILED, true, "macro_builder.component.builder.misc.repeatUntil.primary", "macro_builder.component.builder.misc.repeatUntil.secondary", "actionbar"
       ),
       new MacroModel.Descriptor(
-         "builder:flow.skipIfTrue", "Skip If True", "Flow", -7366491, TRUE_FALSE_OR_FAILED, true, "Condition true/false", "Component name/id to skip", "true"
-      ),
-      new MacroModel.Descriptor("builder:flow.endConnection", "End Connection", "Flow", -7366491, List.of(), true, "", "", ""),
-      new MacroModel.Descriptor("builder:flow.note", "Note", "Flow", -7366491, List.of(), true, "Text", "", "Write notes here"),
-      new MacroModel.Descriptor("builder:stop", "Stop Macro", "Flow", -7366491, List.of(), true, "", "", ""),
-      new MacroModel.Descriptor("official:misc.disconnect", "Disconnect", "Misc", -2069387, COMPLETED_OR_FAILED, true, "Permanent true/false", "", "true"),
-      new MacroModel.Descriptor("official:misc.rejoinServer", "Rejoin Server", "Misc", -2069387, COMPLETED_OR_FAILED, true, "Delay ms", "Server IP blank=last", "3000"),
-      new MacroModel.Descriptor("official:misc.joinServer", "Join Server", "Misc", -2069387, COMPLETED_OR_FAILED, true, "Server IP", "Delay ms", ""),
-      new MacroModel.Descriptor("official:misc.macroStop", "Stop Macro Slot", "Misc", -7366491, COMPLETED_OR_FAILED, true, "Macro number", "", ""),
-      new MacroModel.Descriptor("official:misc.macroStart", "Start Macro Slot", "Misc", -7366491, COMPLETED_OR_FAILED, true, "Macro number", "", ""),
-      new MacroModel.Descriptor("official:misc.random", "Random True/False", "Misc", -11094334, TRUE_FALSE_OR_FAILED, true, "True percent", "", "50"),
-      new MacroModel.Descriptor("builder:misc.randomOutput3", "Random Output 3", "Misc", -11094334, RANDOM_OUTPUT_3, true, "", "", ""),
-      new MacroModel.Descriptor(
-         "official:misc.updateSign", "Update Sign", "Misc", -11094334, COMPLETED_OR_FAILED, true, "Line 1 | Line 2 | Line 3 | Line 4", "", ""
-      ),
-      new MacroModel.Descriptor("official:misc.isInLobby", "Is In Lobby", "Misc", -1726398, TRUE_FALSE_OR_FAILED, true, "Player", "", ""),
-      new MacroModel.Descriptor(
-         "official:notification.discord", "Discord Notification", "Notification", -10983950, COMPLETED_OR_FAILED, true, "Webhook URL", "Message; use ${player.name}", ""
-      ),
-      new MacroModel.Descriptor("official:login.repeat", "Login Repeat", "Login", -4794025, COMPLETED_OR_FAILED, true, "Repeat count", "", "2"),
-      new MacroModel.Descriptor(
-         "builder:event.ifChatSame", "If Chat Same", "Event", -1726398, TRUE_FALSE_OR_FAILED, true, "Chat text", "Mode: same/contains/regex", ""
+         "builder:misc.idleUntil", "macro_builder.component.builder.misc.idleUntil.name", "Idle Until", "Flow", -7366491, List.of("triggered", "failed"), true, "macro_builder.component.builder.misc.idleUntil.primary", "macro_builder.component.builder.misc.idleUntil.secondary", "chat"
       ),
       new MacroModel.Descriptor(
-         "official:event.chat", "Event: Chat", "Event", -10375185, List.of("triggered"), true, "Filter text/regex", "Mode: any/allow/block", ""
+         "builder:flow.skipIfTrue", "macro_builder.component.builder.flow.skipIfTrue.name", "Skip If True", "Flow", -7366491, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.flow.skipIfTrue.primary", "macro_builder.component.builder.flow.skipIfTrue.secondary", "true"
+      ),
+      new MacroModel.Descriptor("builder:flow.endConnection", "macro_builder.component.builder.flow.endConnection.name", "End Connection", "Flow", -7366491, List.of(), true, "", "", ""),
+      new MacroModel.Descriptor("builder:flow.note", "macro_builder.component.builder.flow.note.name", "Note", "Flow", -7366491, List.of(), true, "macro_builder.component.builder.flow.note.primary", "", "Write notes here"),
+      new MacroModel.Descriptor("builder:stop", "macro_builder.component.builder.stop.name", "Stop Macro", "Flow", -7366491, List.of(), true, "", "", ""),
+      new MacroModel.Descriptor("official:misc.disconnect", "macro_builder.component.official.misc.disconnect.name", "Disconnect", "Misc", -2069387, COMPLETED_OR_FAILED, true, "macro_builder.component.official.misc.disconnect.primary", "", "true"),
+      new MacroModel.Descriptor("official:misc.rejoinServer", "macro_builder.component.official.misc.rejoinServer.name", "Rejoin Server", "Misc", -2069387, COMPLETED_OR_FAILED, true, "macro_builder.component.official.misc.rejoinServer.primary", "macro_builder.component.official.misc.rejoinServer.secondary", "3000"),
+      new MacroModel.Descriptor("official:misc.joinServer", "macro_builder.component.official.misc.joinServer.name", "Join Server", "Misc", -2069387, COMPLETED_OR_FAILED, true, "macro_builder.component.official.misc.joinServer.primary", "macro_builder.component.official.misc.joinServer.secondary", ""),
+      new MacroModel.Descriptor("official:misc.macroStop", "macro_builder.component.official.misc.macroStop.name", "Stop Macro Slot", "Misc", -7366491, COMPLETED_OR_FAILED, true, "macro_builder.component.official.misc.macroStop.primary", "", ""),
+      new MacroModel.Descriptor("official:misc.macroStart", "macro_builder.component.official.misc.macroStart.name", "Start Macro Slot", "Misc", -7366491, COMPLETED_OR_FAILED, true, "macro_builder.component.official.misc.macroStart.primary", "", ""),
+      new MacroModel.Descriptor("official:misc.random", "macro_builder.component.official.misc.random.name", "Random True/False", "Misc", -11094334, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.official.misc.random.primary", "", "50"),
+      new MacroModel.Descriptor("builder:misc.randomOutput3", "macro_builder.component.builder.misc.randomOutput3.name", "Random Output 3", "Misc", -11094334, RANDOM_OUTPUT_3, true, "", "", ""),
+      new MacroModel.Descriptor(
+         "official:misc.updateSign", "macro_builder.component.official.misc.updateSign.name", "Update Sign", "Misc", -11094334, COMPLETED_OR_FAILED, true, "macro_builder.component.official.misc.updateSign.primary", "", ""
+      ),
+      new MacroModel.Descriptor("official:misc.isInLobby", "macro_builder.component.official.misc.isInLobby.name", "Is In Lobby", "Misc", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.official.misc.isInLobby.primary", "", ""),
+      new MacroModel.Descriptor(
+         "official:notification.discord", "macro_builder.component.official.notification.discord.name", "Discord Notification", "Notification", -10983950, COMPLETED_OR_FAILED, true, "macro_builder.component.official.notification.discord.primary", "macro_builder.component.official.notification.discord.secondary", ""
+      ),
+      new MacroModel.Descriptor("official:login.repeat", "macro_builder.component.official.login.repeat.name", "Login Repeat", "Login", -4794025, COMPLETED_OR_FAILED, true, "macro_builder.component.official.login.repeat.primary", "", "2"),
+      new MacroModel.Descriptor(
+         "builder:event.ifChatSame", "macro_builder.component.builder.event.ifChatSame.name", "If Chat Same", "Event", -1726398, TRUE_FALSE_OR_FAILED, true, "macro_builder.component.builder.event.ifChatSame.primary", "macro_builder.component.builder.event.ifChatSame.secondary", ""
       ),
       new MacroModel.Descriptor(
-         "builder:event.actionbar", "Event: Actionbar", "Event", -10375185, List.of("triggered"), true, "Filter text/regex", "Mode: any/allow/block", ""
+         "official:event.chat", "macro_builder.component.official.event.chat.name", "Event: Chat", "Event", -10375185, List.of("triggered"), true, "macro_builder.component.official.event.chat.primary", "macro_builder.component.official.event.chat.secondary", ""
       ),
       new MacroModel.Descriptor(
-         "builder:event.statusEffect", "Event: Status Effect", "Event", -10375185, List.of("triggered"), true, "Effect id or name", "Minimum level", "minecraft:speed"
+         "builder:event.actionbar", "macro_builder.component.builder.event.actionbar.name", "Event: Actionbar", "Event", -10375185, List.of("triggered"), true, "macro_builder.component.builder.event.actionbar.primary", "macro_builder.component.builder.event.actionbar.secondary", ""
       ),
       new MacroModel.Descriptor(
-         "builder:event.bossbar", "Event: Bossbar", "Event", -10375185, List.of("triggered"), true, "Visible bossbar text", "Mode: contains/exact/regex", "Litemacro Test"
+         "builder:event.statusEffect", "macro_builder.component.builder.event.statusEffect.name", "Event: Status Effect", "Event", -10375185, List.of("triggered"), true, "macro_builder.component.builder.event.statusEffect.primary", "macro_builder.component.builder.event.statusEffect.secondary", "minecraft:speed"
       ),
       new MacroModel.Descriptor(
-         "builder:event.kicked", "If Kicked", "Event", -10375185, List.of("triggered"), true, "Reason text/regex", "Mode: any/allow/block", ""
+         "builder:event.bossbar", "macro_builder.component.builder.event.bossbar.name", "Event: Bossbar", "Event", -10375185, List.of("triggered"), true, "macro_builder.component.builder.event.bossbar.primary", "macro_builder.component.builder.event.bossbar.secondary", "Litemacro Test"
       ),
-      new MacroModel.Descriptor("official:event.death", "Event: Death", "Event", -10375185, List.of("triggered"), true, "", "", ""),
-      new MacroModel.Descriptor("official:event.damageReceived", "Event: Damage", "Event", -10375185, List.of("triggered"), true, "", "", ""),
-      new MacroModel.Descriptor("official:event.teleport", "Event: Teleport", "Event", -10375185, List.of("triggered"), true, "", "", ""),
       new MacroModel.Descriptor(
-         "official:event.schedule", "Event: Schedule", "Event", -10375185, List.of("triggered"), true, "Time or cron", "Target type", "* * * * *"
+         "builder:event.kicked", "macro_builder.component.builder.event.kicked.name", "If Kicked", "Event", -10375185, List.of("triggered"), true, "macro_builder.component.builder.event.kicked.primary", "macro_builder.component.builder.event.kicked.secondary", ""
+      ),
+      new MacroModel.Descriptor("official:event.death", "macro_builder.component.official.event.death.name", "Event: Death", "Event", -10375185, List.of("triggered"), true, "", "", ""),
+      new MacroModel.Descriptor("official:event.damageReceived", "macro_builder.component.official.event.damageReceived.name", "Event: Damage", "Event", -10375185, List.of("triggered"), true, "", "", ""),
+      new MacroModel.Descriptor("official:event.teleport", "macro_builder.component.official.event.teleport.name", "Event: Teleport", "Event", -10375185, List.of("triggered"), true, "", "", ""),
+      new MacroModel.Descriptor(
+         "official:event.schedule", "macro_builder.component.official.event.schedule.name", "Event: Schedule", "Event", -10375185, List.of("triggered"), true, "macro_builder.component.official.event.schedule.primary", "macro_builder.component.official.event.schedule.secondary", "* * * * *"
       ),
       new MacroModel.Descriptor(
          "official:event.player_spawned",
-         "Event: Player Spawned",
+         "macro_builder.component.official.event.player_spawned.name", "Event: Player Spawned",
          "Event",
          -10375185,
          List.of("triggered"),
          true,
-         "Filter text/regex",
-         "Mode: any/allow/block",
+         "macro_builder.component.official.event.player_spawned.primary",
+         "macro_builder.component.official.event.player_spawned.secondary",
          ""
       ),
       new MacroModel.Descriptor(
          "official:event.player_despawned",
-         "Event: Player Despawned",
+         "macro_builder.component.official.event.player_despawned.name", "Event: Player Despawned",
          "Event",
          -10375185,
          List.of("triggered"),
          true,
-         "Filter text/regex",
-         "Mode: any/allow/block",
+         "macro_builder.component.official.event.player_despawned.primary",
+         "macro_builder.component.official.event.player_despawned.secondary",
          ""
       )
    );
@@ -1014,115 +1019,115 @@ final class MacroModel {
 
    private static String description(String type) {
       return switch (type) {
-         case "official:start" -> "First block every macro starts from";
-         case "official:player.respawn" -> "Clicks respawn when the player is dead";
-         case "official:player.move" -> "Moves toward a direction, place, or entity";
-         case "official:player.look" -> "Turns the player toward a target";
-         case "builder:player.recordedActions" -> "Records movement, gameplay keys, inventory moves, and sent chat";
-         case "official:player.setMouseButton" -> "Presses or releases left/right click";
-         case "official:player.shootBow" -> "Aims and fires a bow";
-         case "official:player.isAccount" -> "Checks if your username matches";
-         case "official:player.inAction" -> "Checks sneaking, using, dead, or alive";
-         case "official:player.isAlive" -> "True when the player is alive";
-         case "official:player.setCrouch" -> "Turns crouch on or off";
-         case "builder:player.setSprint" -> "Turns sprint on or off";
-         case "official:player.jump" -> "Makes the player jump once";
-         case "builder:player.autoClick" -> "Clicks or holds left/right click with a count and interval";
-         case "builder:player.autoFish" -> "Casts, detects a bite, reels in, and switches fishing rods before they break";
-         case "builder:player.pressKey" -> "Presses or holds a keyboard key for a set duration";
-         case "official:inventory.isFull" -> "True when inventory has no empty slots";
-         case "official:inventory.hasItem", "builder:inventory.hasItem" -> "Checks for an item and count";
-         case "builder:player.healthBelow" -> "True when health is at or below value";
-         case "builder:player.foodBelow" -> "True when hunger is at or below value";
-         case "builder:player.xpLevelAtLeast" -> "True when XP level is high enough";
-         case "builder:player.stopAtXpLevel" -> "Waits for XP level, then releases held actions or stops the macro";
-         case "builder:player.onGround" -> "True when player is touching ground";
-         case "builder:player.inWater" -> "True when player is in water";
-         case "official:player.isAtLocation" -> "Checks if player is near coordinates";
-         case "official:entity.player_nearby" -> "Checks for nearby players";
-         case "official:misc.wait" -> "Pauses the macro for a set time";
-         case "official:misc.chat" -> "Sends a chat message or command";
-         case "official:inventory.clickOpenContainerSlot" -> "Clicks a matching item or numbered slot in open GUI";
-         case "official:inventory.hotbarSelect" -> "Selects a hotbar item or slot";
-         case "official:inventory.hotbarUse" -> "Uses the selected hotbar item";
-         case "official:inventory.dropItems" -> "Drops matching inventory or hotbar items";
-         case "official:inventory.chestWithdrawItems" -> "Moves items from open GUI to inventory";
-         case "official:inventory.chestDepositItems" -> "Moves inventory items into open GUI";
-         case "builder:inventory.heldItemIs" -> "Checks the item in your main hand";
-         case "builder:inventory.slotHasItem" -> "Checks an inventory slot for an item";
-         case "builder:inventory.itemOrSlotHasTag" -> "Checks item tags or stack data text and can click matching GUI slots";
-         case "builder:inventory.itemDurability" -> "Checks whether item durability is lower or higher than a percent";
-         case "builder:inventory.emptySlotsAtLeast" -> "Checks free inventory slot count";
-         case "official:inventory.hasOpenContainer" -> "True when a GUI or chest is open";
-         case "official:inventory.isOpenContainerFull" -> "True when open GUI has no empty slots";
-         case "builder:inventory.openContainerHasItem" -> "Checks for an item in open GUI";
-         case "builder:inventory.autoEnchant" -> "Loads item/lapis when possible and clicks an enchanting table option";
-         case "builder:inventory.autoGrindstone" -> "Loads items, handles one grindstone result, and saves last.slot/last.item";
-         case "official:inventory.openInventory" -> "Opens the player inventory";
-         case "official:inventory.closeOpenContainer" -> "Closes the current GUI or chest";
-         case "builder:inventory.selectHotbarSlot" -> "Selects a numbered hotbar slot";
-         case "builder:inventory.dropSelectedItem" -> "Drops the held hotbar item";
-         case "official:world.interactWithBlock" -> "Clicks or attacks a target block";
-         case "official:world.mineBlock" -> "Mines a target block";
-         case "builder:world.mineArea" -> "Mines a 16x16x16 box from the top layer down and can stop before a protected block";
-         case "official:world.placeBlock" -> "Places a selected block on target";
-         case "official:world.jumpAndPlaceBlock" -> "Jumps and places below player";
-         case "builder:world.farmArea" -> "Harvests crops between two XYZ points and can move";
-         case "builder:world.openNearestContainer" -> "Finds and opens a selected container type";
-         case "builder:world.openNearestChest" -> "Finds and opens the nearest chest";
-         case "builder:world.openNearestBarrel" -> "Finds and opens the nearest barrel";
-         case "builder:world.openNearestShulker" -> "Finds and opens the nearest shulker box";
-         case "builder:world.openNearestEnchantingTable" -> "Finds and opens the nearest enchanting table";
-         case "builder:world.openNearestGrindstone" -> "Finds and opens the nearest grindstone";
-         case "builder:world.autoBoneMeal" -> "Uses bone meal and can refill from nearby containers";
-         case "builder:world.blockIs" -> "Checks block id at coordinates";
-         case "builder:world.lookingAtBlock" -> "Checks the block you are looking at";
-         case "official:entity.attack" -> "Attacks matching mob or player";
-         case "official:entity.interact" -> "Right-clicks matching mob or player";
-         case "builder:entity.nearby" -> "Checks for matching nearby entities";
-         case "builder:logic.scoreboardContains" -> "Checks sidebar, team, and objective scoreboard text";
-         case SCOREBOARD_NUMBER -> "Extracts and compares a visible sidebar number, with configurable freshness and change rate";
-         case CHAT_NUMBER -> "Compares numbers from matching server messages; unrelated messages do not overwrite observations";
-         case WAIT_FOR_CONDITION -> "Waits until all referenced conditions are true, keeping the current macro progress";
-         case CLICK_WITH_CONDITION -> "Evaluates all referenced conditions before every normal left-click attempt; false follows blocked";
-         case CLEAR_NUMBER_OBSERVATION -> "Clears the shared numeric observation referenced by a comparison node";
-         case "builder:logic.actionbarContains" -> "Checks the latest actionbar text";
-         case "builder:logic.hasStatusEffect" -> "Checks whether the player has a matching status effect and level";
-         case "builder:logic.bossbarContains" -> "Checks all boss bars currently visible on screen";
-         case "builder:logic.macroActiveState" -> "Checks another macro and can trigger this macro when its state changes";
-         case "builder:localMessage" -> "Shows a local chat notification";
-         case "builder:misc.repeatMacro" -> "Repeats the whole macro a set number of times, then stops";
-         case "builder:misc.repeatSection" -> "Repeats a linked section a set number of times";
-         case "builder:misc.repeatUntil" -> "Repeats a linked section until a condition is true";
-         case "builder:misc.idleUntil" -> "Waits here until chat, actionbar, player, full inventory, or disconnect is detected";
-         case "builder:flow.skipIfTrue" -> "When true, jumps past a named component";
-         case "builder:flow.endConnection" -> "Ends this connection path without stopping other running branches";
-         case "builder:flow.note" -> "Adds a saved note to explain part of the macro";
-         case "builder:stop" -> "Stops the current macro run";
-         case "official:misc.disconnect" -> "Disconnects from the server";
-         case "official:misc.rejoinServer" -> "Reconnects to the last multiplayer server or a typed server IP";
-         case "official:misc.joinServer" -> "Connects to the typed multiplayer server IP";
-         case "official:misc.macroStop" -> "Stops another macro slot";
-         case "official:misc.macroStart" -> "Starts another macro slot";
-         case "official:misc.random" -> "Randomly chooses true or false";
-         case "builder:misc.randomOutput3" -> "Randomly chooses one of three outputs";
-         case "official:misc.updateSign" -> "Updates the sign you are looking at";
-         case "official:misc.isInLobby" -> "Checks if named player is you";
-         case "official:notification.discord" -> "Sends a Discord webhook message";
-         case "official:login.repeat" -> "Pass-through login repeat marker";
-         case "builder:event.ifChatSame" -> "Checks latest chat against text";
-         case "official:event.chat" -> "Triggers when matching chat appears";
-         case "builder:event.actionbar" -> "Triggers when matching actionbar text appears";
-         case "builder:event.statusEffect" -> "Triggers once when a matching status effect appears and can start the selected macro";
-         case "builder:event.bossbar" -> "Triggers once when a matching boss bar appears and can start the selected macro";
-         case "builder:event.kicked" -> "Triggers after a kick or disconnect";
-         case "official:event.death" -> "Triggers when you die";
-         case "official:event.damageReceived" -> "Triggers when you take damage";
-         case "official:event.teleport" -> "Triggers after a teleport or world change";
-         case "official:event.schedule" -> "Triggers on a timer or clock time";
-         case "official:event.player_spawned" -> "Triggers when matching player appears";
-         case "official:event.player_despawned" -> "Triggers when matching player leaves";
-         default -> "Macro component";
+         case "official:start" -> tr("macro_builder.description.first_block_every_macro_starts_from");
+         case "official:player.respawn" -> tr("macro_builder.description.clicks_respawn_when_the_player_is_dead");
+         case "official:player.move" -> tr("macro_builder.description.moves_toward_a_direction_place_or_entity");
+         case "official:player.look" -> tr("macro_builder.description.turns_the_player_toward_a_target");
+         case "builder:player.recordedActions" -> tr("macro_builder.description.records_movement_gameplay_keys_inventory_moves_and_sent_chat");
+         case "official:player.setMouseButton" -> tr("macro_builder.description.presses_or_releases_left_right_click");
+         case "official:player.shootBow" -> tr("macro_builder.description.aims_and_fires_a_bow");
+         case "official:player.isAccount" -> tr("macro_builder.description.checks_if_your_username_matches");
+         case "official:player.inAction" -> tr("macro_builder.description.checks_sneaking_using_dead_or_alive");
+         case "official:player.isAlive" -> tr("macro_builder.description.true_when_the_player_is_alive");
+         case "official:player.setCrouch" -> tr("macro_builder.description.turns_crouch_on_or_off");
+         case "builder:player.setSprint" -> tr("macro_builder.description.turns_sprint_on_or_off");
+         case "official:player.jump" -> tr("macro_builder.description.makes_the_player_jump_once");
+         case "builder:player.autoClick" -> tr("macro_builder.description.clicks_or_holds_left_right_click_with_a_count_and_interval");
+         case "builder:player.autoFish" -> tr("macro_builder.description.casts_detects_a_bite_reels_in_and_switches_fishing_rods_before_they");
+         case "builder:player.pressKey" -> tr("macro_builder.description.presses_or_holds_a_keyboard_key_for_a_set_duration");
+         case "official:inventory.isFull" -> tr("macro_builder.description.true_when_inventory_has_no_empty_slots");
+         case "official:inventory.hasItem", "builder:inventory.hasItem" -> tr("macro_builder.description.checks_for_an_item_and_count");
+         case "builder:player.healthBelow" -> tr("macro_builder.description.true_when_health_is_at_or_below_value");
+         case "builder:player.foodBelow" -> tr("macro_builder.description.true_when_hunger_is_at_or_below_value");
+         case "builder:player.xpLevelAtLeast" -> tr("macro_builder.description.true_when_xp_level_is_high_enough");
+         case "builder:player.stopAtXpLevel" -> tr("macro_builder.description.waits_for_xp_level_then_releases_held_actions_or_stops_the_macro");
+         case "builder:player.onGround" -> tr("macro_builder.description.true_when_player_is_touching_ground");
+         case "builder:player.inWater" -> tr("macro_builder.description.true_when_player_is_in_water");
+         case "official:player.isAtLocation" -> tr("macro_builder.description.checks_if_player_is_near_coordinates");
+         case "official:entity.player_nearby" -> tr("macro_builder.description.checks_for_nearby_players");
+         case "official:misc.wait" -> tr("macro_builder.description.pauses_the_macro_for_a_set_time");
+         case "official:misc.chat" -> tr("macro_builder.description.sends_a_chat_message_or_command");
+         case "official:inventory.clickOpenContainerSlot" -> tr("macro_builder.description.clicks_a_matching_item_or_numbered_slot_in_open_gui");
+         case "official:inventory.hotbarSelect" -> tr("macro_builder.description.selects_a_hotbar_item_or_slot");
+         case "official:inventory.hotbarUse" -> tr("macro_builder.description.uses_the_selected_hotbar_item");
+         case "official:inventory.dropItems" -> tr("macro_builder.description.drops_matching_inventory_or_hotbar_items");
+         case "official:inventory.chestWithdrawItems" -> tr("macro_builder.description.moves_items_from_open_gui_to_inventory");
+         case "official:inventory.chestDepositItems" -> tr("macro_builder.description.moves_inventory_items_into_open_gui");
+         case "builder:inventory.heldItemIs" -> tr("macro_builder.description.checks_the_item_in_your_main_hand");
+         case "builder:inventory.slotHasItem" -> tr("macro_builder.description.checks_an_inventory_slot_for_an_item");
+         case "builder:inventory.itemOrSlotHasTag" -> tr("macro_builder.description.checks_item_tags_or_stack_data_text_and_can_click_matching_gui");
+         case "builder:inventory.itemDurability" -> tr("macro_builder.description.checks_whether_item_durability_is_lower_or_higher_than_a_percent");
+         case "builder:inventory.emptySlotsAtLeast" -> tr("macro_builder.description.checks_free_inventory_slot_count");
+         case "official:inventory.hasOpenContainer" -> tr("macro_builder.description.true_when_a_gui_or_chest_is_open");
+         case "official:inventory.isOpenContainerFull" -> tr("macro_builder.description.true_when_open_gui_has_no_empty_slots");
+         case "builder:inventory.openContainerHasItem" -> tr("macro_builder.description.checks_for_an_item_in_open_gui");
+         case "builder:inventory.autoEnchant" -> tr("macro_builder.description.loads_item_lapis_when_possible_and_clicks_an_enchanting_table_option");
+         case "builder:inventory.autoGrindstone" -> tr("macro_builder.description.loads_items_handles_one_grindstone_result_and_saves_last_slot_last_item");
+         case "official:inventory.openInventory" -> tr("macro_builder.description.opens_the_player_inventory");
+         case "official:inventory.closeOpenContainer" -> tr("macro_builder.description.closes_the_current_gui_or_chest");
+         case "builder:inventory.selectHotbarSlot" -> tr("macro_builder.description.selects_a_numbered_hotbar_slot");
+         case "builder:inventory.dropSelectedItem" -> tr("macro_builder.description.drops_the_held_hotbar_item");
+         case "official:world.interactWithBlock" -> tr("macro_builder.description.clicks_or_attacks_a_target_block");
+         case "official:world.mineBlock" -> tr("macro_builder.description.mines_a_target_block");
+         case "builder:world.mineArea" -> tr("macro_builder.description.mines_a_16x16x16_box_from_the_top_layer_down_and_can_stop");
+         case "official:world.placeBlock" -> tr("macro_builder.description.places_a_selected_block_on_target");
+         case "official:world.jumpAndPlaceBlock" -> tr("macro_builder.description.jumps_and_places_below_player");
+         case "builder:world.farmArea" -> tr("macro_builder.description.harvests_crops_between_two_xyz_points_and_can_move");
+         case "builder:world.openNearestContainer" -> tr("macro_builder.description.finds_and_opens_a_selected_container_type");
+         case "builder:world.openNearestChest" -> tr("macro_builder.description.finds_and_opens_the_nearest_chest");
+         case "builder:world.openNearestBarrel" -> tr("macro_builder.description.finds_and_opens_the_nearest_barrel");
+         case "builder:world.openNearestShulker" -> tr("macro_builder.description.finds_and_opens_the_nearest_shulker_box");
+         case "builder:world.openNearestEnchantingTable" -> tr("macro_builder.description.finds_and_opens_the_nearest_enchanting_table");
+         case "builder:world.openNearestGrindstone" -> tr("macro_builder.description.finds_and_opens_the_nearest_grindstone");
+         case "builder:world.autoBoneMeal" -> tr("macro_builder.description.uses_bone_meal_and_can_refill_from_nearby_containers");
+         case "builder:world.blockIs" -> tr("macro_builder.description.checks_block_id_at_coordinates");
+         case "builder:world.lookingAtBlock" -> tr("macro_builder.description.checks_the_block_you_are_looking_at");
+         case "official:entity.attack" -> tr("macro_builder.description.attacks_matching_mob_or_player");
+         case "official:entity.interact" -> tr("macro_builder.description.right_clicks_matching_mob_or_player");
+         case "builder:entity.nearby" -> tr("macro_builder.description.checks_for_matching_nearby_entities");
+         case "builder:logic.scoreboardContains" -> tr("macro_builder.description.checks_sidebar_team_and_objective_scoreboard_text");
+         case SCOREBOARD_NUMBER -> tr("macro_builder.description.extracts_and_compares_a_visible_sidebar_number_with_configurable_freshness_and_change");
+         case CHAT_NUMBER -> tr("macro_builder.description.compares_numbers_from_matching_server_messages_unrelated_messages_do_not_overwrite_observations");
+         case WAIT_FOR_CONDITION -> tr("macro_builder.description.waits_until_all_referenced_conditions_are_true_keeping_the_current_macro_progress");
+         case CLICK_WITH_CONDITION -> tr("macro_builder.description.evaluates_all_referenced_conditions_before_every_normal_left_click_attempt_false_follows");
+         case CLEAR_NUMBER_OBSERVATION -> tr("macro_builder.description.clears_the_shared_numeric_observation_referenced_by_a_comparison_node");
+         case "builder:logic.actionbarContains" -> tr("macro_builder.description.checks_the_latest_actionbar_text");
+         case "builder:logic.hasStatusEffect" -> tr("macro_builder.description.checks_whether_the_player_has_a_matching_status_effect_and_level");
+         case "builder:logic.bossbarContains" -> tr("macro_builder.description.checks_all_boss_bars_currently_visible_on_screen");
+         case "builder:logic.macroActiveState" -> tr("macro_builder.description.checks_another_macro_and_can_trigger_this_macro_when_its_state_changes");
+         case "builder:localMessage" -> tr("macro_builder.description.shows_a_local_chat_notification");
+         case "builder:misc.repeatMacro" -> tr("macro_builder.description.repeats_the_whole_macro_a_set_number_of_times_then_stops");
+         case "builder:misc.repeatSection" -> tr("macro_builder.description.repeats_a_linked_section_a_set_number_of_times");
+         case "builder:misc.repeatUntil" -> tr("macro_builder.description.repeats_a_linked_section_until_a_condition_is_true");
+         case "builder:misc.idleUntil" -> tr("macro_builder.description.waits_here_until_chat_actionbar_player_full_inventory_or_disconnect_is_detected");
+         case "builder:flow.skipIfTrue" -> tr("macro_builder.description.when_true_jumps_past_a_named_component");
+         case "builder:flow.endConnection" -> tr("macro_builder.description.ends_this_connection_path_without_stopping_other_running_branches");
+         case "builder:flow.note" -> tr("macro_builder.description.adds_a_saved_note_to_explain_part_of_the_macro");
+         case "builder:stop" -> tr("macro_builder.description.stops_the_current_macro_run");
+         case "official:misc.disconnect" -> tr("macro_builder.description.disconnects_from_the_server");
+         case "official:misc.rejoinServer" -> tr("macro_builder.description.reconnects_to_the_last_multiplayer_server_or_a_typed_server_ip");
+         case "official:misc.joinServer" -> tr("macro_builder.description.connects_to_the_typed_multiplayer_server_ip");
+         case "official:misc.macroStop" -> tr("macro_builder.description.stops_another_macro_slot");
+         case "official:misc.macroStart" -> tr("macro_builder.description.starts_another_macro_slot");
+         case "official:misc.random" -> tr("macro_builder.description.randomly_chooses_true_or_false");
+         case "builder:misc.randomOutput3" -> tr("macro_builder.description.randomly_chooses_one_of_three_outputs");
+         case "official:misc.updateSign" -> tr("macro_builder.description.updates_the_sign_you_are_looking_at");
+         case "official:misc.isInLobby" -> tr("macro_builder.description.checks_if_named_player_is_you");
+         case "official:notification.discord" -> tr("macro_builder.description.sends_a_discord_webhook_message");
+         case "official:login.repeat" -> tr("macro_builder.description.pass_through_login_repeat_marker");
+         case "builder:event.ifChatSame" -> tr("macro_builder.description.checks_latest_chat_against_text");
+         case "official:event.chat" -> tr("macro_builder.description.triggers_when_matching_chat_appears");
+         case "builder:event.actionbar" -> tr("macro_builder.description.triggers_when_matching_actionbar_text_appears");
+         case "builder:event.statusEffect" -> tr("macro_builder.description.triggers_once_when_a_matching_status_effect_appears_and_can_start_the");
+         case "builder:event.bossbar" -> tr("macro_builder.description.triggers_once_when_a_matching_boss_bar_appears_and_can_start_the");
+         case "builder:event.kicked" -> tr("macro_builder.description.triggers_after_a_kick_or_disconnect");
+         case "official:event.death" -> tr("macro_builder.description.triggers_when_you_die");
+         case "official:event.damageReceived" -> tr("macro_builder.description.triggers_when_you_take_damage");
+         case "official:event.teleport" -> tr("macro_builder.description.triggers_after_a_teleport_or_world_change");
+         case "official:event.schedule" -> tr("macro_builder.description.triggers_on_a_timer_or_clock_time");
+         case "official:event.player_spawned" -> tr("macro_builder.description.triggers_when_matching_player_appears");
+         case "official:event.player_despawned" -> tr("macro_builder.description.triggers_when_matching_player_leaves");
+         default -> tr("macro_builder.description.macro_component");
       };
    }
 
@@ -1583,15 +1588,40 @@ final class MacroModel {
 
    record Descriptor(
       String type,
-      String label,
+      String labelKey,
+      String legacyLabel,
       String group,
       int color,
       List<String> outputs,
       boolean inPalette,
-      String primaryLabel,
-      String secondaryLabel,
+      String primaryLabelKey,
+      String secondaryLabelKey,
       String defaultValue
    ) {
+      String label() {
+         return tr(this.labelKey);
+      }
+
+      String primaryLabel() {
+         return this.primaryLabelKey.isEmpty() ? "" : tr(this.primaryLabelKey);
+      }
+
+      String secondaryLabel() {
+         return this.secondaryLabelKey.isEmpty() ? "" : tr(this.secondaryLabelKey);
+      }
+
+      String groupLabel() {
+         return tr("macro_builder.group." + this.group.toLowerCase(Locale.ROOT));
+      }
+
+      boolean primaryItemField() {
+         return PRIMARY_ITEM_FIELDS.contains(this.type);
+      }
+
+      boolean secondaryItemField() {
+         return SECONDARY_ITEM_FIELDS.contains(this.type);
+      }
+
       String description() {
          return MacroModel.description(this.type);
       }

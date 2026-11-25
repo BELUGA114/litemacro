@@ -48,6 +48,8 @@ The built jar appears in that version folder under `build\libs`.
 
 ## Use
 
+Litemacro supports English and Simplified Chinese and follows Minecraft's language setting. See [internationalization](docs/i18n.md) for adding languages and checking translations.
+
 - Press `B` in Minecraft to open Litemacro.
 - Use the main Litemacro menu to select macro slots, assign macro keybinds, import/export macros, and open the marketplace.
 - Open the builder to place components on the canvas, connect outputs, add notes, and configure component settings.

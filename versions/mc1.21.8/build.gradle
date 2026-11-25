@@ -66,3 +66,5 @@ jar {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
 }
+
+apply from: '../../gradle/i18n.gradle'

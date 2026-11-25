@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -11,6 +13,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -96,18 +99,18 @@ final class MacroBuilderScreen extends Screen {
    private static final int RIGHT_CONNECTION_LIST_Y = 496;
    private static final int CONTAINER_TYPE_DROPDOWN_ROW_HEIGHT = 18;
    private static final String[][] CONTAINER_TYPE_OPTIONS = new String[][]{
-      {"any", "Any"},
-      {"chest", "Chest"},
-      {"barrel", "Barrel"},
-      {"shulker", "Shulker"},
-      {"ender_chest", "Ender Chest"},
-      {"furnace", "Furnace"},
-      {"blast_furnace", "Blast Furnace"},
-      {"smoker", "Smoker"},
-      {"brewing_stand", "Brewing Stand"},
-      {"hopper", "Hopper"},
-      {"dispenser", "Dispenser"},
-      {"dropper", "Dropper"}
+      {"any", "macro_builder.container.any"},
+      {"chest", "macro_builder.container.chest"},
+      {"barrel", "macro_builder.container.barrel"},
+      {"shulker", "macro_builder.container.shulker"},
+      {"ender_chest", "macro_builder.container.ender_chest"},
+      {"furnace", "macro_builder.container.furnace"},
+      {"blast_furnace", "macro_builder.container.blast_furnace"},
+      {"smoker", "macro_builder.container.smoker"},
+      {"brewing_stand", "macro_builder.container.brewing_stand"},
+      {"hopper", "macro_builder.container.hopper"},
+      {"dispenser", "macro_builder.container.dispenser"},
+      {"dropper", "macro_builder.container.dropper"}
    };
    private static final int MIN_LAYOUT_WIDTH = 960;
    private static final int MIN_LAYOUT_HEIGHT = 540;
@@ -253,7 +256,7 @@ final class MacroBuilderScreen extends Screen {
    }
 
    MacroBuilderScreen(MacroRunner runner, MacroModel model, String selectedNodeId) {
-      super(Component.literal("Macro Builder"));
+      super(Component.translatable("macro_builder.builder.macro_builder"));
       this.runner = runner;
       this.model = model;
       this.selectedNode = selectedNodeId == null ? model.startNode() : model.node(selectedNodeId);
@@ -288,28 +291,28 @@ final class MacroBuilderScreen extends Screen {
       try {
          int rightX = this.propertyLeft();
          int rightWidth = this.propertyInnerWidth();
-          this.addRenderableWidget(Button.builder(Component.literal("Back"), button -> this.leaveToMacroList()).bounds(8, TOP_BUTTON_Y, 42, TOP_BUTTON_HEIGHT).build());
-       this.addRenderableWidget(Button.builder(Component.literal("Save"), button -> this.save()).bounds(54, TOP_BUTTON_Y, 42, TOP_BUTTON_HEIGHT).build());
-       this.addRenderableWidget(Button.builder(Component.literal("Run"), button -> {
+          this.addRenderableWidget(Button.builder(Component.translatable("macro_builder.builder.back"), button -> this.leaveToMacroList()).bounds(8, TOP_BUTTON_Y, 42, TOP_BUTTON_HEIGHT).build());
+       this.addRenderableWidget(Button.builder(Component.translatable("macro_builder.builder.save"), button -> this.save()).bounds(54, TOP_BUTTON_Y, 42, TOP_BUTTON_HEIGHT).build());
+       this.addRenderableWidget(Button.builder(Component.translatable("macro_builder.builder.run"), button -> {
           this.syncSelectedFromFields();
           this.runner.resume(this.minecraft, this.model);
-          this.status = "Running";
+          this.status = tr("macro_builder.builder.running");
           this.statusColor = -4200769;
        }).bounds(100, TOP_BUTTON_Y, 38, TOP_BUTTON_HEIGHT).build());
-      this.addRenderableWidget(Button.builder(Component.literal("Stop"), button -> {
-          this.runner.stop(this.minecraft, "Stopped.");
-          this.status = "Stopped";
+      this.addRenderableWidget(Button.builder(Component.translatable("macro_builder.builder.stop"), button -> {
+          this.runner.stop(this.minecraft, tr("macro_builder.builder.stopped"));
+          this.status = tr("macro_builder.builder.stopped_2");
           this.statusColor = -11382;
        }).bounds(142, TOP_BUTTON_Y, 42, TOP_BUTTON_HEIGHT).build());
        this.moreActionsButton = (Button)this.addRenderableWidget(
-          Button.builder(Component.literal("Market"), button -> {
+          Button.builder(Component.translatable("macro_builder.builder.market"), button -> {
              this.topActionsMenuOpen = false;
              this.openMarketplace();
           }).bounds(TOP_MORE_X, TOP_BUTTON_Y, TOP_MORE_WIDTH, TOP_BUTTON_HEIGHT).build()
        );
       this.componentSearchField = new EditBox(this.font, 14, 64, Math.max(92, this.paletteWidth() - 28), 18, Component.empty());
       this.componentSearchField.setMaxLength(60);
-      this.componentSearchField.setSuggestion("Search components...");
+      this.componentSearchField.setSuggestion(tr("macro_builder.builder.search_components"));
       this.addRenderableWidget(this.componentSearchField);
       this.nameField = new EditBox(this.font, rightX + 56, TOP_BUTTON_Y, Math.max(82, this.propertiesWidth() - 70), TOP_BUTTON_HEIGHT, Component.empty());
       this.nameField.setMaxLength(60);
@@ -320,19 +323,19 @@ final class MacroBuilderScreen extends Screen {
       this.delayField.setValue(Integer.toString(this.model.stepDelayMs()));
       this.addRenderableWidget(this.delayField);
       this.setAllDelayButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("All"), button -> this.setAllComponentDelays()).bounds(this.globalDelayButtonX(), TOP_BUTTON_Y, 36, TOP_BUTTON_HEIGHT).build()
+         Button.builder(Component.translatable("macro_builder.builder.all"), button -> this.setAllComponentDelays()).bounds(this.globalDelayButtonX(), TOP_BUTTON_Y, 36, TOP_BUTTON_HEIGHT).build()
       );
       this.randomDelayButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Rand"), button -> this.openRandomDelaySettings()).bounds(this.globalDelayButtonX() + 40, TOP_BUTTON_Y, 42, TOP_BUTTON_HEIGHT).build()
+         Button.builder(Component.translatable("macro_builder.builder.rand"), button -> this.openRandomDelaySettings()).bounds(this.globalDelayButtonX() + 40, TOP_BUTTON_Y, 42, TOP_BUTTON_HEIGHT).build()
       );
       this.autoSettingsButton = (Button)this.addRenderableWidget(
-          Button.builder(Component.literal("Auto: Off"), button -> this.openAutoSettings()).bounds(rightX + 14, RIGHT_AUTO_BUTTON_Y, rightWidth, 20).build()
+          Button.builder(Component.translatable("macro_builder.builder.auto_off"), button -> this.openAutoSettings()).bounds(rightX + 14, RIGHT_AUTO_BUTTON_Y, rightWidth, 20).build()
       );
       this.enabledButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Enabled: On"), button -> this.toggleSelectedEnabled()).bounds(rightX + 14, RIGHT_ENABLE_BUTTON_Y, rightWidth, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.enabled_on"), button -> this.toggleSelectedEnabled()).bounds(rightX + 14, RIGHT_ENABLE_BUTTON_Y, rightWidth, 20).build()
       );
       this.recordActionsButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Record"), button -> this.startRecordedActions()).bounds(rightX + 14, RIGHT_PRIMARY_FIELD_Y, rightWidth, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.record"), button -> this.startRecordedActions()).bounds(rightX + 14, RIGHT_PRIMARY_FIELD_Y, rightWidth, 20).build()
       );
       this.primaryField = new EditBox(this.font, rightX + 14, RIGHT_PRIMARY_FIELD_Y, rightWidth, 20, Component.empty());
       this.primaryField.setMaxLength(2048);
@@ -368,133 +371,133 @@ final class MacroBuilderScreen extends Screen {
       this.nodeDelayField.setMaxLength(8);
       this.addRenderableWidget(this.nodeDelayField);
       this.primaryItemButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Pick Item"), button -> this.openItemPicker(false)).bounds(rightX + 14, RIGHT_PRIMARY_ITEM_Y, rightWidth, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.pick_item"), button -> this.openItemPicker(false)).bounds(rightX + 14, RIGHT_PRIMARY_ITEM_Y, rightWidth, 20).build()
       );
       this.secondaryItemButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Pick Item"), button -> this.openItemPicker(true)).bounds(rightX + 14, RIGHT_SECONDARY_ITEM_Y, rightWidth, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.pick_item"), button -> this.openItemPicker(true)).bounds(rightX + 14, RIGHT_SECONDARY_ITEM_Y, rightWidth, 20).build()
       );
       int splitButtonWidth = Math.max(72, (rightWidth - 8) / 2);
       int trailingButtonWidth = Math.max(64, rightWidth - splitButtonWidth - 8);
       this.mineAreaMoveButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Move: On"), button -> this.toggleMineAreaMove())
+         Button.builder(Component.translatable("macro_builder.builder.move_on"), button -> this.toggleMineAreaMove())
             .bounds(rightX + 14, RIGHT_MINE_AREA_TOGGLE_Y, splitButtonWidth, 20)
             .build()
       );
       this.mineAreaAutoToolButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Auto Tool: Off"), button -> this.toggleMineAreaAutoTool())
+         Button.builder(Component.translatable("macro_builder.builder.auto_tool_off"), button -> this.toggleMineAreaAutoTool())
             .bounds(rightX + 22 + splitButtonWidth, RIGHT_MINE_AREA_TOGGLE_Y, trailingButtonWidth, 20)
             .build()
       );
       this.mineAreaSliceButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Slice: 3"), button -> this.cycleMineAreaSliceHeight())
+         Button.builder(Component.translatable("macro_builder.builder.slice_3"), button -> this.cycleMineAreaSliceHeight())
             .bounds(rightX + 14, RIGHT_MINE_AREA_HINT_Y, splitButtonWidth, 20)
             .build()
       );
       this.mineAreaSafePathButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Safe Path: On"), button -> this.toggleMineAreaSafePath())
+         Button.builder(Component.translatable("macro_builder.builder.safe_path_on"), button -> this.toggleMineAreaSafePath())
             .bounds(rightX + 22 + splitButtonWidth, RIGHT_MINE_AREA_HINT_Y, trailingButtonWidth, 20)
             .build()
       );
       this.containerMoveButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Move: On"), button -> this.toggleContainerMove())
+         Button.builder(Component.translatable("macro_builder.builder.move_on"), button -> this.toggleContainerMove())
             .bounds(rightX + 14, RIGHT_SECONDARY_FIELD_Y, splitButtonWidth, 20)
             .build()
       );
       this.containerTypeButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Type: Chest"), button -> this.toggleContainerTypeDropdown())
+         Button.builder(Component.translatable("macro_builder.builder.type_chest"), button -> this.toggleContainerTypeDropdown())
             .bounds(rightX + 22 + splitButtonWidth, RIGHT_SECONDARY_FIELD_Y, trailingButtonWidth, 20)
             .build()
       );
       this.autoEnchantUseHeldButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Use Held"), button -> this.setAutoEnchantItemToHeld()).bounds(rightX + 14, RIGHT_AUTO_ENCHANT_ITEM_BUTTON_Y, splitButtonWidth, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.use_held"), button -> this.setAutoEnchantItemToHeld()).bounds(rightX + 14, RIGHT_AUTO_ENCHANT_ITEM_BUTTON_Y, splitButtonWidth, 20).build()
       );
       this.autoEnchantPickItemButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Pick Item"), button -> this.openItemPicker("autoEnchantItem"))
+         Button.builder(Component.translatable("macro_builder.builder.pick_item"), button -> this.openItemPicker("autoEnchantItem"))
             .bounds(rightX + 22 + splitButtonWidth, RIGHT_AUTO_ENCHANT_ITEM_BUTTON_Y, trailingButtonWidth, 20)
             .build()
       );
       this.autoEnchantPickLapisButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Pick Lapis"), button -> this.openItemPicker("autoEnchantLapis"))
+         Button.builder(Component.translatable("macro_builder.builder.pick_lapis"), button -> this.openItemPicker("autoEnchantLapis"))
             .bounds(rightX + 14, RIGHT_AUTO_ENCHANT_LAPIS_BUTTON_Y, splitButtonWidth, 20)
             .build()
       );
       this.autoEnchantCloseButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Close: Off"), button -> this.toggleAutoEnchantClose())
+         Button.builder(Component.translatable("macro_builder.builder.close_off"), button -> this.toggleAutoEnchantClose())
             .bounds(rightX + 22 + splitButtonWidth, RIGHT_AUTO_ENCHANT_LAPIS_BUTTON_Y, trailingButtonWidth, 20)
             .build()
       );
       this.autoGrindstoneModeButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Mode: Remove Enchants"), button -> this.toggleAutoGrindstoneMode())
+         Button.builder(Component.translatable("macro_builder.builder.mode_remove_enchants"), button -> this.toggleAutoGrindstoneMode())
             .bounds(rightX + 14, RIGHT_GRINDSTONE_MODE_BUTTON_Y, rightWidth, 20)
             .build()
       );
       this.autoGrindstoneUseHeldButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Use Held"), button -> this.setAutoGrindstoneInputToHeld())
+         Button.builder(Component.translatable("macro_builder.builder.use_held"), button -> this.setAutoGrindstoneInputToHeld())
             .bounds(rightX + 40, RIGHT_GRINDSTONE_INPUT_BUTTON_Y, Math.max(46, splitButtonWidth - 26), 20)
             .build()
       );
       this.autoGrindstonePickInputButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Pick Item"), button -> this.openItemPicker("autoGrindstoneInput"))
+         Button.builder(Component.translatable("macro_builder.builder.pick_item"), button -> this.openItemPicker("autoGrindstoneInput"))
             .bounds(rightX + 22 + splitButtonWidth, RIGHT_GRINDSTONE_INPUT_BUTTON_Y, trailingButtonWidth, 20)
             .build()
       );
       this.autoGrindstoneUseSameButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Use Same"), button -> this.setAutoGrindstoneRepairToSame())
+         Button.builder(Component.translatable("macro_builder.builder.use_same"), button -> this.setAutoGrindstoneRepairToSame())
             .bounds(rightX + 40, RIGHT_GRINDSTONE_REPAIR_BUTTON_Y, Math.max(46, splitButtonWidth - 26), 20)
             .build()
       );
       this.autoGrindstonePickRepairButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Pick Repair"), button -> this.openItemPicker("autoGrindstoneRepair"))
+         Button.builder(Component.translatable("macro_builder.builder.pick_repair"), button -> this.openItemPicker("autoGrindstoneRepair"))
             .bounds(rightX + 22 + splitButtonWidth, RIGHT_GRINDSTONE_REPAIR_BUTTON_Y, trailingButtonWidth, 20)
             .build()
       );
       this.autoGrindstoneShiftButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Result: Inv"), button -> this.toggleAutoGrindstoneShift())
+         Button.builder(Component.translatable("macro_builder.builder.result_inv"), button -> this.toggleAutoGrindstoneShift())
             .bounds(rightX + 14, RIGHT_GRINDSTONE_TOGGLE_Y, splitButtonWidth, 20)
             .build()
       );
       this.autoGrindstoneCloseButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Close: Off"), button -> this.toggleAutoGrindstoneClose())
+         Button.builder(Component.translatable("macro_builder.builder.close_off"), button -> this.toggleAutoGrindstoneClose())
             .bounds(rightX + 22 + splitButtonWidth, RIGHT_GRINDSTONE_TOGGLE_Y, trailingButtonWidth, 20)
             .build()
       );
       this.modeButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Toggle Mode"), button -> this.toggleDepositMode()).bounds(rightX + 14, RIGHT_MODE_Y, Math.max(78, (rightWidth - 8) / 2), 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.toggle_mode"), button -> this.toggleDepositMode()).bounds(rightX + 14, RIGHT_MODE_Y, Math.max(78, (rightWidth - 8) / 2), 20).build()
       );
       this.shiftClickButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Shift: On"), button -> this.toggleDepositWithdrawShiftClick())
+         Button.builder(Component.translatable("macro_builder.builder.shift_on"), button -> this.toggleDepositWithdrawShiftClick())
             .bounds(rightX + 22 + Math.max(78, (rightWidth - 8) / 2), RIGHT_MODE_Y, Math.max(78, rightWidth - Math.max(78, (rightWidth - 8) / 2) - 8), 20)
             .build()
       );
       this.fastDepositButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Fast: Off"), button -> this.toggleFastDeposit()).bounds(rightX + 14, RIGHT_TOGGLE_ROW_Y, rightWidth, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.fast_off"), button -> this.toggleFastDeposit()).bounds(rightX + 14, RIGHT_TOGGLE_ROW_Y, rightWidth, 20).build()
       );
       this.clickButtonButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Button: Left"), button -> this.toggleClickGuiButton()).bounds(rightX + 14, RIGHT_TOGGLE_ROW_Y, rightWidth, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.button_left"), button -> this.toggleClickGuiButton()).bounds(rightX + 14, RIGHT_TOGGLE_ROW_Y, rightWidth, 20).build()
       );
       this.repeatIndefinitelyButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Repeat: Count"), button -> this.toggleRepeatIndefinitely()).bounds(rightX + 14, RIGHT_TOGGLE_ROW_Y, rightWidth, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.repeat_count"), button -> this.toggleRepeatIndefinitely()).bounds(rightX + 14, RIGHT_TOGGLE_ROW_Y, rightWidth, 20).build()
       );
       this.setNextButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Done"), button -> this.startConnection(this.defaultOutputKey())).bounds(rightX + 14, RIGHT_CONNECTION_BUTTON_Y, 58, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.done"), button -> this.startConnection(this.defaultOutputKey())).bounds(rightX + 14, RIGHT_CONNECTION_BUTTON_Y, 58, 20).build()
       );
       this.setTrueButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("True"), button -> this.startConnection(this.firstBranchOutput())).bounds(rightX + 14, RIGHT_CONNECTION_BUTTON_Y, 58, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.true"), button -> this.startConnection(this.firstBranchOutput())).bounds(rightX + 14, RIGHT_CONNECTION_BUTTON_Y, 58, 20).build()
       );
       this.setFalseButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("False"), button -> this.startConnection(this.secondBranchOutput())).bounds(rightX + 78, RIGHT_CONNECTION_BUTTON_Y, 58, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.false"), button -> this.startConnection(this.secondBranchOutput())).bounds(rightX + 78, RIGHT_CONNECTION_BUTTON_Y, 58, 20).build()
       );
       this.setToolLowButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Low"), button -> this.startConnection(this.specialOutputKey())).bounds(rightX + 82, RIGHT_CONNECTION_BUTTON_Y, 58, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.low"), button -> this.startConnection(this.specialOutputKey())).bounds(rightX + 82, RIGHT_CONNECTION_BUTTON_Y, 58, 20).build()
       );
       this.setFailedButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Fail"), button -> this.startConnection(this.thirdBranchOutput())).bounds(rightX + 146, RIGHT_CONNECTION_BUTTON_Y, 58, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.fail"), button -> this.startConnection(this.thirdBranchOutput())).bounds(rightX + 146, RIGHT_CONNECTION_BUTTON_Y, 58, 20).build()
       );
       this.clearConnectionsButton = (Button)this.addRenderableWidget(
-         Button.builder(Component.literal("Clear"), button -> this.clearConnections()).bounds(rightX + 14, RIGHT_ACTION_BUTTON_Y, 82, 20).build()
+         Button.builder(Component.translatable("macro_builder.builder.clear"), button -> this.clearConnections()).bounds(rightX + 14, RIGHT_ACTION_BUTTON_Y, 82, 20).build()
       );
          this.deleteButton = (Button)this.addRenderableWidget(
-             Button.builder(Component.literal("Delete"), button -> this.deleteSelected()).bounds(rightX + 104, RIGHT_ACTION_BUTTON_Y, 82, 20).build()
+             Button.builder(Component.translatable("macro_builder.builder.delete"), button -> this.deleteSelected()).bounds(rightX + 104, RIGHT_ACTION_BUTTON_Y, 82, 20).build()
          );
          this.refreshProperties();
       } finally {
@@ -539,7 +542,7 @@ final class MacroBuilderScreen extends Screen {
           }
 
           if (this.pendingConnectionSource != null) {
-             context.centeredText(this.font, Component.literal("Drag to a component or click a target"), this.width / 2, 44, -3672);
+             context.centeredText(this.font, Component.translatable("macro_builder.builder.drag_to_a_component_or_click_a_target"), this.width / 2, 44, -3672);
           }
 
           this.drawContextMenu(context, mouseX, mouseY);
@@ -633,7 +636,7 @@ final class MacroBuilderScreen extends Screen {
                }
 
                this.selectedNode.outputs.remove(outputToClear);
-               this.status = "Cleared " + outputToClear + " link";
+               this.status = tr("macro_builder.builder.cleared_link", outputToClear);
                this.statusColor = -11382;
                this.recordHistorySnapshot();
                this.refreshProperties();
@@ -850,7 +853,7 @@ final class MacroBuilderScreen extends Screen {
                       (int)Math.round(this.worldY(mouseY) - this.nodeWorldHeight(this.paletteDragType) / 2.0)
                    );
                this.selectNode(node, false);
-               this.status = "Added " + node.displayLabel();
+               this.status = tr("macro_builder.builder.added", node.displayLabel());
                this.statusColor = -4200769;
                if (this.isNoteNode(node)) {
                   node.noteWidth = NOTE_WIDTH;
@@ -1015,12 +1018,12 @@ final class MacroBuilderScreen extends Screen {
          this.runner.save(this.model);
          this.savedSnapshot = this.model.toJson();
          this.lastHistorySnapshot = this.savedSnapshot;
-         this.status = "Saved";
+         this.status = tr("macro_builder.builder.saved");
          this.statusColor = -4200769;
          return true;
       } catch (RuntimeException | IOException var2) {
          MacroBuilderClient.LOGGER.error("Failed to save macro", var2);
-         this.status = "Save failed: " + var2.getMessage();
+         this.status = tr("macro_builder.builder.save_failed", var2.getMessage());
          this.statusColor = -30070;
          return false;
       }
@@ -1043,11 +1046,11 @@ final class MacroBuilderScreen extends Screen {
       try {
          this.runner.save(this.model);
          this.savedSnapshot = currentSnapshot;
-         this.status = "Auto-saved";
+         this.status = tr("macro_builder.builder.auto_saved");
          this.statusColor = -4200769;
       } catch (RuntimeException | IOException error) {
          MacroBuilderClient.LOGGER.error("Failed to auto-save macro", error);
-         this.status = "Auto-save failed";
+         this.status = tr("macro_builder.builder.auto_save_failed");
          this.statusColor = -30070;
       }
    }
@@ -1186,6 +1189,8 @@ final class MacroBuilderScreen extends Screen {
             this.containerTypeDropdownOpen = false;
          }
 
+         this.primaryField.setTooltip(hasSelection ? Tooltip.create(Component.literal(descriptor.primaryLabel())) : null);
+         this.secondaryField.setTooltip(hasSelection ? Tooltip.create(Component.literal(descriptor.secondaryLabel())) : null);
          boolean hasPrimary = hasSelection && !noteNode && !autoGrindstoneNode && !descriptor.primaryLabel().isBlank();
          boolean hasSecondary = hasSelection && !noteNode && !autoGrindstoneNode && !descriptor.secondaryLabel().isBlank();
          boolean clickGuiItem = hasSelection && this.isClickGuiItemNode(this.selectedNode);
@@ -1237,7 +1242,7 @@ final class MacroBuilderScreen extends Screen {
          this.autoEnchantItemField.visible = autoEnchantNode;
          this.autoEnchantItemField.active = autoEnchantNode;
          this.autoEnchantItemField.setValue(autoEnchantItemText);
-         this.autoEnchantItemField.setSuggestion(autoEnchantNode && autoEnchantItemText.isBlank() ? "held, any, or minecraft:book" : "");
+         this.autoEnchantItemField.setSuggestion(autoEnchantNode && autoEnchantItemText.isBlank() ? tr("macro_builder.builder.held_any_or_minecraft_book") : "");
          this.autoEnchantLapisField.visible = autoEnchantNode;
          this.autoEnchantLapisField.active = autoEnchantNode;
          this.autoEnchantLapisField.setValue(autoEnchantLapisText);
@@ -1245,11 +1250,11 @@ final class MacroBuilderScreen extends Screen {
          this.autoGrindstoneInputField.visible = autoGrindstoneNode;
          this.autoGrindstoneInputField.active = autoGrindstoneNode;
          this.autoGrindstoneInputField.setValue(autoGrindstoneInputText);
-         this.autoGrindstoneInputField.setSuggestion(autoGrindstoneNode && autoGrindstoneInputText.isBlank() ? "held, selected, any, or minecraft:iron_sword" : "");
+         this.autoGrindstoneInputField.setSuggestion(autoGrindstoneNode && autoGrindstoneInputText.isBlank() ? tr("macro_builder.builder.held_selected_any_or_minecraft_iron_sword") : "");
          this.autoGrindstoneRepairField.visible = autoGrindstoneRepair;
          this.autoGrindstoneRepairField.active = autoGrindstoneRepair;
          this.autoGrindstoneRepairField.setValue(autoGrindstoneRepairText);
-         this.autoGrindstoneRepairField.setSuggestion(autoGrindstoneRepair && autoGrindstoneRepairText.isBlank() ? "same, held, any, or minecraft:iron_sword" : "");
+         this.autoGrindstoneRepairField.setSuggestion(autoGrindstoneRepair && autoGrindstoneRepairText.isBlank() ? tr("macro_builder.builder.same_held_any_or_minecraft_iron_sword") : "");
          this.excludeSlotsField.visible = hasExcludeSlots;
          this.excludeSlotsField.active = hasExcludeSlots;
          this.excludeSlotsField.setValue(excludeSlotsText);
@@ -1261,31 +1266,31 @@ final class MacroBuilderScreen extends Screen {
          this.componentNameField.visible = hasSelection && !noteNode;
          this.componentNameField.active = this.componentNameField.visible;
          this.componentNameField.setValue(hasSelection && this.selectedNode.displayName != null ? this.selectedNode.displayName : "");
-         this.componentNameField.setSuggestion(hasSelection && !noteNode && (this.selectedNode.displayName == null || this.selectedNode.displayName.isBlank()) ? "optional name" : "");
-         boolean primaryItem = hasPrimary && !autoEnchantNode && this.isItemField(descriptor.primaryLabel());
-         boolean secondaryItem = hasSecondary && !autoEnchantNode && this.isItemField(descriptor.secondaryLabel());
+         this.componentNameField.setSuggestion(hasSelection && !noteNode && (this.selectedNode.displayName == null || this.selectedNode.displayName.isBlank()) ? tr("macro_builder.builder.optional_name") : "");
+         boolean primaryItem = hasPrimary && !autoEnchantNode && descriptor.primaryItemField();
+         boolean secondaryItem = hasSecondary && !autoEnchantNode && descriptor.secondaryItemField();
          this.primaryItemButton.visible = primaryItem;
          this.primaryItemButton.active = primaryItem;
          this.secondaryItemButton.visible = secondaryItem;
          this.secondaryItemButton.active = secondaryItem;
          this.mineAreaMoveButton.visible = mineAreaNode;
          this.mineAreaMoveButton.active = mineAreaNode;
-         this.mineAreaMoveButton.setMessage(Component.literal(this.mineAreaMoveEnabled(this.selectedNode) ? "Move: On" : "Move: Off"));
+         this.mineAreaMoveButton.setMessage(Component.literal(this.mineAreaMoveEnabled(this.selectedNode) ? tr("macro_builder.builder.move_on") : tr("macro_builder.builder.move_off")));
          this.mineAreaAutoToolButton.visible = mineAreaNode;
          this.mineAreaAutoToolButton.active = mineAreaNode;
-         this.mineAreaAutoToolButton.setMessage(Component.literal(this.mineAreaAutoToolEnabled(this.selectedNode) ? "Auto Tool: On" : "Auto Tool: Off"));
+         this.mineAreaAutoToolButton.setMessage(Component.literal(this.mineAreaAutoToolEnabled(this.selectedNode) ? tr("macro_builder.builder.auto_tool_on") : tr("macro_builder.builder.auto_tool_off")));
          this.mineAreaSliceButton.visible = mineAreaNode;
          this.mineAreaSliceButton.active = mineAreaNode;
-         this.mineAreaSliceButton.setMessage(Component.literal("Slice: " + this.mineAreaSliceHeight(this.selectedNode)));
+         this.mineAreaSliceButton.setMessage(Component.translatable("macro_builder.builder.slice", this.mineAreaSliceHeight(this.selectedNode)));
          this.mineAreaSafePathButton.visible = mineAreaNode;
          this.mineAreaSafePathButton.active = mineAreaNode;
-         this.mineAreaSafePathButton.setMessage(Component.literal(this.mineAreaSafePathEnabled(this.selectedNode) ? "Safe Path: On" : "Safe Path: Off"));
+         this.mineAreaSafePathButton.setMessage(Component.literal(this.mineAreaSafePathEnabled(this.selectedNode) ? tr("macro_builder.builder.safe_path_on") : tr("macro_builder.builder.safe_path_off")));
          this.containerMoveButton.visible = containerSettingsNode;
          this.containerMoveButton.active = containerSettingsNode;
-         this.containerMoveButton.setMessage(Component.literal(containerSettingsNode && this.containerMoveEnabled(this.selectedNode) ? "Move: On" : "Move: Off"));
+         this.containerMoveButton.setMessage(Component.literal(containerSettingsNode && this.containerMoveEnabled(this.selectedNode) ? tr("macro_builder.builder.move_on") : tr("macro_builder.builder.move_off")));
          this.containerTypeButton.visible = genericContainerNode;
          this.containerTypeButton.active = genericContainerNode;
-         this.containerTypeButton.setMessage(Component.literal("Type: " + this.containerTypeLabel(this.containerType(this.selectedNode))));
+         this.containerTypeButton.setMessage(Component.translatable("macro_builder.builder.type", this.containerTypeLabel(this.containerType(this.selectedNode))));
          this.autoEnchantUseHeldButton.visible = autoEnchantNode;
          this.autoEnchantUseHeldButton.active = autoEnchantNode;
          this.autoEnchantPickItemButton.visible = autoEnchantNode;
@@ -1294,10 +1299,10 @@ final class MacroBuilderScreen extends Screen {
          this.autoEnchantPickLapisButton.active = autoEnchantNode;
          this.autoEnchantCloseButton.visible = autoEnchantNode;
          this.autoEnchantCloseButton.active = autoEnchantNode;
-         this.autoEnchantCloseButton.setMessage(Component.literal(this.autoEnchantCloseEnabled(this.selectedNode) ? "Close: On" : "Close: Off"));
+         this.autoEnchantCloseButton.setMessage(Component.literal(this.autoEnchantCloseEnabled(this.selectedNode) ? tr("macro_builder.builder.close_on") : tr("macro_builder.builder.close_off")));
          this.autoGrindstoneModeButton.visible = autoGrindstoneNode;
          this.autoGrindstoneModeButton.active = autoGrindstoneNode;
-         this.autoGrindstoneModeButton.setMessage(Component.literal(autoGrindstoneRepair ? "Mode: Repair" : "Mode: Remove Enchants"));
+         this.autoGrindstoneModeButton.setMessage(Component.literal(autoGrindstoneRepair ? tr("macro_builder.builder.mode_repair") : tr("macro_builder.builder.mode_remove_enchants")));
          this.autoGrindstoneUseHeldButton.visible = autoGrindstoneNode;
          this.autoGrindstoneUseHeldButton.active = autoGrindstoneNode;
          this.autoGrindstonePickInputButton.visible = autoGrindstoneNode;
@@ -1308,55 +1313,55 @@ final class MacroBuilderScreen extends Screen {
          this.autoGrindstonePickRepairButton.active = autoGrindstoneRepair;
          this.autoGrindstoneShiftButton.visible = autoGrindstoneNode;
          this.autoGrindstoneShiftButton.active = autoGrindstoneNode;
-         this.autoGrindstoneShiftButton.setMessage(Component.literal("drop".equals(this.autoGrindstoneResultAction(this.selectedNode)) ? "Result: Drop" : "Result: Inv"));
+         this.autoGrindstoneShiftButton.setMessage(Component.literal("drop".equals(this.autoGrindstoneResultAction(this.selectedNode)) ? tr("macro_builder.builder.result_drop") : tr("macro_builder.builder.result_inv")));
          this.autoGrindstoneCloseButton.visible = autoGrindstoneNode;
          this.autoGrindstoneCloseButton.active = autoGrindstoneNode;
-         this.autoGrindstoneCloseButton.setMessage(Component.literal(this.autoGrindstoneCloseEnabled(this.selectedNode) ? "Close: On" : "Close: Off"));
+         this.autoGrindstoneCloseButton.setMessage(Component.literal(this.autoGrindstoneCloseEnabled(this.selectedNode) ? tr("macro_builder.builder.close_on") : tr("macro_builder.builder.close_off")));
          this.modeButton.visible = depositWithdraw;
          this.modeButton.active = this.modeButton.visible;
-         this.modeButton.setMessage(Component.literal(this.modeButton.visible ? "Mode: " + this.selectedNode.value : "Toggle Mode"));
+         this.modeButton.setMessage(Component.literal(this.modeButton.visible ? tr("macro_builder.builder.mode", this.selectedNode.value) : tr("macro_builder.builder.toggle_mode")));
          this.shiftClickButton.visible = shiftClickNode || itemTagClick;
          this.shiftClickButton.active = this.shiftClickButton.visible;
          this.shiftClickButton.setMessage(
-            Component.literal(itemTagClick ? (this.clickMatchedTagEnabled(this.selectedNode) ? "Click: On" : "Click: Off") : (this.shiftClickEnabled(this.selectedNode) ? "Shift: On" : "Shift: Off"))
+            Component.literal(itemTagClick ? (this.clickMatchedTagEnabled(this.selectedNode) ? tr("macro_builder.builder.click_on") : tr("macro_builder.builder.click_off")) : (this.shiftClickEnabled(this.selectedNode) ? tr("macro_builder.builder.shift_on") : tr("macro_builder.builder.shift_off")))
          );
          this.fastDepositButton.visible = depositNode || dropItemsNode;
          this.fastDepositButton.active = this.fastDepositButton.visible;
          this.fastDepositButton.setMessage(
-            Component.literal(dropItemsNode ? (this.dropAllEnabled(this.selectedNode) ? "All: On" : "All: Off") : (this.fastDepositEnabled(this.selectedNode) ? "Fast: On" : "Fast: Off"))
+            Component.literal(dropItemsNode ? (this.dropAllEnabled(this.selectedNode) ? tr("macro_builder.builder.all_on") : tr("macro_builder.builder.all_off")) : (this.fastDepositEnabled(this.selectedNode) ? tr("macro_builder.builder.fast_on") : tr("macro_builder.builder.fast_off")))
          );
          this.clickButtonButton.visible = clickGuiItem;
          this.clickButtonButton.active = clickGuiItem;
-         this.clickButtonButton.setMessage(Component.literal("Button: " + this.clickGuiButtonText(this.selectedNode)));
+         this.clickButtonButton.setMessage(Component.translatable("macro_builder.builder.button", this.clickGuiButtonText(this.selectedNode)));
          this.enabledButton.visible = hasSelection && !noteNode;
          this.enabledButton.active = this.enabledButton.visible && !"official:start".equals(this.selectedNode.type);
-         this.enabledButton.setMessage(Component.literal(hasSelection && this.selectedNode.enabled ? "Enabled: On" : "Enabled: Off"));
+         this.enabledButton.setMessage(Component.literal(hasSelection && this.selectedNode.enabled ? tr("macro_builder.builder.enabled_on") : tr("macro_builder.builder.enabled_off")));
          this.recordActionsButton.visible = recordedActionsNode;
          this.recordActionsButton.active = recordedActionsNode && !this.runner.actionRecording();
-         this.recordActionsButton.setMessage(Component.literal(recordedActionsNode && this.selectedNode.value != null && !this.selectedNode.value.isBlank() ? "Record Again" : "Record"));
+         this.recordActionsButton.setMessage(Component.literal(recordedActionsNode && this.selectedNode.value != null && !this.selectedNode.value.isBlank() ? tr("macro_builder.builder.record_again") : tr("macro_builder.builder.record")));
          this.repeatIndefinitelyButton.visible = repeatNode;
          this.repeatIndefinitelyButton.active = repeatNode;
-         this.repeatIndefinitelyButton.setMessage(Component.literal(repeatNode && this.repeatIndefinitelyEnabled(this.selectedNode) ? "Repeat: Forever" : "Repeat: Count"));
+         this.repeatIndefinitelyButton.setMessage(Component.literal(repeatNode && this.repeatIndefinitelyEnabled(this.selectedNode) ? tr("macro_builder.builder.repeat_forever") : tr("macro_builder.builder.repeat_count")));
          this.setNextButton.visible = connectable && !branch && !randomOutput3;
          this.setNextButton.active = this.setNextButton.visible;
          this.setNextButton.setMessage(Component.literal(this.connectionButtonLabel(normalOutput)));
          this.setTrueButton.visible = branch || randomOutput3;
          this.setTrueButton.active = branch;
-         this.setTrueButton.setMessage(Component.literal(randomOutput3 ? "Set One" : "Set True"));
+         this.setTrueButton.setMessage(Component.literal(randomOutput3 ? tr("macro_builder.builder.set_one") : tr("macro_builder.builder.set_true")));
          this.setTrueButton.active = this.setTrueButton.visible;
          this.setFalseButton.visible = branch || randomOutput3;
          this.setFalseButton.active = branch;
-         this.setFalseButton.setMessage(Component.literal(randomOutput3 ? "Set Two" : "Set False"));
+         this.setFalseButton.setMessage(Component.literal(randomOutput3 ? tr("macro_builder.builder.set_two") : tr("macro_builder.builder.set_false")));
          this.setFalseButton.active = this.setFalseButton.visible;
          this.setToolLowButton.visible = connectable && (hasToolLow || hasRepeat);
          this.setToolLowButton.active = this.setToolLowButton.visible;
-          this.setToolLowButton.setMessage(Component.literal(hasRepeat ? "Repeat" : "Low"));
+          this.setToolLowButton.setMessage(Component.literal(hasRepeat ? tr("macro_builder.builder.repeat") : tr("macro_builder.builder.low")));
          this.setFailedButton.visible = randomOutput3 || connectable && hasFailed;
          this.setFailedButton.active = this.setFailedButton.visible;
-          this.setFailedButton.setMessage(Component.literal(randomOutput3 ? "Three" : "Fail"));
+          this.setFailedButton.setMessage(Component.literal(randomOutput3 ? tr("macro_builder.builder.three") : tr("macro_builder.builder.fail")));
           this.clearConnectionsButton.visible = hasSelection && this.model.hasAnyConnection(this.selectedNode);
          this.clearConnectionsButton.active = this.clearConnectionsButton.visible;
-          this.clearConnectionsButton.setMessage(Component.literal("Clear"));
+          this.clearConnectionsButton.setMessage(Component.translatable("macro_builder.builder.clear"));
          this.deleteButton.visible = hasSelection && this.selectionHasDeletableNode();
          this.deleteButton.active = this.deleteButton.visible;
          if (this.copyComponentButton != null) {
@@ -1373,7 +1378,7 @@ final class MacroBuilderScreen extends Screen {
 
          if (this.randomDelayButton != null) {
             this.randomDelayButton.active = true;
-            this.randomDelayButton.setMessage(Component.literal(this.model.randomDelayEnabled() ? "Rand On" : "Rand"));
+            this.randomDelayButton.setMessage(Component.literal(this.model.randomDelayEnabled() ? tr("macro_builder.builder.rand_on") : tr("macro_builder.builder.rand")));
          }
 
          if (this.autoSettingsButton != null) {
@@ -1643,7 +1648,7 @@ final class MacroBuilderScreen extends Screen {
          }
       }
 
-      this.status = enable ? "Enabled selected components" : "Disabled selected components";
+      this.status = enable ? tr("macro_builder.builder.enabled_selected_components") : tr("macro_builder.builder.disabled_selected_components");
       this.statusColor = -4200769;
       this.recordHistorySnapshot();
       this.refreshProperties();
@@ -1656,7 +1661,7 @@ final class MacroBuilderScreen extends Screen {
 
       boolean enableForever = !this.repeatIndefinitelyEnabled(this.selectedNode);
       this.selectedNode.value = enableForever ? "forever" : "3";
-      this.status = enableForever ? "Repeat forever" : "Repeat count";
+      this.status = enableForever ? tr("macro_builder.builder.repeat_forever_2") : tr("macro_builder.builder.repeat_count_2");
       this.statusColor = -4200769;
       this.recordHistorySnapshot();
       this.refreshProperties();
@@ -1674,8 +1679,8 @@ final class MacroBuilderScreen extends Screen {
 
    void refreshAfterRandomDelaySettings() {
       this.status = this.model.randomDelayEnabled()
-         ? "Random delay " + this.model.randomDelayMinMs() + "-" + this.model.randomDelayMaxMs() + " ms"
-         : "Random delay off";
+         ? tr("macro_builder.builder.random_delay_ms", this.model.randomDelayMinMs(), this.model.randomDelayMaxMs())
+         : tr("macro_builder.builder.random_delay_off");
       this.statusColor = -4200769;
       this.refreshProperties();
    }
@@ -1735,7 +1740,7 @@ final class MacroBuilderScreen extends Screen {
    }
 
    private boolean repeatIndefinitelyEnabled(MacroModel.Node node) {
-      String value = node == null || node.value == null ? "" : node.value.trim().toLowerCase();
+      String value = node == null || node.value == null ? "" : node.value.trim().toLowerCase(Locale.ROOT);
       return value.equals("forever") || value.equals("infinite") || value.equals("indefinite") || value.equals("always") || value.equals("-1");
    }
 
@@ -1765,7 +1770,7 @@ final class MacroBuilderScreen extends Screen {
 
    private String clickGuiButtonText(MacroModel.Node node) {
       String value = node == null || node.value3 == null ? "" : node.value3.trim();
-      return "right".equalsIgnoreCase(value) || "1".equals(value) || "use".equalsIgnoreCase(value) ? "Right" : "Left";
+      return "right".equalsIgnoreCase(value) || "1".equals(value) || "use".equalsIgnoreCase(value) ? tr("macro_builder.builder.right") : tr("macro_builder.builder.left");
    }
 
    private boolean autoEnchantCloseEnabled(MacroModel.Node node) {
@@ -1926,11 +1931,11 @@ final class MacroBuilderScreen extends Screen {
 
       for (String[] option : CONTAINER_TYPE_OPTIONS) {
          if (option[0].equals(normalized)) {
-            return option[1];
+            return tr(option[1]);
          }
       }
 
-      return "Chest";
+      return tr("macro_builder.builder.chest");
    }
 
    private String containerOptionsText(boolean move, String type) {
@@ -2356,20 +2361,20 @@ final class MacroBuilderScreen extends Screen {
 
    private String autoSettingsButtonText() {
       if (this.model.alwaysOn()) {
-         return "Auto: Always";
+         return tr("macro_builder.builder.auto_always");
       } else {
-         return "Auto: " + this.autoModeLabel(this.model.autoStartMode());
+         return tr("macro_builder.builder.auto", this.autoModeLabel(this.model.autoStartMode()));
       }
    }
 
    private String autoModeLabel(String mode) {
       return switch (mode == null ? "" : mode) {
-         case "chat" -> "Chat";
-         case "player" -> "Player";
-         case "inventory_full" -> "Full Inv";
-         case "kicked" -> "Kicked";
-         case "always" -> "Always";
-         default -> "Off";
+         case "chat" -> tr("macro_builder.builder.chat");
+         case "player" -> tr("macro_builder.builder.player");
+         case "inventory_full" -> tr("macro_builder.builder.full_inv");
+         case "kicked" -> tr("macro_builder.builder.kicked");
+         case "always" -> tr("macro_builder.builder.always");
+         default -> tr("macro_builder.builder.off");
       };
    }
 
@@ -2378,7 +2383,7 @@ final class MacroBuilderScreen extends Screen {
       if (this.selectedNode != null) {
          this.pendingConnectionSource = this.selectedNode;
          this.pendingConnectionOutput = outputKey;
-         this.status = "Choose target for " + outputKey;
+         this.status = tr("macro_builder.builder.choose_target_for", MacroText.output(outputKey));
          this.statusColor = -3672;
       }
    }
@@ -2391,14 +2396,14 @@ final class MacroBuilderScreen extends Screen {
       if (target != null && target != this.pendingConnectionSource && !this.isNoteNode(target)) {
          this.pendingConnectionSource.addTarget(this.pendingConnectionOutput, target.id);
          this.selectNode(this.pendingConnectionSource, false);
-         this.status = "Connected " + this.pendingConnectionOutput + " to " + target.displayLabel();
+         this.status = tr("macro_builder.builder.connected_to", MacroText.output(this.pendingConnectionOutput), target.displayLabel());
          this.statusColor = -4200769;
          this.recordHistorySnapshot();
       } else if (this.isNoteNode(target)) {
-         this.status = "Notes do not run as components";
+         this.status = tr("macro_builder.builder.notes_do_not_run_as_components");
          this.statusColor = -11382;
       } else {
-         this.status = "Connection canceled";
+         this.status = tr("macro_builder.builder.connection_canceled");
          this.statusColor = -11382;
       }
 
@@ -2441,9 +2446,9 @@ final class MacroBuilderScreen extends Screen {
 
    private String connectionButtonLabel(String output) {
       return switch (output) {
-         case "started" -> "Start";
-         case "triggered" -> "Trig";
-         case "completed" -> "Done";
+         case "started" -> tr("macro_builder.builder.start");
+         case "triggered" -> tr("macro_builder.builder.trig");
+         case "completed" -> tr("macro_builder.builder.done");
          default -> this.fit(output, 42);
       };
    }
@@ -2453,7 +2458,7 @@ final class MacroBuilderScreen extends Screen {
          if (this.model.clearConnections(this.selectedNode)) {
             this.highlightedConnection = null;
             this.draggedConnection = null;
-            this.status = "Cleared links";
+            this.status = tr("macro_builder.builder.cleared_links");
             this.statusColor = -11382;
             this.recordHistorySnapshot();
             this.refreshProperties();
@@ -2589,18 +2594,18 @@ final class MacroBuilderScreen extends Screen {
 
    private String[] contextMenuLabels() {
       return this.contextMenuConnection == null
-         ? new String[]{"New Note", "Copy", "Duplicate", "Paste Here", "Delete", "Clear Links", "Toggle Enabled"}
-         : new String[]{"Delete Link", "Color Blue", "Color Green", "Color Yellow", "Color Pink", "Default Color"};
+         ? new String[]{tr("macro_builder.builder.new_note"), tr("macro_builder.builder.copy"), tr("macro_builder.builder.duplicate"), tr("macro_builder.builder.paste_here"), tr("macro_builder.builder.delete"), tr("macro_builder.builder.clear_links"), tr("macro_builder.builder.toggle_enabled")}
+         : new String[]{tr("macro_builder.builder.delete_link"), tr("macro_builder.builder.color_blue"), tr("macro_builder.builder.color_green"), tr("macro_builder.builder.color_yellow"), tr("macro_builder.builder.color_pink"), tr("macro_builder.builder.default_color")};
    }
 
    private void handleLinkContextAction(MacroBuilderScreen.ConnectionHit connection, int row) {
       switch (row) {
          case 0 -> this.deleteConnection(connection);
-         case 1 -> this.setConnectionColor(connection, "#4aa3ff", "Link color blue");
-         case 2 -> this.setConnectionColor(connection, "#46d66f", "Link color green");
-         case 3 -> this.setConnectionColor(connection, "#f4c94d", "Link color yellow");
-         case 4 -> this.setConnectionColor(connection, "#ff5aa5", "Link color pink");
-         case 5 -> this.setConnectionColor(connection, "", "Link color default");
+         case 1 -> this.setConnectionColor(connection, "#4aa3ff", tr("macro_builder.builder.link_color_blue"));
+         case 2 -> this.setConnectionColor(connection, "#46d66f", tr("macro_builder.builder.link_color_green"));
+         case 3 -> this.setConnectionColor(connection, "#f4c94d", tr("macro_builder.builder.link_color_yellow"));
+         case 4 -> this.setConnectionColor(connection, "#ff5aa5", tr("macro_builder.builder.link_color_pink"));
+         case 5 -> this.setConnectionColor(connection, "", tr("macro_builder.builder.link_color_default"));
          default -> {
          }
       }
@@ -2610,7 +2615,7 @@ final class MacroBuilderScreen extends Screen {
       if (connection != null && this.model.removeConnection(connection.source(), connection.output(), connection.target().id)) {
          this.highlightedConnection = null;
          this.draggedConnection = null;
-         this.status = "Deleted link";
+         this.status = tr("macro_builder.builder.deleted_link");
          this.statusColor = -11382;
          this.recordHistorySnapshot();
          this.refreshProperties();
@@ -2638,7 +2643,7 @@ final class MacroBuilderScreen extends Screen {
          }
       }
 
-      this.status = "Set all component delays to " + delay + " ms";
+      this.status = tr("macro_builder.builder.set_all_component_delays_to_ms", delay);
       this.statusColor = -4200769;
       this.recordHistorySnapshot();
       this.refreshProperties();
@@ -2659,14 +2664,14 @@ final class MacroBuilderScreen extends Screen {
          }
 
          if (deleted > 0) {
-            this.status = deleted == 1 ? "Deleted" : "Deleted " + deleted + " components";
+            this.status = deleted == 1 ? tr("macro_builder.builder.deleted") : tr("macro_builder.builder.deleted_components", deleted);
             this.statusColor = -11382;
             this.selectNode(null, false);
             this.highlightedConnection = null;
             this.draggedConnection = null;
             this.recordHistorySnapshot();
          } else {
-            this.status = "Keep at least one entry point";
+            this.status = tr("macro_builder.builder.keep_at_least_one_entry_point");
             this.statusColor = -11382;
          }
 
@@ -2682,10 +2687,10 @@ final class MacroBuilderScreen extends Screen {
       context.fill(0, TOP_BAR_HEIGHT, paletteWidth, this.height, -14867926);
       context.fill(rightX, TOP_BAR_HEIGHT, this.width, this.height, -14867926);
       this.drawCanvasGrid(context);
-      context.text(this.font, "Components", 14, 48, -1);
-      context.text(this.font, "Delay", this.globalDelayLabelX(), 14, -2565928);
-      context.text(this.font, "Name", rightX + 14, 14, -2565928);
-      context.text(this.font, "Zoom " + (int)Math.round(this.zoom * 100.0) + "%", this.canvasLeft() + 10, this.height - 18, -5327166);
+      context.text(this.font, tr("macro_builder.builder.components"), 14, 48, -1);
+      context.text(this.font, tr("macro_builder.builder.delay"), this.globalDelayLabelX(), 14, -2565928);
+      context.text(this.font, tr("macro_builder.builder.name"), rightX + 14, 14, -2565928);
+      context.text(this.font, tr("macro_builder.builder.zoom", (int)Math.round(this.zoom * 100.0)), this.canvasLeft() + 10, this.height - 18, -5327166);
       this.paletteScroll = clamp(this.paletteScroll, 0, this.maxPaletteScroll());
       int y = this.paletteListTop() - this.paletteScroll;
       context.enableScissor(0, this.paletteListTop() - 4, paletteWidth, this.height);
@@ -2698,7 +2703,7 @@ final class MacroBuilderScreen extends Screen {
                int sectionColor = this.sectionColor(row.group());
                context.fill(8, y, paletteWidth - 8, y + 22 - 2, this.sectionHeaderColor(row.group()));
                context.fill(8, y, 14, y + 22 - 2, sectionColor);
-               context.text(this.font, this.fit((expanded ? "v " : "> ") + row.group(), paletteWidth - 28), 20, y + 7, -1);
+               context.text(this.font, this.fit((expanded ? "v " : "> ") + tr("macro_builder.group." + row.group().toLowerCase(Locale.ROOT)), paletteWidth - 28), 20, y + 7, -1);
             }
 
             y += rowHeight;
@@ -2776,10 +2781,10 @@ final class MacroBuilderScreen extends Screen {
       int rightX = this.propertyLeft();
       int rightWidth = this.propertyInnerWidth();
       if (this.selectedNode == null) {
-         context.text(this.font, "No component selected", rightX + 14, RIGHT_COMPONENT_Y, -5327166);
+         context.text(this.font, tr("macro_builder.builder.no_component_selected"), rightX + 14, RIGHT_COMPONENT_Y, -5327166);
       } else {
          MacroModel.Descriptor descriptor = this.selectedNode.descriptor();
-         String title = this.selectedNodes.size() > 1 ? this.selectedNodes.size() + " components selected" : this.selectedNode.displayLabel();
+         String title = this.selectedNodes.size() > 1 ? tr("macro_builder.builder.components_selected", this.selectedNodes.size()) : this.selectedNode.displayLabel();
          context.text(this.font, this.fit(title, rightWidth), rightX + 14, RIGHT_COMPONENT_Y, -1);
          this.drawWrappedText(context, descriptor.description(), rightX + 14, RIGHT_COMPONENT_Y + 12, rightWidth, -7366491, 3);
          if (this.isNoteNode(this.selectedNode)) {
@@ -2790,7 +2795,7 @@ final class MacroBuilderScreen extends Screen {
             context.text(this.font, MacroRunner.recordedActionSummary(this.selectedNode.value), rightX + 14, RIGHT_SECONDARY_LABEL_Y, -5327166);
             this.drawWrappedText(
                context,
-               "Click Record, perform the actions, then press this macro's assigned key to stop and save.",
+               tr("macro_builder.builder.click_record_perform_the_actions_then_press_this_macro_s_assigned_key"),
                rightX + 14,
                RIGHT_SECONDARY_LABEL_Y + 14,
                rightWidth,
@@ -2800,46 +2805,46 @@ final class MacroBuilderScreen extends Screen {
          }
 
          if ("official:start".equals(this.selectedNode.type)) {
-            context.text(this.font, "Start Settings", rightX + 14, RIGHT_PRIMARY_LABEL_Y, -2565928);
+            context.text(this.font, tr("macro_builder.builder.start_settings"), rightX + 14, RIGHT_PRIMARY_LABEL_Y, -2565928);
             context.text(this.font, this.fit(this.autoSettingsButtonText(), rightWidth), rightX + 14, RIGHT_PRIMARY_LABEL_Y + 12, -4204545);
          }
 
          if (!descriptor.primaryLabel().isBlank() && !this.isAutoGrindstoneNode(this.selectedNode)) {
-            context.text(this.font, descriptor.primaryLabel(), rightX + 14, RIGHT_PRIMARY_LABEL_Y, -2565928);
+            context.text(this.font, this.fit(descriptor.primaryLabel(), rightWidth), rightX + 14, RIGHT_PRIMARY_LABEL_Y, -2565928);
          }
 
          if (!descriptor.secondaryLabel().isBlank() && !this.isClickGuiItemNode(this.selectedNode) && !this.isAutoGrindstoneNode(this.selectedNode)) {
-            context.text(this.font, descriptor.secondaryLabel(), rightX + 14, RIGHT_SECONDARY_LABEL_Y, -2565928);
+            context.text(this.font, this.fit(descriptor.secondaryLabel(), rightWidth), rightX + 14, RIGHT_SECONDARY_LABEL_Y, -2565928);
          }
 
          if (this.isMineAreaNode(this.selectedNode)) {
-            context.text(this.font, "Tool low durability", rightX + 14, RIGHT_MINE_AREA_TOOL_LABEL_Y, -2565928);
-             context.text(this.font, "Stop before block (optional)", rightX + 14, RIGHT_MINE_AREA_PROTECTED_LABEL_Y, -2565928);
+            context.text(this.font, tr("macro_builder.builder.tool_low_durability"), rightX + 14, RIGHT_MINE_AREA_TOOL_LABEL_Y, -2565928);
+             context.text(this.font, tr("macro_builder.builder.stop_before_block_optional"), rightX + 14, RIGHT_MINE_AREA_PROTECTED_LABEL_Y, -2565928);
          }
 
          if (this.isAutoEnchantNode(this.selectedNode)) {
-            context.text(this.font, "Enchant item", rightX + 14, RIGHT_AUTO_ENCHANT_ITEM_LABEL_Y, -2565928);
-            context.text(this.font, "Lapis item", rightX + 14, RIGHT_AUTO_ENCHANT_LAPIS_LABEL_Y, -2565928);
+            context.text(this.font, tr("macro_builder.builder.enchant_item"), rightX + 14, RIGHT_AUTO_ENCHANT_ITEM_LABEL_Y, -2565928);
+            context.text(this.font, tr("macro_builder.builder.lapis_item"), rightX + 14, RIGHT_AUTO_ENCHANT_LAPIS_LABEL_Y, -2565928);
          }
 
          if (this.isAutoGrindstoneNode(this.selectedNode)) {
-            context.text(this.font, "Mode", rightX + 14, RIGHT_GRINDSTONE_MODE_LABEL_Y, -2565928);
-            context.text(this.font, "Input item", rightX + 14, RIGHT_GRINDSTONE_INPUT_LABEL_Y, -2565928);
+            context.text(this.font, tr("macro_builder.builder.mode_2"), rightX + 14, RIGHT_GRINDSTONE_MODE_LABEL_Y, -2565928);
+            context.text(this.font, tr("macro_builder.builder.input_item"), rightX + 14, RIGHT_GRINDSTONE_INPUT_LABEL_Y, -2565928);
             if (this.autoGrindstoneRepairMode(this.selectedNode)) {
-               context.text(this.font, "Repair item", rightX + 14, RIGHT_GRINDSTONE_REPAIR_LABEL_Y, -2565928);
+               context.text(this.font, tr("macro_builder.builder.repair_item"), rightX + 14, RIGHT_GRINDSTONE_REPAIR_LABEL_Y, -2565928);
             }
 
-            this.drawWrappedText(context, "Outputs: last.slot, last.hotbar_slot, last.item", rightX + 14, RIGHT_GRINDSTONE_TOGGLE_Y + 26, rightWidth, -7366491, 2);
+            this.drawWrappedText(context, tr("macro_builder.builder.outputs_last_slot_last_hotbar_slot_last_item"), rightX + 14, RIGHT_GRINDSTONE_TOGGLE_Y + 26, rightWidth, -7366491, 2);
          }
 
-         context.text(this.font, "Name", rightX + 14, RIGHT_NODE_DELAY_LABEL_Y, -2565928);
-         context.text(this.font, "Delay", this.nodeDelayField.getX(), RIGHT_NODE_DELAY_LABEL_Y, -2565928);
+         context.text(this.font, tr("macro_builder.builder.name"), rightX + 14, RIGHT_NODE_DELAY_LABEL_Y, -2565928);
+         context.text(this.font, tr("macro_builder.builder.delay"), this.nodeDelayField.getX(), RIGHT_NODE_DELAY_LABEL_Y, -2565928);
          if (this.hasExcludeSlotField(this.selectedNode)) {
-            context.text(this.font, "Exclude slots", rightX + 14, RIGHT_EXTRA_LABEL_Y, -2565928);
-            context.text(this.font, "0-8 hotbar, 9-35 inventory", rightX + 14, RIGHT_EXTRA_HINT_Y, -7366491);
+            context.text(this.font, tr("macro_builder.builder.exclude_slots"), rightX + 14, RIGHT_EXTRA_LABEL_Y, -2565928);
+            context.text(this.font, tr("macro_builder.builder.0_8_hotbar_9_35_inventory"), rightX + 14, RIGHT_EXTRA_HINT_Y, -7366491);
          }
 
-         context.text(this.font, "Connections", rightX + 14, RIGHT_CONNECTION_LABEL_Y, -2565928);
+         context.text(this.font, tr("macro_builder.builder.connections"), rightX + 14, RIGHT_CONNECTION_LABEL_Y, -2565928);
          int y = RIGHT_CONNECTION_LIST_Y;
 
          for (String output : descriptor.outputs()) {
@@ -2849,11 +2854,11 @@ final class MacroBuilderScreen extends Screen {
             }
 
             List<String> targets = this.selectedNode.nextTargets(output);
-            String targetLabel = targets.isEmpty() ? "none" : (targets.size() == 1 ? this.labelForTarget(targets.get(0)) : targets.size() + " links");
+            String targetLabel = targets.isEmpty() ? "none" : (targets.size() == 1 ? this.labelForTarget(targets.get(0)) : tr("macro_builder.builder.links", targets.size()));
              int rowWidth = targets.isEmpty() ? rightWidth : Math.max(80, rightWidth - 50);
-             context.text(this.font, this.fit(output + " -> " + targetLabel, rowWidth), rightX + 14, y, -5327166);
+             context.text(this.font, this.fit(MacroText.output(output) + " → " + targetLabel, rowWidth), rightX + 14, y, -5327166);
             if (!targets.isEmpty()) {
-               String clearText = "Clear";
+               String clearText = tr("macro_builder.builder.clear");
                int clearX = this.width - 14 - this.font.width(clearText);
                context.text(this.font, clearText, clearX, y, -20312);
             }
@@ -2935,7 +2940,7 @@ final class MacroBuilderScreen extends Screen {
    }
 
    private String[] topActionLabels() {
-      return new String[]{"Reset View", "Copy", "Paste", "Market"};
+      return new String[]{tr("macro_builder.builder.reset_view"), tr("macro_builder.builder.copy"), tr("macro_builder.builder.paste"), tr("macro_builder.builder.market")};
    }
 
    private boolean topActionEnabled(int row) {
@@ -2962,7 +2967,7 @@ final class MacroBuilderScreen extends Screen {
       this.panX = 0.0;
       this.panY = 0.0;
       this.zoom = 1.0;
-      this.status = "View reset";
+      this.status = tr("macro_builder.builder.view_reset");
       this.statusColor = -4200769;
    }
 
@@ -3052,12 +3057,12 @@ final class MacroBuilderScreen extends Screen {
          sharedCopiedComponents = this.copiedComponents;
          this.copiedComponent = this.copiedComponents.get(0);
          this.status = this.copiedComponents.size() == 1
-            ? "Copied " + this.copiedComponent.displayLabel()
-            : "Copied " + this.copiedComponents.size() + " components";
+            ? tr("macro_builder.builder.copied", this.copiedComponent.displayLabel())
+            : tr("macro_builder.builder.copied_components", this.copiedComponents.size());
          this.statusColor = -4200769;
          this.refreshProperties();
       } else {
-         this.status = "Select a component to copy";
+         this.status = tr("macro_builder.builder.select_a_component_to_copy");
          this.statusColor = -11382;
       }
    }
@@ -3066,7 +3071,7 @@ final class MacroBuilderScreen extends Screen {
       this.syncSelectedFromFields();
       this.refreshCopiedComponentsFromShared();
       if (this.copiedComponents.isEmpty()) {
-         this.status = "No copied component";
+         this.status = tr("macro_builder.builder.no_copied_component");
          this.statusColor = -11382;
       } else {
          MacroBuilderScreen.CopiedComponent first = this.copiedComponents.get(0);
@@ -3079,7 +3084,7 @@ final class MacroBuilderScreen extends Screen {
    private void pasteCopiedComponentAt(int x, int y) {
       this.refreshCopiedComponentsFromShared();
       if (this.copiedComponents.isEmpty()) {
-         this.status = "No copied component";
+         this.status = tr("macro_builder.builder.no_copied_component");
          this.statusColor = -11382;
       } else {
          int minX = this.copiedComponents.stream().mapToInt(MacroBuilderScreen.CopiedComponent::x).min().orElse(x);
@@ -3138,7 +3143,7 @@ final class MacroBuilderScreen extends Screen {
          this.selectedNodes.clear();
          this.selectedNodes.addAll(pastedNodes);
          this.selectedNode = pastedNodes.isEmpty() ? null : pastedNodes.get(pastedNodes.size() - 1);
-         this.status = pastedNodes.size() == 1 ? "Pasted " + this.selectedNode.displayLabel() : "Pasted " + pastedNodes.size() + " components";
+         this.status = pastedNodes.size() == 1 ? tr("macro_builder.builder.pasted", this.selectedNode.displayLabel()) : tr("macro_builder.builder.pasted_components", pastedNodes.size());
          this.statusColor = -4200769;
          this.recordHistorySnapshot();
          this.refreshProperties();
@@ -3174,7 +3179,7 @@ final class MacroBuilderScreen extends Screen {
       note.noteHeight = NOTE_HEIGHT;
       this.selectNode(note, false);
       this.startNoteEditing(note);
-      this.status = "Added note";
+      this.status = tr("macro_builder.builder.added_note");
       this.statusColor = -4200769;
       this.refreshProperties();
       return note;
@@ -3815,20 +3820,20 @@ final class MacroBuilderScreen extends Screen {
       }
 
       if (this.undoSnapshots.isEmpty()) {
-         this.status = "Nothing to undo";
+         this.status = tr("macro_builder.builder.nothing_to_undo");
          this.statusColor = -11382;
          return;
       }
 
       this.redoSnapshots.add(this.model.toJson());
       String snapshot = this.undoSnapshots.remove(this.undoSnapshots.size() - 1);
-      this.restoreHistorySnapshot(snapshot, "Undid change", -4200769);
+      this.restoreHistorySnapshot(snapshot, tr("macro_builder.builder.undid_change"), -4200769);
    }
 
    private void redo() {
       this.syncSelectedFromFields();
       if (this.redoSnapshots.isEmpty()) {
-         this.status = "Nothing to redo";
+         this.status = tr("macro_builder.builder.nothing_to_redo");
          this.statusColor = -11382;
          return;
       }
@@ -3839,7 +3844,7 @@ final class MacroBuilderScreen extends Screen {
       }
 
       String snapshot = this.redoSnapshots.remove(this.redoSnapshots.size() - 1);
-      this.restoreHistorySnapshot(snapshot, "Redid change", -4200769);
+      this.restoreHistorySnapshot(snapshot, tr("macro_builder.builder.redid_change"), -4200769);
    }
 
    private void restoreHistorySnapshot(String snapshot, String message, int color) {
@@ -3875,7 +3880,7 @@ final class MacroBuilderScreen extends Screen {
          this.refreshProperties();
       } catch (IOException error) {
          MacroBuilderClient.LOGGER.error("Failed to restore Litemacro history snapshot", error);
-         this.status = "Undo failed";
+         this.status = tr("macro_builder.builder.undo_failed");
          this.statusColor = -30070;
       }
    }
@@ -3895,7 +3900,7 @@ final class MacroBuilderScreen extends Screen {
 
       for (int index = 0; index < CONTAINER_TYPE_OPTIONS.length; index++) {
          String type = CONTAINER_TYPE_OPTIONS[index][0];
-         String label = CONTAINER_TYPE_OPTIONS[index][1];
+         String label = tr(CONTAINER_TYPE_OPTIONS[index][1]);
          int rowY = y + index * CONTAINER_TYPE_DROPDOWN_ROW_HEIGHT;
          boolean selected = type.equals(selectedType);
          boolean hovered = mouseX >= x && mouseX < x + width && mouseY >= rowY && mouseY < rowY + CONTAINER_TYPE_DROPDOWN_ROW_HEIGHT;
@@ -3918,11 +3923,11 @@ final class MacroBuilderScreen extends Screen {
             if (this.autoGrindstoneRepairMode(this.selectedNode)) {
                this.drawItemPreview(context, this.autoGrindstoneRepairField.getValue(), rightX + 14, RIGHT_GRINDSTONE_REPAIR_BUTTON_Y);
             }
-         } else if (!descriptor.primaryLabel().isBlank() && this.isItemField(descriptor.primaryLabel())) {
+         } else if (!descriptor.primaryLabel().isBlank() && descriptor.primaryItemField()) {
             this.drawItemPreview(context, this.primaryField.getValue(), rightX + 14, RIGHT_PRIMARY_ITEM_Y);
          }
 
-         if (!this.isAutoGrindstoneNode(this.selectedNode) && !descriptor.secondaryLabel().isBlank() && this.isItemField(descriptor.secondaryLabel())) {
+         if (!this.isAutoGrindstoneNode(this.selectedNode) && !descriptor.secondaryLabel().isBlank() && descriptor.secondaryItemField()) {
             this.drawItemPreview(context, this.secondaryField.getValue(), rightX + 14, RIGHT_SECONDARY_ITEM_Y);
          }
       }
@@ -3945,9 +3950,9 @@ final class MacroBuilderScreen extends Screen {
          MacroBuilderScreen.ItemPickerLayout layout = this.itemPickerLayout();
          context.fill(layout.left() - 2, layout.top() - 2, layout.left() + layout.panelWidth() + 2, layout.top() + layout.panelHeight() + 2, -1511947);
          context.fill(layout.left(), layout.top(), layout.left() + layout.panelWidth(), layout.top() + layout.panelHeight(), -14867926);
-         context.text(this.font, "Pick Item", layout.left() + 8, layout.top() + 8, -1);
-         context.text(this.font, "Esc closes", layout.left() + layout.panelWidth() - 64, layout.top() + 8, -5327166);
-         context.text(this.font, "Search", layout.searchX(), layout.searchY() - 11, -5327166);
+         context.text(this.font, tr("macro_builder.builder.pick_item"), layout.left() + 8, layout.top() + 8, -1);
+         context.text(this.font, tr("macro_builder.builder.esc_closes"), layout.left() + layout.panelWidth() - 64, layout.top() + 8, -5327166);
+         context.text(this.font, tr("macro_builder.builder.search"), layout.searchX(), layout.searchY() - 11, -5327166);
          context.fill(
             layout.searchX() - 1,
             layout.searchY() - 1,
@@ -3956,7 +3961,7 @@ final class MacroBuilderScreen extends Screen {
             this.itemSearchFocused ? -1511947 : -7366491
          );
          context.fill(layout.searchX(), layout.searchY(), layout.searchX() + layout.searchWidth(), layout.searchY() + 16, -16250355);
-         String searchDisplay = this.itemSearchText.isBlank() ? "type item name..." : this.itemSearchText;
+         String searchDisplay = this.itemSearchText.isBlank() ? tr("macro_builder.builder.type_item_name") : this.itemSearchText;
          int searchColor = this.itemSearchText.isBlank() ? -9405818 : -1;
          context.text(this.font, this.fit(searchDisplay, layout.searchWidth() - 8), layout.searchX() + 4, layout.searchY() + 4, searchColor);
          if (this.itemSearchFocused && System.currentTimeMillis() / 450L % 2L == 0L) {
@@ -3964,7 +3969,7 @@ final class MacroBuilderScreen extends Screen {
             context.fill(cursorX, layout.searchY() + 3, cursorX + 1, layout.searchY() + 14, -1);
          }
 
-         context.text(this.font, items.size() + " items", layout.left() + 8, layout.gridTop() - 12, -5327166);
+         context.text(this.font, tr("macro_builder.builder.items", items.size()), layout.left() + 8, layout.gridTop() - 12, -5327166);
          context.enableScissor(layout.left() + 6, layout.gridTop(), layout.left() + layout.panelWidth() - 6, layout.top() + layout.panelHeight() - 8);
          int startIndex = this.itemPickerScroll * layout.columns();
          int endIndex = Math.min(items.size(), startIndex + layout.rowsVisible() * layout.columns());
@@ -4043,10 +4048,10 @@ final class MacroBuilderScreen extends Screen {
          if (!node.enabled) {
             int badgeLeft = sx + Math.max(3, this.scaled(5));
             int badgeTop = sy + nodeHeight - Math.max(13, this.scaled(14));
-            int badgeRight = badgeLeft + Math.max(22, this.font.width("OFF") + 6);
+            int badgeRight = badgeLeft + Math.max(22, this.font.width(tr("macro_builder.builder.off_2")) + 6);
             int badgeBottom = Math.min(sy + nodeHeight - 2, badgeTop + 11);
             context.fill(badgeLeft, badgeTop, badgeRight, badgeBottom, 0xCC2A1118);
-            this.drawNodeText(context, "OFF", badgeLeft + 3, badgeTop + 2, badgeRight - badgeLeft - 6, -30070);
+            this.drawNodeText(context, tr("macro_builder.builder.off_2"), badgeLeft + 3, badgeTop + 2, badgeRight - badgeLeft - 6, -30070);
          }
       }
 
@@ -4059,7 +4064,7 @@ final class MacroBuilderScreen extends Screen {
          int dotY = y + Math.max(1, this.scaled(2));
          context.fill(dotX, dotY, dotX + dotSize, dotY + dotSize, dotColor);
          if (showText) {
-            this.drawNodeTextRight(context, output, dotX - 5, y, nodeWidth - 18, -5327166);
+            this.drawNodeTextRight(context, MacroText.output(output), dotX - 5, y, nodeWidth - 18, -5327166);
          }
       }
    }
@@ -4076,7 +4081,7 @@ final class MacroBuilderScreen extends Screen {
       context.fill(sx, sy, sx + nodeWidth, sy + headerHeight, node.enabled ? this.sectionColor(node.descriptor().group()) : -12434878);
       boolean showText = this.zoom >= 0.45 && nodeWidth >= 86 && nodeHeight >= 46;
       if (showText) {
-         this.drawReadableNoteText(context, this.fit("Note", nodeWidth - 14), sx + Math.max(4, this.scaled(7)), sy + Math.max(2, this.scaled(5)), NOTE_TEXT_COLOR);
+         this.drawReadableNoteText(context, this.fit(tr("macro_builder.builder.note"), nodeWidth - 14), sx + Math.max(4, this.scaled(7)), sy + Math.max(2, this.scaled(5)), NOTE_TEXT_COLOR);
          String value = this.editingNote == node ? this.editingNoteText : this.noteText(node);
          int bodyMargin = Math.max(6, this.scaled(NOTE_TEXT_MARGIN));
          int bodyLeft = sx + bodyMargin;
@@ -4419,7 +4424,7 @@ final class MacroBuilderScreen extends Screen {
       if (this.selectedNode != null && !this.selectedNode.outputs.isEmpty()) {
          int rightX = this.propertyLeft();
          int clearRight = this.width - 14;
-         int clearLeft = clearRight - this.font.width("Clear") - 4;
+         int clearLeft = clearRight - this.font.width(tr("macro_builder.builder.clear")) - 4;
          if (mouseX >= clearLeft && mouseX <= clearRight && mouseX >= rightX) {
             int y = RIGHT_CONNECTION_LIST_Y;
 
@@ -4497,15 +4502,15 @@ final class MacroBuilderScreen extends Screen {
       if (MacroModel.PLAYER_RECORDED_ACTIONS.equals(node.type)) {
          return MacroRunner.recordedActionSummary(node.value);
       } else if ("official:misc.wait".equals(node.type)) {
-         return node.value + " ms";
+         return tr("macro_builder.builder.ms", node.value);
       } else if ("official:misc.chat".equals(node.type) || "builder:localMessage".equals(node.type)) {
          return node.value;
       } else if ("builder:misc.repeatMacro".equals(node.type)) {
-         return this.repeatIndefinitelyEnabled(node) ? "forever" : node.value + " runs";
+         return this.repeatIndefinitelyEnabled(node) ? "forever" : tr("macro_builder.builder.runs", node.value);
       } else if ("builder:misc.repeatSection".equals(node.type)) {
-         return this.repeatIndefinitelyEnabled(node) ? "forever" : node.value + " loops";
+         return this.repeatIndefinitelyEnabled(node) ? "forever" : tr("macro_builder.builder.loops", node.value);
       } else if ("builder:flow.endConnection".equals(node.type)) {
-         return "end branch";
+         return tr("macro_builder.builder.end_branch");
       } else if ("builder:flow.note".equals(node.type)) {
          return node.value == null ? "" : node.value;
       } else if ("builder:misc.idleUntil".equals(node.type)) {
@@ -4515,19 +4520,19 @@ final class MacroBuilderScreen extends Screen {
       } else if (MacroModel.SCOREBOARD_NUMBER.equals(node.type) || MacroModel.CHAT_NUMBER.equals(node.type)) {
          return node.value + " / " + node.value2;
       } else if (MacroModel.WAIT_FOR_CONDITION.equals(node.type)) {
-         return node.value + " / " + node.value2 + " ms";
+         return tr("macro_builder.builder.ms_3", node.value, node.value2);
       } else if (MacroModel.CLICK_WITH_CONDITION.equals(node.type)) {
-         return node.value + " / guard " + node.value2;
+         return tr("macro_builder.builder.guard", node.value, node.value2);
       } else if ("builder:event.kicked".equals(node.type)) {
          return node.value + (node.value2 == null || node.value2.isBlank() ? "" : " / " + node.value2);
       } else if ("builder:player.autoClick".equals(node.type)) {
          return node.value + " / " + node.value2;
       } else if ("builder:player.autoFish".equals(node.type)) {
-         return "rod low " + node.value + "% / " + node.value2 + "s";
+         return tr("macro_builder.builder.rod_low_s", node.value, node.value2);
       } else if ("builder:player.pressKey".equals(node.type)) {
          return node.value + " / " + node.value2;
       } else if ("official:inventory.hasItem".equals(node.type) || "builder:inventory.hasItem".equals(node.type)) {
-         return node.value + " x" + node.value2;
+         return tr("macro_builder.builder.x", node.value, node.value2);
       } else if ("builder:player.healthBelow".equals(node.type)) {
          return "<= " + node.value;
       } else if ("builder:player.foodBelow".equals(node.type)) {
@@ -4542,7 +4547,7 @@ final class MacroBuilderScreen extends Screen {
       } else if ("official:entity.player_nearby".equals(node.type)) {
          return node.value2;
       } else if ("official:inventory.clickOpenContainerSlot".equals(node.type)) {
-         return node.value + " / " + this.clickGuiButtonText(node).toLowerCase() + (this.shiftClickEnabled(node) ? " / shift" : "");
+         return node.value + " / " + this.clickGuiButtonText(node).toLowerCase(Locale.ROOT) + (this.shiftClickEnabled(node) ? tr("macro_builder.builder.shift") : "");
       } else if ("official:inventory.hotbarSelect".equals(node.type) || "official:inventory.hotbarUse".equals(node.type)) {
          return node.value != null && !node.value.isBlank() ? node.value : "slot " + node.value2;
       } else if ("official:inventory.dropItems".equals(node.type)) {
@@ -4552,42 +4557,42 @@ final class MacroBuilderScreen extends Screen {
          }
 
          if (this.dropAllEnabled(node)) {
-            text += " / all";
+            text += tr("macro_builder.builder.all_2");
          }
 
          return this.withSkipText(text, node.value3);
       } else if ("official:inventory.chestWithdrawItems".equals(node.type)) {
-         String text = "specific".equalsIgnoreCase(node.value) ? "specific: " + node.value2 : "all items";
-         return text + (this.shiftClickEnabled(node) ? " / shift" : " / click");
+         String text = "specific".equalsIgnoreCase(node.value) ? "specific: " + node.value2 : tr("macro_builder.builder.all_items");
+         return text + (this.shiftClickEnabled(node) ? tr("macro_builder.builder.shift") : tr("macro_builder.builder.click"));
       } else if ("official:inventory.chestDepositItems".equals(node.type)) {
-         String text = "specific".equalsIgnoreCase(node.value) ? "specific: " + node.value2 : "all items";
-         return this.withSkipText(text + (this.shiftClickEnabled(node) ? " / shift" : " / click") + (this.fastDepositEnabled(node) ? " / fast" : ""), node.value5);
+         String text = "specific".equalsIgnoreCase(node.value) ? "specific: " + node.value2 : tr("macro_builder.builder.all_items");
+         return this.withSkipText(text + (this.shiftClickEnabled(node) ? tr("macro_builder.builder.shift") : tr("macro_builder.builder.click")) + (this.fastDepositEnabled(node) ? tr("macro_builder.builder.fast") : ""), node.value5);
       } else if ("builder:inventory.heldItemIs".equals(node.type)) {
          return node.value;
       } else if ("builder:inventory.slotHasItem".equals(node.type)) {
          return "slot " + node.value + " = " + node.value2;
       } else if ("builder:inventory.itemOrSlotHasTag".equals(node.type)) {
-         return node.value + " # " + node.value2 + (this.clickMatchedTagEnabled(node) ? " / click" : "");
+         return node.value + " # " + node.value2 + (this.clickMatchedTagEnabled(node) ? tr("macro_builder.builder.click") : "");
       } else if ("builder:inventory.itemDurability".equals(node.type)) {
          return node.value + " / " + node.value2;
       } else if ("builder:inventory.emptySlotsAtLeast".equals(node.type)) {
          return "empty >= " + node.value;
       } else if ("builder:inventory.openContainerHasItem".equals(node.type)) {
-         return node.value + " x" + node.value2;
+         return tr("macro_builder.builder.x", node.value, node.value2);
       } else if ("builder:inventory.autoEnchant".equals(node.type)) {
          this.normalizeAutoEnchantNode(node);
          String item = this.autoEnchantItemText(node);
-         String close = this.autoEnchantCloseEnabled(node) ? " / close" : "";
-         return "option " + node.value + " / XP " + this.autoEnchantXpText(node) + " / " + item + close;
+         String close = this.autoEnchantCloseEnabled(node) ? tr("macro_builder.builder.close") : "";
+         return tr("macro_builder.builder.option_xp", node.value, this.autoEnchantXpText(node), item, close);
       } else if ("builder:inventory.autoGrindstone".equals(node.type)) {
          this.normalizeAutoGrindstoneNode(node);
-         String text = this.autoGrindstoneRepairMode(node) ? "repair " + this.autoGrindstoneInputText(node) + " + " + this.autoGrindstoneRepairText(node) : "remove enchants / " + this.autoGrindstoneInputText(node);
+         String text = this.autoGrindstoneRepairMode(node) ? "repair " + this.autoGrindstoneInputText(node) + " + " + this.autoGrindstoneRepairText(node) : tr("macro_builder.builder.remove_enchants", this.autoGrindstoneInputText(node));
          if ("drop".equals(this.autoGrindstoneResultAction(node))) {
-            text += " / drop";
+            text += tr("macro_builder.builder.drop");
          }
 
          if (this.autoGrindstoneCloseEnabled(node)) {
-            text += " / close";
+            text += tr("macro_builder.builder.close");
          }
 
          return text;
@@ -4602,28 +4607,24 @@ final class MacroBuilderScreen extends Screen {
       } else if ("builder:world.blockIs".equals(node.type)) {
          return node.value + " = " + node.value2;
       } else if ("builder:world.lookingAtBlock".equals(node.type)) {
-         return node.value != null && !node.value.isBlank() ? node.value : "any block";
+         return node.value != null && !node.value.isBlank() ? node.value : tr("macro_builder.builder.any_block");
       } else if ("builder:world.mineArea".equals(node.type)) {
-         return this.mineAreaToText(node)
-            + (this.mineAreaAutoToolEnabled(node) ? " / auto tool" : "")
-            + " / slice "
-            + this.mineAreaSliceHeight(node)
-            + (this.mineAreaSafePathEnabled(node) ? " / safe path" : "");
+         return tr("macro_builder.builder.slice_2", this.mineAreaToText(node), (this.mineAreaAutoToolEnabled(node) ? tr("macro_builder.builder.auto_tool") : ""), this.mineAreaSliceHeight(node), (this.mineAreaSafePathEnabled(node) ? tr("macro_builder.builder.safe_path") : ""));
       } else if (this.isOpenNearestContainerSettingsNode(node)) {
-         return this.containerTypeLabel(this.containerType(node)) + " / " + node.value + " blocks" + (this.containerMoveEnabled(node) ? " / move" : " / no move");
+         return tr("macro_builder.builder.blocks", this.containerTypeLabel(this.containerType(node)), node.value, (this.containerMoveEnabled(node) ? tr("macro_builder.builder.move") : tr("macro_builder.builder.no_move")));
       } else if ("builder:world.openNearestEnchantingTable".equals(node.type) || "builder:world.openNearestGrindstone".equals(node.type)) {
-         return node.value + " blocks" + (this.isTruthyText(node.value2) ? " / move" : "");
+         return tr("macro_builder.builder.blocks_2", node.value, (this.isTruthyText(node.value2) ? tr("macro_builder.builder.move") : ""));
       } else if ("builder:entity.nearby".equals(node.type)) {
          return node.value + " / " + node.value2;
       } else if ("official:misc.random".equals(node.type)) {
-         return node.value + "% true";
+         return tr("macro_builder.builder.true_2", node.value);
       } else if ("builder:misc.randomOutput3".equals(node.type)) {
-         return "one / two / three";
+         return tr("macro_builder.builder.one_two_three");
       } else if ("official:misc.rejoinServer".equals(node.type)) {
-         return node.value + " ms" + (node.value2 == null || node.value2.isBlank() ? "" : " -> " + node.value2);
+         return tr("macro_builder.builder.ms_2", node.value, (node.value2 == null || node.value2.isBlank() ? "" : " -> " + node.value2));
       } else if ("official:misc.joinServer".equals(node.type)) {
          String delay = node.value2 == null || node.value2.isBlank() ? "1000" : node.value2;
-         return node.value + " / " + delay + " ms";
+         return tr("macro_builder.builder.ms_3", node.value, delay);
       } else if ("official:misc.macroStart".equals(node.type) || "official:misc.macroStop".equals(node.type)) {
          return "macro " + node.value;
       } else if ("official:notification.discord".equals(node.type)) {
@@ -4640,7 +4641,7 @@ final class MacroBuilderScreen extends Screen {
    }
 
    private String withSkipText(String text, String slots) {
-      return slots != null && !slots.isBlank() ? text + " / skip " + slots : text;
+      return slots != null && !slots.isBlank() ? tr("macro_builder.builder.skip", text, slots) : text;
    }
 
    private String mouseButtonStateText(String value) {
@@ -4685,49 +4686,49 @@ final class MacroBuilderScreen extends Screen {
       if ("builder:world.mineArea".equals(descriptor.type())) {
          return secondary ? "10 79 10" : "0 64 0";
       } else if ("builder:world.farmArea".equals(descriptor.type())) {
-         return secondary ? "0 64 0 replant deposit move=true" : "0 64 0";
+         return secondary ? tr("macro_builder.builder.0_64_0_replant_deposit_move_true") : "0 64 0";
       } else if ("official:inventory.clickOpenContainerSlot".equals(descriptor.type())) {
          return secondary ? "false" : "minecraft:water_bucket $2k-$5k or slot 1";
       } else if ("builder:inventory.itemOrSlotHasTag".equals(descriptor.type())) {
-         return secondary ? "Delivered or $1-10T" : "held, slot 1, or gui slots 0-53";
+         return secondary ? tr("macro_builder.builder.delivered_or_1_10t") : tr("macro_builder.builder.held_slot_1_or_gui_slots_0_53");
       } else if ("builder:inventory.itemDurability".equals(descriptor.type())) {
-         return secondary ? "lower 20 or higher 80" : "held, slot 1, or gui slots 0-53";
+         return secondary ? tr("macro_builder.builder.lower_20_or_higher_80") : tr("macro_builder.builder.held_slot_1_or_gui_slots_0_53");
       } else if ("builder:inventory.autoEnchant".equals(descriptor.type())) {
-         return secondary ? "30" : "1, 2, 3, best";
+         return secondary ? "30" : tr("macro_builder.builder.1_2_3_best");
       } else if ("builder:inventory.autoGrindstone".equals(descriptor.type())) {
-         return secondary ? "held, selected, any, or minecraft:iron_sword" : "remove enchants or repair";
+         return secondary ? tr("macro_builder.builder.held_selected_any_or_minecraft_iron_sword") : tr("macro_builder.builder.remove_enchants_or_repair");
       } else if ("builder:player.stopAtXpLevel".equals(descriptor.type())) {
-         return secondary ? "release or stop" : "30";
+         return secondary ? tr("macro_builder.builder.release_or_stop") : "30";
       } else if ("builder:misc.repeatMacro".equals(descriptor.type()) || "builder:misc.repeatSection".equals(descriptor.type())) {
-         return secondary ? "" : "3 or forever";
+         return secondary ? "" : tr("macro_builder.builder.3_or_forever");
       } else if ("builder:misc.idleUntil".equals(descriptor.type())) {
-         return secondary ? "optional chat text, player, or kick reason" : "chat, player, full, or kicked";
+         return secondary ? tr("macro_builder.builder.optional_chat_text_player_or_kick_reason") : tr("macro_builder.builder.chat_player_full_or_kicked");
       } else if ("builder:logic.scoreboardContains".equals(descriptor.type())) {
-         return secondary ? "contains, exact, or regex" : "scoreboard text";
+         return secondary ? tr("macro_builder.builder.contains_exact_or_regex") : tr("macro_builder.builder.scoreboard_text");
       } else if (MacroModel.SCOREBOARD_NUMBER.equals(descriptor.type()) || MacroModel.CHAT_NUMBER.equals(descriptor.type())) {
-         return secondary ? "op=... value=... stale=... rate=... mode=... missing=..." : "regex with number in capture group 1";
+         return secondary ? tr("macro_builder.builder.op_value_stale_rate_mode_missing") : tr("macro_builder.builder.regex_with_number_in_capture_group_1");
       } else if (MacroModel.WAIT_FOR_CONDITION.equals(descriptor.type())) {
-         return secondary ? "poll interval ms" : "condition node IDs";
+         return secondary ? tr("macro_builder.builder.poll_interval_ms") : tr("macro_builder.builder.condition_node_ids");
       } else if (MacroModel.CLICK_WITH_CONDITION.equals(descriptor.type())) {
-         return secondary ? "condition node IDs" : "item id, tag, price, or GUI slot";
+         return secondary ? tr("macro_builder.builder.condition_node_ids") : tr("macro_builder.builder.item_id_tag_price_or_gui_slot");
       } else if ("builder:event.kicked".equals(descriptor.type())) {
-         return secondary ? "any, allow, block, or regex" : "optional kick reason";
+         return secondary ? tr("macro_builder.builder.any_allow_block_or_regex") : tr("macro_builder.builder.optional_kick_reason");
       } else if ("builder:flow.note".equals(descriptor.type())) {
-         return secondary ? "" : "Write notes here";
+         return secondary ? "" : tr("macro_builder.builder.write_notes_here");
       } else if ("official:misc.rejoinServer".equals(descriptor.type())) {
-         return secondary ? "blank = last server, or play.example.net" : "3000";
+         return secondary ? tr("macro_builder.builder.blank_last_server_or_play_example_net") : "3000";
       } else if ("official:misc.joinServer".equals(descriptor.type())) {
          return secondary ? "1000" : "play.example.net";
       } else if ("official:player.setMouseButton".equals(descriptor.type())) {
          return secondary ? "left" : "press";
       } else if ("builder:player.autoClick".equals(descriptor.type())) {
-         return secondary ? "count=5 cps=8 or hold 500" : "left or right";
+         return secondary ? tr("macro_builder.builder.count_5_cps_8_or_hold_500") : tr("macro_builder.builder.left_or_right");
       } else if ("builder:player.autoFish".equals(descriptor.type())) {
          return secondary ? "60" : "10";
       } else if ("builder:player.pressKey".equals(descriptor.type())) {
-         return secondary ? "tap 100 or hold 1000" : "space, shift, ctrl, alt, E";
+         return secondary ? tr("macro_builder.builder.tap_100_or_hold_1000") : tr("macro_builder.builder.space_shift_ctrl_alt_e");
       } else if (secondary && "builder:world.openNearestContainer".equals(descriptor.type())) {
-         return "move=true type=chest";
+         return tr("macro_builder.builder.move_true_type_chest");
       } else if (secondary
          && ("builder:world.openNearestChest".equals(descriptor.type())
             || "builder:world.openNearestBarrel".equals(descriptor.type())
@@ -4839,7 +4840,7 @@ final class MacroBuilderScreen extends Screen {
                }
 
                this.itemPickerOpen = false;
-               this.status = "Selected " + entry.displayName();
+               this.status = tr("macro_builder.builder.selected", entry.displayName());
                this.statusColor = -4200769;
                return true;
             } else {
@@ -4878,7 +4879,7 @@ final class MacroBuilderScreen extends Screen {
    }
 
    private List<MacroBuilderScreen.ItemEntry> filteredItems() {
-      String filter = this.itemFilterText().toLowerCase();
+      String filter = this.itemFilterText().toLowerCase(Locale.ROOT);
       if (!filter.isBlank() && !filter.equals("minecraft:air")) {
          List<MacroBuilderScreen.ItemEntry> filtered = new ArrayList<>();
 
@@ -4937,10 +4938,7 @@ final class MacroBuilderScreen extends Screen {
       }
    }
 
-   private boolean isItemField(String label) {
-      String normalized = label == null ? "" : label.toLowerCase();
-      return normalized.contains("item");
-   }
+
 
    private void drawCanvasGrid(GuiGraphicsExtractor context) {
       int left = this.canvasLeft();
@@ -5046,21 +5044,7 @@ final class MacroBuilderScreen extends Screen {
    }
 
    private String fit(String text, int maxWidth) {
-      if (text == null) {
-         return "";
-      } else if (this.font.width(text) <= maxWidth) {
-         return text;
-      } else {
-         String suffix = "...";
-         int suffixWidth = this.font.width(suffix);
-         String trimmed = text;
-
-         while (!trimmed.isEmpty() && this.font.width(trimmed) + suffixWidth > maxWidth) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
-         }
-
-         return trimmed + suffix;
-      }
+      return MacroText.fit(text, this.font, maxWidth);
    }
 
    private int parseDelayMs(String text) {
@@ -5095,33 +5079,7 @@ final class MacroBuilderScreen extends Screen {
    }
 
    private List<String> wrapText(String text, int maxWidth) {
-      List<String> lines = new ArrayList<>();
-      if (text != null && !text.isBlank()) {
-         StringBuilder current = new StringBuilder();
-
-         for (String word : text.trim().split("\\s+")) {
-            String candidate = current.isEmpty() ? word : current + " " + word;
-            if (this.font.width(candidate) <= maxWidth) {
-               current.setLength(0);
-               current.append(candidate);
-            } else {
-               if (!current.isEmpty()) {
-                  lines.add(current.toString());
-                  current.setLength(0);
-               }
-
-               current.append(word);
-            }
-         }
-
-         if (!current.isEmpty()) {
-            lines.add(current.toString());
-         }
-
-         return lines;
-      } else {
-         return lines;
-      }
+      return MacroText.wrap(text, this.font.getSplitter(), maxWidth);
    }
 
    private void drawNodeText(GuiGraphicsExtractor context, String text, int x, int y, int maxWidth, int color) {
@@ -5205,15 +5163,17 @@ final class MacroBuilderScreen extends Screen {
    }
 
    private String componentSearchText() {
-      return this.componentSearchField != null && this.componentSearchField.getValue() != null ? this.componentSearchField.getValue().trim().toLowerCase() : "";
+      return this.componentSearchField != null && this.componentSearchField.getValue() != null ? this.componentSearchField.getValue().trim().toLowerCase(Locale.ROOT) : "";
    }
 
    private boolean componentMatches(MacroModel.Descriptor descriptor, String filter) {
       return filter != null && !filter.isBlank()
-         ? descriptor.label().toLowerCase().contains(filter)
-            || descriptor.group().toLowerCase().contains(filter)
-            || descriptor.description().toLowerCase().contains(filter)
-            || descriptor.type().toLowerCase().contains(filter)
+         ? descriptor.label().toLowerCase(Locale.ROOT).contains(filter)
+            || descriptor.groupLabel().toLowerCase(Locale.ROOT).contains(filter)
+            || descriptor.legacyLabel().toLowerCase(Locale.ROOT).contains(filter)
+            || descriptor.group().toLowerCase(Locale.ROOT).contains(filter)
+            || descriptor.description().toLowerCase(Locale.ROOT).contains(filter)
+            || descriptor.type().toLowerCase(Locale.ROOT).contains(filter)
          : true;
    }
 
@@ -5410,7 +5370,7 @@ final class MacroBuilderScreen extends Screen {
       }
 
       String searchText() {
-         return (this.id.toString() + " " + this.item.getDescriptionId()).toLowerCase();
+         return (this.id.toString() + " " + this.item.getDescriptionId()).toLowerCase(Locale.ROOT);
       }
    }
 

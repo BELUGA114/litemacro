@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -51,9 +53,10 @@ final class MacroMarketplaceScreen extends Screen {
    private EditBox publishDescriptionField;
    private EditBox publishTagsField;
    private String searchText = "";
-   private String status = "Loading Litemacro marketplace...";
+   private String status = tr("macro_builder.marketplace.loading_litemacro_marketplace");
    private int page;
    private boolean loading;
+   private boolean statusError;
    private boolean refreshQueued;
    private boolean busy;
    private boolean publishPopupOpen;
@@ -62,13 +65,13 @@ final class MacroMarketplaceScreen extends Screen {
    private boolean showingMyUploads;
 
    MacroMarketplaceScreen(MacroRunner runner, int returnPage) {
-      super(Component.literal("Litemacro Marketplace"));
+      super(Component.translatable("macro_builder.marketplace.litemacro_marketplace"));
       this.runner = runner;
       this.returnPage = returnPage;
    }
 
    protected void init() {
-      this.searchField = new EditBox(this.font, 118, 16, 172, 18, Component.literal("Search macros"));
+      this.searchField = new EditBox(this.font, 118, 16, 172, 18, Component.translatable("macro_builder.marketplace.search_macros"));
       this.searchField.setMaxLength(64);
       this.searchField.setValue(this.searchText);
       this.searchField.setResponder(value -> {
@@ -77,10 +80,10 @@ final class MacroMarketplaceScreen extends Screen {
       });
       this.addRenderableWidget(this.searchField);
 
-      this.publishNameField = this.popupField("Macro name");
-      this.publishAuthorField = this.popupField("Author");
-      this.publishDescriptionField = this.popupField("Description");
-      this.publishTagsField = this.popupField("Tags");
+      this.publishNameField = this.popupField(tr("macro_builder.marketplace.macro_name"));
+      this.publishAuthorField = this.popupField(tr("macro_builder.marketplace.author"));
+      this.publishDescriptionField = this.popupField(tr("macro_builder.marketplace.description"));
+      this.publishTagsField = this.popupField(tr("macro_builder.marketplace.tags"));
       this.addRenderableWidget(this.publishNameField);
       this.addRenderableWidget(this.publishAuthorField);
       this.addRenderableWidget(this.publishDescriptionField);
@@ -178,7 +181,7 @@ final class MacroMarketplaceScreen extends Screen {
                   this.deleteSelectedPreset();
                } else {
                   this.deleteConfirmArmed = true;
-                  this.status = "Click Confirm Delete to remove your upload permanently.";
+                  this.setStatus(tr("macro_builder.marketplace.click_confirm_delete_to_remove_your_upload_permanently"), false);
                }
                return true;
             }
@@ -280,13 +283,13 @@ final class MacroMarketplaceScreen extends Screen {
          this.filteredPresets = List.of();
          this.page = 0;
          this.refreshQueued = false;
-         this.status = LitemacroMarketplaceService.configurationHelp();
+         this.setStatus(LitemacroMarketplaceService.configurationHelp(), true);
          return;
       }
 
       this.loading = true;
       this.refreshQueued = false;
-      this.status = this.showingMyUploads ? "Loading your uploads..." : "Loading Litemacro marketplace...";
+      this.setStatus(this.showingMyUploads ? tr("macro_builder.marketplace.loading_your_uploads") : tr("macro_builder.marketplace.loading_litemacro_marketplace"), false);
       (this.showingMyUploads
             ? LitemacroMarketplaceService.fetchOwnPresets()
             : LitemacroMarketplaceService.fetchPublishedPresets(this.sortMode))
@@ -301,7 +304,7 @@ final class MacroMarketplaceScreen extends Screen {
             this.filteredPresets = List.of();
             this.selectedPreset = null;
             this.page = 0;
-            this.status = this.shortError(error);
+            this.setStatus(this.shortError(error), true);
          } else {
             this.allPresets.clear();
             if (presets != null) {
@@ -310,9 +313,9 @@ final class MacroMarketplaceScreen extends Screen {
 
             this.page = 0;
             this.applyFilter();
-            this.status = this.showingMyUploads
-               ? (this.allPresets.isEmpty() ? "You have not uploaded any macros from this installation." : "Loaded " + this.allPresets.size() + " of your uploads.")
-               : (this.allPresets.isEmpty() ? "No Litemacro uploads found yet." : "Loaded " + this.allPresets.size() + " Litemacro marketplace macros.");
+            this.setStatus(this.showingMyUploads
+               ? (this.allPresets.isEmpty() ? tr("macro_builder.marketplace.you_have_not_uploaded_any_macros_from_this_installation") : tr("macro_builder.marketplace.loaded_of_your_uploads", this.allPresets.size()))
+               : (this.allPresets.isEmpty() ? tr("macro_builder.marketplace.no_litemacro_uploads_found_yet") : tr("macro_builder.marketplace.loaded_litemacro_marketplace_macros", this.allPresets.size())), false);
          }
 
          if (this.refreshQueued) {
@@ -410,13 +413,13 @@ final class MacroMarketplaceScreen extends Screen {
       try {
          this.runner.save(this.runner.model());
       } catch (IOException var8) {
-         this.status = "Save before upload failed: " + var8.getMessage();
+         this.setStatus(tr("macro_builder.marketplace.save_before_upload_failed", var8.getMessage()), true);
          return;
       }
 
       Path path = this.runner.macroFilePath(this.runner.currentMacroNumber());
       this.busy = true;
-      this.status = "Submitting " + name + "...";
+      this.setStatus(tr("macro_builder.marketplace.submitting", name), false);
       LitemacroMarketplaceService.PublishRequest request = new LitemacroMarketplaceService.PublishRequest(
          path,
          null,
@@ -434,13 +437,13 @@ final class MacroMarketplaceScreen extends Screen {
          .whenComplete((result, error) -> this.runOnClient(() -> {
             this.busy = false;
             if (error != null) {
-               this.status = this.shortError(error);
+               this.setStatus(this.shortError(error), true);
                return;
             }
 
             this.publishPopupOpen = false;
             this.updatePopupFieldVisibility();
-            this.status = result.message() + " " + result.remaining() + " upload(s) left.";
+            this.setStatus(tr("macro_builder.marketplace.upload_s_left", result.message(), result.remaining()), false);
             this.refreshMarketplace();
          }));
    }
@@ -452,22 +455,22 @@ final class MacroMarketplaceScreen extends Screen {
 
       LitemacroMarketplacePreset preset = this.selectedPreset;
       this.busy = true;
-      this.status = "Downloading " + preset.name() + "...";
+      this.setStatus(tr("macro_builder.marketplace.downloading", preset.name()), false);
       LitemacroMarketplaceService.downloadPresetToTempFile(preset).whenComplete((path, error) -> this.runOnClient(() -> {
          this.busy = false;
          if (error != null) {
-            this.status = this.shortError(error);
+            this.setStatus(this.shortError(error), true);
             return;
          }
 
          try {
             this.runner.importMacroFromDownloads(this.minecraft, this.runner.currentMacroNumber(), path);
             Files.deleteIfExists(path);
-            this.status = "Imported " + preset.name() + " into Macro " + this.runner.currentMacroNumber() + ".";
+            this.setStatus(tr("macro_builder.marketplace.imported_into_macro", preset.name(), this.runner.currentMacroNumber()), false);
             this.selectedPreset = null;
             LitemacroMarketplaceService.incrementDownload(preset.id());
          } catch (Exception var5) {
-            this.status = "Import failed: " + var5.getMessage();
+            this.setStatus(tr("macro_builder.marketplace.import_failed", var5.getMessage()), true);
          }
       }));
    }
@@ -479,11 +482,11 @@ final class MacroMarketplaceScreen extends Screen {
 
       LitemacroMarketplacePreset preset = this.selectedPreset;
       this.busy = true;
-      this.status = "Liking " + preset.name() + "...";
+      this.setStatus(tr("macro_builder.marketplace.liking", preset.name()), false);
       LitemacroMarketplaceService.likePreset(preset.id()).whenComplete((updated, error) -> this.runOnClient(() -> {
          this.busy = false;
          if (error != null) {
-            this.status = this.shortError(error);
+            this.setStatus(this.shortError(error), true);
             return;
          }
 
@@ -491,7 +494,7 @@ final class MacroMarketplaceScreen extends Screen {
             this.replacePreset(updated);
             this.selectedPreset = updated;
             this.applyFilter();
-            this.status = "Liked " + updated.name() + ".";
+            this.setStatus(tr("macro_builder.marketplace.liked", updated.name()), false);
          }
       }));
    }
@@ -504,11 +507,11 @@ final class MacroMarketplaceScreen extends Screen {
       LitemacroMarketplacePreset preset = this.selectedPreset;
       this.busy = true;
       this.deleteConfirmArmed = false;
-      this.status = "Deleting " + preset.name() + "...";
+      this.setStatus(tr("macro_builder.marketplace.deleting", preset.name()), false);
       LitemacroMarketplaceService.deleteOwnPreset(preset.id()).whenComplete((message, error) -> this.runOnClient(() -> {
          this.busy = false;
          if (error != null) {
-            this.status = this.shortError(error);
+            this.setStatus(this.shortError(error), true);
             return;
          }
 
@@ -516,7 +519,7 @@ final class MacroMarketplaceScreen extends Screen {
          this.selectedPreset = null;
          this.applyFilter();
          this.page = Math.min(this.page, this.totalPages() - 1);
-         this.status = firstNonBlank(message, "Deleted your marketplace upload.");
+         this.setStatus(firstNonBlank(message, tr("macro_builder.marketplace.deleted_your_marketplace_upload")), false);
       }));
    }
 
@@ -534,14 +537,14 @@ final class MacroMarketplaceScreen extends Screen {
    private void drawTopBar(GuiGraphicsExtractor context, int mouseX, int mouseY) {
       context.fill(0, 0, this.width, TOP_BAR_HEIGHT, 0xF3121A23);
       context.fill(0, TOP_BAR_HEIGHT - 1, this.width, TOP_BAR_HEIGHT, BORDER);
-      this.drawButton(context, this.backRect(), "Back", mouseX, mouseY, true);
-      this.drawButton(context, this.publishRect(), "Submit", mouseX, mouseY, !this.busy);
-      this.drawButton(context, this.myUploadsRect(), this.showingMyUploads ? "Community" : "My Uploads", mouseX, mouseY, !this.loading);
+      this.drawButton(context, this.backRect(), tr("macro_builder.marketplace.back"), mouseX, mouseY, true);
+      this.drawButton(context, this.publishRect(), tr("macro_builder.marketplace.submit"), mouseX, mouseY, !this.busy);
+      this.drawButton(context, this.myUploadsRect(), this.showingMyUploads ? tr("macro_builder.marketplace.community") : tr("macro_builder.marketplace.my_uploads"), mouseX, mouseY, !this.loading);
       this.drawButton(context, this.sortRect(), this.sortShortLabel(), mouseX, mouseY, true);
-      this.drawButton(context, this.refreshRect(), this.loading ? "Loading" : "Refresh", mouseX, mouseY, !this.loading);
-      context.centeredText(this.font, "Litemacro Marketplace", this.width / 2, 8, TEXT);
+      this.drawButton(context, this.refreshRect(), this.loading ? tr("macro_builder.marketplace.loading") : tr("macro_builder.marketplace.refresh"), mouseX, mouseY, !this.loading);
+      context.centeredText(this.font, tr("macro_builder.marketplace.litemacro_marketplace"), this.width / 2, 8, TEXT);
       if (this.width >= 760) {
-         context.centeredText(this.font, "Litemacro online macro gallery", this.width / 2, 22, MUTED);
+         context.centeredText(this.font, tr("macro_builder.marketplace.litemacro_online_macro_gallery"), this.width / 2, 22, MUTED);
       }
    }
 
@@ -551,20 +554,20 @@ final class MacroMarketplaceScreen extends Screen {
       int width = this.width - 36;
       int bottom = this.height - 34;
       this.drawPanel(context, left, top, left + width, bottom, PANEL);
-      context.text(this.font, this.showingMyUploads ? "My uploads" : "Community macros", left + 14, top + 12, TEXT);
-      context.text(this.font, this.filteredPresets.size() + " shown / " + this.allPresets.size() + " loaded", left + 14, top + 26, MUTED);
+      context.text(this.font, this.showingMyUploads ? tr("macro_builder.marketplace.my_uploads_2") : tr("macro_builder.marketplace.community_macros"), left + 14, top + 12, TEXT);
+      context.text(this.font, tr("macro_builder.marketplace.shown_loaded", this.filteredPresets.size(), this.allPresets.size()), left + 14, top + 26, MUTED);
       int galleryTop = top + 48;
       int columns = this.galleryColumns();
       int pageSize = this.pageSize();
       int start = this.page * pageSize;
       int end = Math.min(this.filteredPresets.size(), start + pageSize);
       if (this.loading) {
-         context.centeredText(this.font, "Loading marketplace...", this.width / 2, galleryTop + 48, ACCENT);
+         context.centeredText(this.font, tr("macro_builder.marketplace.loading_marketplace"), this.width / 2, galleryTop + 48, ACCENT);
          return;
       }
       if (this.filteredPresets.isEmpty()) {
-         context.centeredText(this.font, this.showingMyUploads ? "No uploads from this installation." : "No Litemacro macros match this view.", this.width / 2, galleryTop + 48, MUTED);
-         context.centeredText(this.font, this.showingMyUploads ? "Submit a macro to add it here." : "Submit one from the button above.", this.width / 2, galleryTop + 64, DIM);
+         context.centeredText(this.font, this.showingMyUploads ? tr("macro_builder.marketplace.no_uploads_from_this_installation") : tr("macro_builder.marketplace.no_litemacro_macros_match_this_view"), this.width / 2, galleryTop + 48, MUTED);
+         context.centeredText(this.font, this.showingMyUploads ? tr("macro_builder.marketplace.submit_a_macro_to_add_it_here") : tr("macro_builder.marketplace.submit_one_from_the_button_above"), this.width / 2, galleryTop + 64, DIM);
          return;
       }
 
@@ -585,8 +588,8 @@ final class MacroMarketplaceScreen extends Screen {
       context.fill(x + 1, y + 1, x + width - 1, y + 4, accent);
       this.drawMiniGraph(context, x + 10, y + 14, width - 20, 38, accent);
       context.text(this.font, this.fit(preset.name(), width - 18), x + 9, y + 60, TEXT);
-      context.text(this.font, this.fit(firstNonBlank(preset.authorName(), "Unknown author"), width - 18), x + 9, y + 74, MUTED);
-      context.text(this.font, "DL " + preset.downloadsCount() + "   Like " + preset.likesCount(), x + 9, y + 90, DIM);
+      context.text(this.font, this.fit(firstNonBlank(preset.authorName(), tr("macro_builder.marketplace.unknown_author")), width - 18), x + 9, y + 74, MUTED);
+      context.text(this.font, tr("macro_builder.marketplace.dl_like", preset.downloadsCount(), preset.likesCount()), x + 9, y + 90, DIM);
       context.text(this.font, this.fit(tagLine(preset.tags()), width - 18), x + 9, y + 106, accent);
    }
 
@@ -612,10 +615,10 @@ final class MacroMarketplaceScreen extends Screen {
       context.fill(x + 1, y + 1, x + w - 1, y + 4, ACCENT);
       context.text(this.font, this.fit(this.selectedPreset.name(), w - 54), x + 18, y + 20, TEXT);
       context.text(this.font, "x", x + w - 24, y + 20, TEXT);
-      context.text(this.font, "By " + firstNonBlank(this.selectedPreset.authorName(), "Unknown author"), x + 18, y + 38, MUTED);
-      context.text(this.font, "Downloads " + this.selectedPreset.downloadsCount() + "   Likes " + this.selectedPreset.likesCount(), x + 18, y + 54, DIM);
-      this.drawWrapped(context, firstNonBlank(this.selectedPreset.description(), "No description."), x + 18, y + 78, w - 36, MUTED, 6);
-      this.drawWrapped(context, "Tags: " + tagLine(this.selectedPreset.tags()), x + 18, y + 160, w - 36, ACCENT, 2);
+      context.text(this.font, tr("macro_builder.marketplace.by", firstNonBlank(this.selectedPreset.authorName(), tr("macro_builder.marketplace.unknown_author"))), x + 18, y + 38, MUTED);
+      context.text(this.font, tr("macro_builder.marketplace.downloads_likes", this.selectedPreset.downloadsCount(), this.selectedPreset.likesCount()), x + 18, y + 54, DIM);
+      this.drawWrapped(context, firstNonBlank(this.selectedPreset.description(), tr("macro_builder.marketplace.no_description")), x + 18, y + 78, w - 36, MUTED, 6);
+      this.drawWrapped(context, tr("macro_builder.marketplace.tags_2", tagLine(this.selectedPreset.tags())), x + 18, y + 160, w - 36, ACCENT, 2);
       this.drawWrapped(
          context,
          firstNonBlank(this.selectedPreset.gameVersion(), "Minecraft") + "  |  " + firstNonBlank(this.selectedPreset.litemacroVersion(), "Litemacro"),
@@ -625,12 +628,12 @@ final class MacroMarketplaceScreen extends Screen {
          DIM,
          1
       );
-      this.drawButton(context, this.popupDownloadRect(), this.busy ? "Working..." : "Download to Current Macro", mouseX, mouseY, !this.busy);
-      this.drawButton(context, this.popupLikeRect(), this.busy ? "..." : "Like +1", mouseX, mouseY, !this.busy);
+      this.drawButton(context, this.popupDownloadRect(), this.busy ? tr("macro_builder.marketplace.working") : tr("macro_builder.marketplace.download_to_current_macro"), mouseX, mouseY, !this.busy);
+      this.drawButton(context, this.popupLikeRect(), this.busy ? "..." : tr("macro_builder.marketplace.like_1"), mouseX, mouseY, !this.busy);
       if (this.showingMyUploads) {
-         this.drawButton(context, this.popupDeleteRect(), this.deleteConfirmArmed ? "Confirm Delete" : "Delete Mine", mouseX, mouseY, !this.busy);
+         this.drawButton(context, this.popupDeleteRect(), this.deleteConfirmArmed ? tr("macro_builder.marketplace.confirm_delete") : tr("macro_builder.marketplace.delete_mine"), mouseX, mouseY, !this.busy);
       }
-      this.drawButton(context, this.popupCloseRect(), "Close", mouseX, mouseY, true);
+      this.drawButton(context, this.popupCloseRect(), tr("macro_builder.marketplace.close"), mouseX, mouseY, true);
    }
 
    private void drawPublishPopup(GuiGraphicsExtractor context, int mouseX, int mouseY) {
@@ -641,14 +644,14 @@ final class MacroMarketplaceScreen extends Screen {
       this.drawOverlay(context);
       this.drawPanel(context, x, y, x + w, y + h, 0xFA0D141C);
       context.fill(x + 1, y + 1, x + w - 1, y + 4, GREEN);
-      context.text(this.font, "Submit Litemacro Macro", x + 18, y + 18, TEXT);
-      context.text(this.font, "Uploads the selected macro. Limit 5 per user.", x + 18, y + 34, MUTED);
-      this.drawFieldLabel(context, "Name", this.publishNameField);
-      this.drawFieldLabel(context, "Author", this.publishAuthorField);
-      this.drawFieldLabel(context, "Description", this.publishDescriptionField);
-      this.drawFieldLabel(context, "Tags", this.publishTagsField);
-      this.drawButton(context, this.publishUploadRect(), this.busy ? "Submitting..." : "Submit", mouseX, mouseY, !this.busy);
-      this.drawButton(context, this.publishCancelRect(), "Cancel", mouseX, mouseY, true);
+      context.text(this.font, tr("macro_builder.marketplace.submit_litemacro_macro"), x + 18, y + 18, TEXT);
+      context.text(this.font, tr("macro_builder.marketplace.uploads_the_selected_macro_limit_5_per_user"), x + 18, y + 34, MUTED);
+      this.drawFieldLabel(context, tr("macro_builder.marketplace.name"), this.publishNameField);
+      this.drawFieldLabel(context, tr("macro_builder.marketplace.author"), this.publishAuthorField);
+      this.drawFieldLabel(context, tr("macro_builder.marketplace.description"), this.publishDescriptionField);
+      this.drawFieldLabel(context, tr("macro_builder.marketplace.tags"), this.publishTagsField);
+      this.drawButton(context, this.publishUploadRect(), this.busy ? tr("macro_builder.marketplace.submitting_2") : tr("macro_builder.marketplace.submit"), mouseX, mouseY, !this.busy);
+      this.drawButton(context, this.publishCancelRect(), tr("macro_builder.marketplace.cancel"), mouseX, mouseY, true);
    }
 
    private void drawSettingsPopup(GuiGraphicsExtractor context, int mouseX, int mouseY) {
@@ -659,24 +662,24 @@ final class MacroMarketplaceScreen extends Screen {
       this.drawOverlay(context);
       this.drawPanel(context, x, y, x + w, y + h, 0xFA0D141C);
       context.fill(x + 1, y + 1, x + w - 1, y + 4, ORANGE);
-      context.text(this.font, "Marketplace Settings", x + 18, y + 18, TEXT);
-      context.text(this.font, "Uploads", x + 18, y + 42, MUTED);
-      this.drawWrapped(context, "No sign-in. Uploads use a local uploader ID and are limited by the marketplace backend.", x + 18, y + 56, w - 36, TEXT, 3);
-      context.text(this.font, this.fit("Uploader: " + LitemacroMarketplaceService.uploaderInstallId(), w - 36), x + 18, y + 98, MUTED);
-      context.text(this.font, this.fit("Limit: " + LitemacroMarketplaceService.ANONYMOUS_UPLOAD_LIMIT + " submissions", w - 36), x + 18, y + 114, MUTED);
+      context.text(this.font, tr("macro_builder.marketplace.marketplace_settings"), x + 18, y + 18, TEXT);
+      context.text(this.font, tr("macro_builder.marketplace.uploads"), x + 18, y + 42, MUTED);
+      this.drawWrapped(context, tr("macro_builder.marketplace.no_sign_in_uploads_use_a_local_uploader_id_and_are_limited"), x + 18, y + 56, w - 36, TEXT, 3);
+      context.text(this.font, this.fit(tr("macro_builder.marketplace.uploader", LitemacroMarketplaceService.uploaderInstallId()), w - 36), x + 18, y + 98, MUTED);
+      context.text(this.font, this.fit(tr("macro_builder.marketplace.limit_submissions", LitemacroMarketplaceService.ANONYMOUS_UPLOAD_LIMIT), w - 36), x + 18, y + 114, MUTED);
       context.text(this.font, this.fit(LitemacroMarketplaceService.litemacroVersionLabel() + " / " + LitemacroMarketplaceService.minecraftVersionLabel(), w - 36), x + 18, y + 132, DIM);
-      this.drawButton(context, this.settingsRefreshRect(), "Refresh", mouseX, mouseY, true);
-      this.drawButton(context, this.settingsCloseRect(), "Close", mouseX, mouseY, true);
+      this.drawButton(context, this.settingsRefreshRect(), tr("macro_builder.marketplace.refresh"), mouseX, mouseY, true);
+      this.drawButton(context, this.settingsCloseRect(), tr("macro_builder.marketplace.close"), mouseX, mouseY, true);
    }
 
    private void drawFooter(GuiGraphicsExtractor context) {
       int y = this.height - 24;
       context.fill(0, y - 5, this.width, this.height, 0xC6101820);
       int statusWidth = Math.max(80, Math.min(this.width / 2 - 44, this.width - 230));
-      context.text(this.font, this.fit(this.cleanStatusMessage(this.status), statusWidth), 18, y, this.status.toLowerCase(Locale.ROOT).contains("failed") ? RED : GREEN);
-      context.centeredText(this.font, "Page " + (this.page + 1) + " / " + this.totalPages(), this.width / 2, y, MUTED);
-      this.drawButton(context, this.prevRect(), "Prev", -1, -1, this.page > 0);
-      this.drawButton(context, this.nextRect(), "Next", -1, -1, this.page + 1 < this.totalPages());
+      context.text(this.font, this.fit(this.cleanStatusMessage(this.status), statusWidth), 18, y, this.statusError ? RED : GREEN);
+      context.centeredText(this.font, tr("macro_builder.marketplace.page", (this.page + 1), this.totalPages()), this.width / 2, y, MUTED);
+      this.drawButton(context, this.prevRect(), tr("macro_builder.marketplace.prev"), -1, -1, this.page > 0);
+      this.drawButton(context, this.nextRect(), tr("macro_builder.marketplace.next"), -1, -1, this.page + 1 < this.totalPages());
    }
 
    private void layoutFields() {
@@ -763,32 +766,9 @@ final class MacroMarketplaceScreen extends Screen {
    }
 
    private void drawWrapped(GuiGraphicsExtractor context, String text, int x, int y, int maxWidth, int color, int maxLines) {
-      String[] words = text.split("\\s+");
-      String line = "";
-      int drawn = 0;
-      for (String word : words) {
-         String next = line.isBlank() ? word : line + " " + word;
-         if (this.font.width(next) > maxWidth && !line.isBlank()) {
-            context.text(this.font, this.fit(line, maxWidth), x, y + drawn * 12, color);
-            drawn++;
-            line = word;
-            if (drawn >= maxLines) {
-               return;
-            }
-         } else if (line.isBlank() && this.font.width(word) > maxWidth) {
-            context.text(this.font, this.fit(word, maxWidth), x, y + drawn * 12, color);
-            drawn++;
-            line = "";
-            if (drawn >= maxLines) {
-               return;
-            }
-         } else {
-            line = next;
-         }
-      }
-
-      if (!line.isBlank() && drawn < maxLines) {
-         context.text(this.font, this.fit(line, maxWidth), x, y + drawn * 12, color);
+      List<String> lines = MacroText.wrap(text, this.font.getSplitter(), maxWidth);
+      for (int index = 0; index < Math.min(lines.size(), maxLines); index++) {
+         context.text(this.font, this.fit(lines.get(index), maxWidth), x, y + index * 12, color);
       }
    }
 
@@ -848,21 +828,21 @@ final class MacroMarketplaceScreen extends Screen {
 
    private String sortLabel() {
       return switch (this.sortMode) {
-         case TRENDING -> "Sort: Trending";
-         case NEWEST -> "Sort: New";
-         case UPDATED -> "Sort: Updated";
-         case DOWNLOADS -> "Sort: Downloads";
-         case LIKES -> "Sort: Likes";
+         case TRENDING -> tr("macro_builder.marketplace.sort_trending");
+         case NEWEST -> tr("macro_builder.marketplace.sort_new");
+         case UPDATED -> tr("macro_builder.marketplace.sort_updated");
+         case DOWNLOADS -> tr("macro_builder.marketplace.sort_downloads");
+         case LIKES -> tr("macro_builder.marketplace.sort_likes");
       };
    }
 
    private String sortShortLabel() {
       return switch (this.sortMode) {
-         case TRENDING -> "Trend";
-         case NEWEST -> "New";
-         case UPDATED -> "Update";
-         case DOWNLOADS -> "DL";
-         case LIKES -> "Likes";
+         case TRENDING -> tr("macro_builder.marketplace.trend");
+         case NEWEST -> tr("macro_builder.marketplace.new");
+         case UPDATED -> tr("macro_builder.marketplace.update");
+         case DOWNLOADS -> tr("macro_builder.marketplace.dl");
+         case LIKES -> tr("macro_builder.marketplace.likes");
       };
    }
 
@@ -893,25 +873,12 @@ final class MacroMarketplaceScreen extends Screen {
    }
 
    private String fit(String text, int maxWidth) {
-      if (text == null) {
-         return "";
-      }
-      if (maxWidth <= 0) {
-         return "";
-      }
-      if (this.font == null || this.font.width(text) <= maxWidth) {
-         return text;
-      }
+      return MacroText.fit(text, this.font, maxWidth);
+   }
 
-      String suffix = "...";
-      if (this.font.width(suffix) > maxWidth) {
-         return "";
-      }
-      String trimmed = text;
-      while (!trimmed.isEmpty() && this.font.width(trimmed) + this.font.width(suffix) > maxWidth) {
-         trimmed = trimmed.substring(0, trimmed.length() - 1);
-      }
-      return trimmed + suffix;
+   private void setStatus(String message, boolean error) {
+      this.status = message;
+      this.statusError = error;
    }
 
    private String shortError(Throwable error) {

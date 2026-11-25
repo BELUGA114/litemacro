@@ -1,11 +1,15 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -14,7 +18,6 @@ import net.minecraft.network.chat.Component;
 
 final class MacroImportScreen extends Screen {
    private static final int PAGE_SIZE = 8;
-   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("M/d HH:mm");
    private final MacroRunner runner;
    private final int macroNumber;
    private final int returnPage;
@@ -27,7 +30,7 @@ final class MacroImportScreen extends Screen {
    }
 
    private MacroImportScreen(MacroRunner runner, int macroNumber, int returnPage, int page) {
-      super(Component.literal("Import Macro"));
+      super(Component.translatable("macro_builder.import.import_macro"));
       this.runner = runner;
       this.macroNumber = macroNumber;
       this.returnPage = returnPage;
@@ -52,7 +55,7 @@ final class MacroImportScreen extends Screen {
             this.runner.importMacroFromDownloads(this.minecraft, this.macroNumber, file);
             this.minecraft.setScreenAndShow(new MacroListScreen(this.runner, this.returnPage));
          }).bounds(left, rowY, listWidth - 220, 22).build());
-         this.addRenderableWidget(Button.builder(Component.literal("Import"), button -> {
+         this.addRenderableWidget(Button.builder(Component.translatable("macro_builder.import.import"), button -> {
             this.runner.importMacroFromDownloads(this.minecraft, this.macroNumber, file);
             this.minecraft.setScreenAndShow(new MacroListScreen(this.runner, this.returnPage));
          }).bounds(left + listWidth - 104, rowY, 104, 22).build());
@@ -60,13 +63,13 @@ final class MacroImportScreen extends Screen {
 
       int footerY = Math.min(this.height - 62, y + 224 + 12);
       this.addRenderableWidget(
-         Button.builder(Component.literal("Back"), button -> this.minecraft.setScreenAndShow(new MacroListScreen(this.runner, this.returnPage)))
+         Button.builder(Component.translatable("macro_builder.import.back"), button -> this.minecraft.setScreenAndShow(new MacroListScreen(this.runner, this.returnPage)))
             .bounds(left, footerY, 74, 20)
             .build()
       );
       ((Button)this.addRenderableWidget(
             Button.builder(
-                  Component.literal("Prev"),
+                  Component.translatable("macro_builder.import.prev"),
                   button -> this.minecraft.setScreenAndShow(new MacroImportScreen(this.runner, this.macroNumber, this.returnPage, currentPage - 1))
                )
                .bounds(left + 82, footerY, 58, 20)
@@ -75,7 +78,7 @@ final class MacroImportScreen extends Screen {
          .active = currentPage > 0;
       ((Button)this.addRenderableWidget(
             Button.builder(
-                  Component.literal("Next"),
+                  Component.translatable("macro_builder.import.next"),
                   button -> this.minecraft.setScreenAndShow(new MacroImportScreen(this.runner, this.macroNumber, this.returnPage, currentPage + 1))
                )
                .bounds(left + 148, footerY, 58, 20)
@@ -84,7 +87,7 @@ final class MacroImportScreen extends Screen {
          .active = end < this.files.size();
       this.addRenderableWidget(
          Button.builder(
-               Component.literal("Refresh"),
+               Component.translatable("macro_builder.import.refresh"),
                button -> this.minecraft.setScreenAndShow(new MacroImportScreen(this.runner, this.macroNumber, this.returnPage, currentPage))
             )
             .bounds(left + listWidth - 82, footerY, 82, 20)
@@ -101,7 +104,7 @@ final class MacroImportScreen extends Screen {
       int start = currentPage * 8;
       int end = Math.min(this.files.size(), start + 8);
       context.centeredText(this.font, this.title, centerX, 24, -1);
-      context.centeredText(this.font, Component.literal("Choose a .json file from Downloads for Macro " + this.macroNumber), centerX, 42, -2561793);
+      context.centeredText(this.font, Component.translatable("macro_builder.import.choose_a_json_file_from_downloads_for_macro", this.macroNumber), centerX, 42, -2561793);
       context.centeredText(this.font, Component.literal(this.fit(this.runner.downloadsDirectory().toString(), this.width - 32)), centerX, 58, -6645094);
       context.centeredText(this.font, Component.literal(this.status), centerX, 72, -6488);
 
@@ -123,7 +126,7 @@ final class MacroImportScreen extends Screen {
    private void loadFiles() {
       try {
          this.files = this.runner.downloadsJsonFiles();
-         this.status = this.files.isEmpty() ? "No .json files found in Downloads." : "Page " + (this.currentPage() + 1) + " / " + this.totalPages();
+         this.status = this.files.isEmpty() ? tr("macro_builder.import.no_json_files_found_in_downloads") : tr("macro_builder.import.page", (this.currentPage() + 1), this.totalPages());
       } catch (IOException var2) {
          this.files = List.of();
          this.status = var2.getMessage();
@@ -141,25 +144,15 @@ final class MacroImportScreen extends Screen {
    private String modifiedLabel(Path path) {
       try {
          FileTime modified = Files.getLastModifiedTime(path);
-         return DATE_FORMAT.format(modified.toInstant().atZone(ZoneId.systemDefault()));
+         Locale locale = Locale.forLanguageTag(this.minecraft.options.languageCode.replace('_', '-'));
+         return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(locale)
+            .format(modified.toInstant().atZone(ZoneId.systemDefault()));
       } catch (IOException var3) {
          return "";
       }
    }
 
    private String fit(String text, int maxWidth) {
-      if (this.font != null && text != null && this.font.width(text) > maxWidth) {
-         String suffix = "...";
-         int suffixWidth = this.font.width(suffix);
-         String trimmed = text;
-
-         while (!trimmed.isEmpty() && this.font.width(trimmed) + suffixWidth > maxWidth) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
-         }
-
-         return trimmed + suffix;
-      } else {
-         return text == null ? "" : text;
-      }
+      return MacroText.fit(text, this.font, maxWidth);
    }
 }

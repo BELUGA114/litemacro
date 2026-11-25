@@ -1,5 +1,7 @@
 package com.alfre.macrobuilder;
 
+import static com.alfre.macrobuilder.MacroText.tr;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -57,7 +59,7 @@ final class LitemacroMarketplaceService {
    }
 
    static String configurationHelp() {
-      return "Marketplace backend not configured. Add config/" + CONFIG_FILE_NAME + " with project_url=https://your-project.supabase.co and publishable_key=sb_publishable_...";
+      return tr("macro_builder.marketplace.marketplace_backend_not_configured_add_config_with_project_url_https_your_project", CONFIG_FILE_NAME);
    }
 
    static void requireConfigured() throws IOException {
@@ -72,7 +74,7 @@ final class LitemacroMarketplaceService {
             requireConfigured();
             return filterLitemacro(fetchPresets(buildPublishedListingsUrl(mode), PUBLISHABLE_KEY));
          } catch (Exception var2) {
-            throw new RuntimeException("Failed to fetch marketplace presets", var2);
+            throw new RuntimeException(tr("macro_builder.marketplace.failed_to_fetch_marketplace_presets"), var2);
          }
       });
    }
@@ -85,7 +87,7 @@ final class LitemacroMarketplaceService {
             payload.addProperty("requester_install_id", uploaderInstallId());
             HttpResponse<String> response = sendRpcRequest(MY_PRESETS_RPC, payload, PUBLISHABLE_KEY, Duration.ofSeconds(15));
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-               throw httpException("Failed to load your marketplace uploads", response);
+               throw httpException(tr("macro_builder.marketplace.failed_to_load_your_marketplace_uploads"), response);
             }
             return filterLitemacro(parsePresets(response.body()));
          } catch (Exception error) {
@@ -104,7 +106,7 @@ final class LitemacroMarketplaceService {
 
             JsonObject payload = new JsonObject();
             payload.addProperty("target_preset_id", presetId);
-            postRpcJson(INCREMENT_DOWNLOAD_RPC, payload, PUBLISHABLE_KEY, "Failed to update download count");
+            postRpcJson(INCREMENT_DOWNLOAD_RPC, payload, PUBLISHABLE_KEY, tr("macro_builder.marketplace.failed_to_update_download_count"));
          } catch (Exception var3) {
             MacroBuilderClient.LOGGER.debug("Marketplace download count failed", var3);
          }
@@ -116,13 +118,13 @@ final class LitemacroMarketplaceService {
          try {
             requireConfigured();
             if (presetId == null || presetId.isBlank()) {
-               throw new IOException("Marketplace macro is missing an id.");
+               throw new IOException(tr("macro_builder.marketplace.marketplace_macro_is_missing_an_id"));
             }
 
             JsonObject payload = new JsonObject();
             payload.addProperty("target_preset_id", presetId);
             payload.addProperty("liker_install_id", uploaderInstallId());
-            JsonObject result = postRpcJson(LIKE_PRESET_RPC, payload, PUBLISHABLE_KEY, "Failed to like marketplace macro");
+            JsonObject result = postRpcJson(LIKE_PRESET_RPC, payload, PUBLISHABLE_KEY, tr("macro_builder.marketplace.failed_to_like_marketplace_macro"));
             JsonObject row = result.has("preset") && result.get("preset").isJsonObject() ? result.getAsJsonObject("preset") : result;
             return parsePreset(row);
          } catch (Exception error) {
@@ -136,14 +138,14 @@ final class LitemacroMarketplaceService {
          try {
             requireConfigured();
             if (presetId == null || presetId.isBlank()) {
-               throw new IOException("Marketplace macro is missing an id.");
+               throw new IOException(tr("macro_builder.marketplace.marketplace_macro_is_missing_an_id"));
             }
 
             JsonObject payload = new JsonObject();
             payload.addProperty("target_preset_id", presetId);
             payload.addProperty("requester_install_id", uploaderInstallId());
-            JsonObject result = postRpcJson(DELETE_PRESET_RPC, payload, PUBLISHABLE_KEY, "Failed to delete marketplace macro");
-            return firstNonBlank(nullableString(result, "message"), "Deleted your marketplace upload.");
+            JsonObject result = postRpcJson(DELETE_PRESET_RPC, payload, PUBLISHABLE_KEY, tr("macro_builder.marketplace.failed_to_delete_marketplace_macro"));
+            return firstNonBlank(nullableString(result, "message"), tr("macro_builder.marketplace.deleted_your_marketplace_upload"));
          } catch (Exception error) {
             throw new CompletionException(error);
          }
@@ -155,7 +157,7 @@ final class LitemacroMarketplaceService {
          try {
             requireConfigured();
             if (preset == null || preset.filePath() == null || preset.filePath().isBlank()) {
-               throw new IOException("Marketplace macro has no file path.");
+               throw new IOException(tr("macro_builder.marketplace.marketplace_macro_has_no_file_path"));
             }
 
             String slug = preset.slug() == null || preset.slug().isBlank() ? "litemacro-marketplace" : preset.slug();
@@ -163,7 +165,7 @@ final class LitemacroMarketplaceService {
             if (isDatabasePreset(preset)) {
                JsonObject payload = new JsonObject();
                payload.addProperty("target_preset_id", preset.id());
-               JsonObject macroJson = postRpcJson(DOWNLOAD_PRESET_RPC, payload, PUBLISHABLE_KEY, "Marketplace macro is unavailable");
+               JsonObject macroJson = postRpcJson(DOWNLOAD_PRESET_RPC, payload, PUBLISHABLE_KEY, tr("macro_builder.marketplace.marketplace_macro_is_unavailable"));
                Files.writeString(tempFile, macroJson.toString(), StandardCharsets.UTF_8);
                return tempFile;
             }
@@ -175,13 +177,13 @@ final class LitemacroMarketplaceService {
 
             HttpResponse<byte[]> response = HTTP_CLIENT.send(builder.GET().build(), HttpResponse.BodyHandlers.ofByteArray());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-               throw new IOException("Marketplace download failed with HTTP " + response.statusCode());
+               throw new IOException(tr("macro_builder.marketplace.marketplace_download_failed_with_http", response.statusCode()));
             }
 
             Files.write(tempFile, response.body());
             return tempFile;
          } catch (Exception var5) {
-            throw new RuntimeException("Failed to download marketplace macro", var5);
+            throw new RuntimeException(tr("macro_builder.marketplace.failed_to_download_marketplace_macro"), var5);
          }
       });
    }
@@ -191,18 +193,18 @@ final class LitemacroMarketplaceService {
          try {
             requireConfigured();
             if (request == null || request.localPresetPath() == null || !Files.exists(request.localPresetPath())) {
-               throw new IOException("Macro file is missing.");
+               throw new IOException(tr("macro_builder.marketplace.macro_file_is_missing"));
             }
 
             requireWithinSizeLimit(request.localPresetPath());
             String slug = sanitizeSlug(request.slug());
             if (slug.isBlank()) {
-               throw new IOException("Macro name is required.");
+               throw new IOException(tr("macro_builder.marketplace.macro_name_is_required"));
             }
 
             JsonElement macroJson = JsonParser.parseString(Files.readString(request.localPresetPath()));
             if (macroJson == null || !macroJson.isJsonObject()) {
-               throw new IOException("Macro file is not valid JSON.");
+               throw new IOException(tr("macro_builder.marketplace.macro_file_is_not_valid_json"));
             }
 
             JsonObject payload = new JsonObject();
@@ -215,11 +217,11 @@ final class LitemacroMarketplaceService {
             payload.addProperty("preset_game_version", blankToEmpty(request.gameVersion()));
             payload.addProperty("preset_litemacro_version", blankToEmpty(request.litemacroVersion()));
             payload.add("macro_json", macroJson);
-            JsonObject result = postRpcJson(SUBMIT_PRESET_RPC, payload, PUBLISHABLE_KEY, "Failed to submit marketplace macro");
+            JsonObject result = postRpcJson(SUBMIT_PRESET_RPC, payload, PUBLISHABLE_KEY, tr("macro_builder.marketplace.failed_to_submit_marketplace_macro"));
             boolean accepted = !result.has("accepted") || result.get("accepted").getAsBoolean();
             int uploadCount = intValue(result, "upload_count");
             int remaining = intValue(result, "remaining");
-            String message = firstNonBlank(nullableString(result, "message"), "Submitted for marketplace review.");
+            String message = firstNonBlank(nullableString(result, "message"), tr("macro_builder.marketplace.submitted_for_marketplace_review"));
             if (!accepted) {
                throw new IOException(message);
             }
@@ -308,7 +310,7 @@ final class LitemacroMarketplaceService {
          .build();
       HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() < 200 || response.statusCode() >= 300) {
-         throw httpException("Marketplace request failed", response);
+         throw httpException(tr("macro_builder.marketplace.marketplace_request_failed"), response);
       }
 
       return parsePresets(response.body());
@@ -424,7 +426,7 @@ final class LitemacroMarketplaceService {
    private static void requireWithinSizeLimit(Path path) throws IOException {
       long size = Files.size(path);
       if (size > MAX_PRESET_FILE_SIZE_BYTES) {
-         throw new IOException("Macro file is too large. Marketplace uploads must be under 5 MB.");
+         throw new IOException(tr("macro_builder.marketplace.macro_file_is_too_large_marketplace_uploads_must_be_under_5_mb"));
       }
    }
 
@@ -535,7 +537,7 @@ final class LitemacroMarketplaceService {
       String parsed = extractJsonErrorMessage(body);
       if (isMissingMarketplaceRpc(body, parsed)) {
          if (containsIgnoreCase(body, LIKE_PRESET_RPC) || containsIgnoreCase(parsed, LIKE_PRESET_RPC)) {
-            return new IOException(message + ": Supabase is missing the Like setup. Run the latest litemacro-supabase-marketplace.sql once.");
+            return new IOException(tr("macro_builder.marketplace.supabase_is_missing_the_like_setup_run_the_latest_litemacro_supabase_marketplace", message));
          }
 
          return new IOException(
